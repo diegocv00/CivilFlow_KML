@@ -35,7 +35,7 @@ const Tr = ({ children }) => <tr>{children}</tr>
 
 const docData = {
   hidraulica: {
-    name: 'Principios de Hidráulica',
+    name: 'Principios de hidráulica',
     icon: 'water_drop',
     color: '#4D8FF7',
     sections: [
@@ -56,9 +56,9 @@ const docData = {
             <div className="mt-3">
               <span className="text-on-surface-variant text-[13px] font-semibold block mb-1">Interpretación del régimen:</span>
               <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-[13px] ml-4">
-                <span className="font-mono text-cyan-400 font-bold">Fr &gt; 1</span><span>Supercritico — flujo rápido, energía cinética predominante</span>
+                <span className="font-mono text-cyan-400 font-bold">Fr &gt; 1</span><span>Supercrítico — flujo rápido, energía cinética predominante</span>
                 <span className="font-mono text-yellow-400 font-bold">Fr = 1</span><span>Crítico — flujo limítrofe</span>
-                <span className="font-mono text-green-400 font-bold">Fr &lt; 1</span><span>Subcritico — flujo lento, energía potencial predominante</span>
+                <span className="font-mono text-green-400 font-bold">Fr &lt; 1</span><span>Subcrítico — flujo lento, energía potencial predominante</span>
               </div>
             </div>
             <div className="text-[12px] text-on-surface-variant border-l-2 border-outline-variant pl-3 mt-2">
@@ -92,7 +92,7 @@ const docData = {
         ),
       },
       {
-        title: 'Fuerza Tractiva',
+        title: 'Fuerza tractiva',
         body: (
           <div className="space-y-3">
             <p>Fuerza que el fluido ejerce sobre el fondo del canal, responsable del arrastre de partículas sedimentadas.</p>
@@ -113,7 +113,7 @@ const docData = {
         ),
       },
       {
-        title: 'Relaciónes Geométricas (Sección Circular)',
+        title: 'Relaciones geométricas (sección circular)',
         body: (
           <div className="space-y-3">
             <p>Para tuberías parcialmente llenas, las relaciones de velocidad y caudal dependen de Y/D:</p>
@@ -145,7 +145,7 @@ const docData = {
         ),
       },
       {
-        title: 'Pendiente Crítica',
+        title: 'Pendiente crítica',
         body: (
           <div className="space-y-3">
             <p>Para canales de sección circular:</p>
@@ -165,7 +165,7 @@ const docData = {
         ),
       },
       {
-        title: 'Elementos Hidraulicos por Sección',
+        title: 'Elementos hidráulicos por sección',
         body: (
           <div className="space-y-4">
             <div>
@@ -214,12 +214,12 @@ const docData = {
     ],
   },
   sanitarias: {
-    name: 'Redes Sanitarias',
+    name: 'Redes sanitarias',
     icon: 'plumbing',
     color: '#F5A623',
     sections: [
       {
-        title: 'Unidades de Descarga (UD)',
+        title: 'Unidades de descarga (UD)',
         body: (
           <div className="space-y-3">
             <p>Método empírico para estimar el flujo máximo probable en sistemas de drenaje sanitario según NTC 1500.</p>
@@ -239,7 +239,7 @@ const docData = {
         ),
       },
       {
-        title: 'Caudal por Simultaneidad',
+        title: 'Caudal por simultaneidad',
         body: (
           <div className="space-y-3">
             <p>Factor de simultaneidad y caudal de diseño por el método de Hunter:</p>
@@ -265,7 +265,7 @@ const docData = {
         ),
       },
       {
-        title: 'Bajantes Sanitarios',
+        title: 'Bajantes sanitarios',
         body: (
           <div className="space-y-3">
             <p>Diametro de bajante por Manning:</p>
@@ -290,7 +290,7 @@ const docData = {
         ),
       },
       {
-        title: 'Tuberia de Ventilación',
+        title: 'Tubería de ventilación',
         body: (
           <div className="space-y-3">
             <p>Funciones: entrada de aire, evacuación de gases, mantener sellos hidráulicos, autolimpieza.</p>
@@ -318,12 +318,12 @@ const docData = {
     ],
   },
   lluvias: {
-    name: 'Aguas Lluvias',
+    name: 'Aguas lluvias',
     icon: 'water',
     color: '#22D3EE',
     sections: [
       {
-        title: 'Método Racional',
+        title: 'Método racional',
         body: (
           <div className="space-y-3">
             <p>El caudal de aguas lluvias se calcula según RAS 2000:</p>
@@ -341,7 +341,7 @@ const docData = {
         ),
       },
       {
-        title: 'Coeficiente de Escorrentia C',
+        title: 'Coeficiente de escorrentía C',
         body: (
           <T>
             <Tr><Th>Tipo de superficie</Th><Th>C</Th></Tr>
@@ -356,7 +356,7 @@ const docData = {
         ),
       },
       {
-        title: 'Bajante y Canal de Cubierta',
+        title: 'Bajante y canal de cubierta',
         body: (
           <div className="space-y-3">
             <p>Diametro de bajante de aguas lluvias:</p>
@@ -384,12 +384,12 @@ const docData = {
     ],
   },
   agua_fria: {
-    name: 'Agua Fría',
+    name: 'Agua fría',
     icon: 'ac_unit',
     color: '#1B6EF3',
     sections: [
       {
-        title: 'Unidades de Consumo (UC)',
+        title: 'Unidades de consumo (UC)',
         body: (
           <div className="space-y-3">
             <p>Unidades de Consumo para suministro de agua según NTC 1500:</p>
@@ -407,7 +407,7 @@ const docData = {
         ),
       },
       {
-        title: 'Hazen-Williams (Perdidas)',
+        title: 'Hazen-Williams (pérdidas)',
         body: (
           <div className="space-y-3">
             <F>
@@ -434,7 +434,7 @@ const docData = {
         ),
       },
       {
-        title: 'Verificación de Presión y Velocidad',
+        title: 'Verificación de presión y velocidad',
         body: (
           <div className="space-y-3">
             <p className="font-semibold text-[13px]">Presiónes mínimas por aparato (NTC 1500):</p>
@@ -455,12 +455,12 @@ const docData = {
     ],
   },
   agua_caliente: {
-    name: 'Agua Caliente',
+    name: 'Agua caliente',
     icon: 'local_fire_department',
     color: '#F04545',
     sections: [
       {
-        title: 'Consideraciones de Diseno',
+        title: 'Consideraciones de diseño',
         body: (
           <div className="space-y-3">
             <ul className="list-disc list-inside text-[13px] space-y-1">
@@ -481,7 +481,7 @@ const docData = {
         ),
       },
       {
-        title: 'Perdidas de Calor y Recirculación',
+        title: 'Pérdidas de calor y recirculación',
         body: (
           <div className="space-y-3">
             <F>
@@ -513,7 +513,7 @@ const docData = {
     ],
   },
   gas: {
-    name: 'Red de Gas',
+    name: 'Red de gas',
     icon: 'gas_meter',
     color: '#A855F7',
     sections: [
@@ -541,7 +541,7 @@ const docData = {
         ),
       },
       {
-        title: 'Factor de Simultaneidad',
+        title: 'Factor de simultaneidad',
         body: (
           <T>
             <Tr><Th>N° aparatos</Th><Th>Factor fs</Th></Tr>
@@ -554,7 +554,7 @@ const docData = {
         ),
       },
       {
-        title: 'Materiales para Gas',
+        title: 'Materiales para gas',
         body: (
           <T>
             <Tr><Th>Material</Th><Th>Diametro típico</Th><Th>K</Th></Tr>
@@ -570,12 +570,12 @@ const docData = {
     ],
   },
   equipos: {
-    name: 'Bombas, Tanques y Equipos',
+    name: 'Bombas, tanques y equipos',
     icon: 'settings',
     color: '#0ECC7A',
     sections: [
       {
-        title: 'Potencia de Bomba',
+        title: 'Potencia de bomba',
         body: (
           <div className="space-y-3">
             <F>
@@ -624,7 +624,7 @@ const docData = {
         ),
       },
       {
-        title: 'Tanque de Reserva',
+        title: 'Tanque de reserva',
         body: (
           <div className="space-y-3">
             <F>
@@ -651,7 +651,7 @@ const docData = {
         ),
       },
       {
-        title: 'Sistemas Hidroneumaticos',
+        title: 'Sistemas hidroneumáticos',
         body: (
           <div className="space-y-3">
             <p className="text-[13px] font-semibold">Premisas de diseño:</p>
@@ -678,12 +678,12 @@ const docData = {
     ],
   },
   tablas: {
-    name: 'Tablas y Verificaciónes',
+    name: 'Tablas y verificaciones',
     icon: 'table_chart',
     color: '#C9A227',
     sections: [
       {
-        title: 'Manning — Coeficientes n',
+        title: 'Manning — coeficientes n',
         body: (
           <T>
             <Tr><Th>Material</Th><Th>n</Th></Tr>
@@ -699,7 +699,7 @@ const docData = {
         ),
       },
       {
-        title: 'Verificaciónes Sanitarias',
+        title: 'Verificaciones sanitarias',
         body: (
           <T>
             <Tr><Th>Parametro</Th><Th>Condicion</Th><Th>Ref.</Th></Tr>
@@ -713,7 +713,7 @@ const docData = {
         ),
       },
       {
-        title: 'Verificaciónes Redes de Agua',
+        title: 'Verificaciones redes de agua',
         body: (
           <T>
             <Tr><Th>Parametro</Th><Th>Condicion</Th><Th>Ref.</Th></Tr>
@@ -725,7 +725,7 @@ const docData = {
         ),
       },
       {
-        title: 'Verificaciónes Red de Gas',
+        title: 'Verificaciones red de gas',
         body: (
           <T>
             <Tr><Th>Parametro</Th><Th>Condicion</Th><Th>Ref.</Th></Tr>
@@ -737,7 +737,7 @@ const docData = {
         ),
       },
       {
-        title: 'Diametros Comerciales PVC RDE 11',
+        title: 'Diámetros comerciales PVC RDE 11',
         body: (
           <T>
             <Tr><Th>Nominal</Th><Th>DI (mm)</Th><Th>DE (mm)</Th></Tr>
@@ -753,7 +753,7 @@ const docData = {
     ],
   },
   formulas: {
-    name: 'Fórmulas del Sistema',
+    name: 'Fórmulas del sistema',
     icon: 'calculate',
     color: '#F5A623',
     sections: [
@@ -784,15 +784,15 @@ const docData = {
     ],
   },
   manual: {
-    name: 'Manual de Usuario',
+    name: 'Manual de usuario',
     icon: 'menu_book',
     color: '#4D8FF7',
     sections: [
       {
-        title: 'Introduccion',
+        title: 'Introducción',
         body: (
           <div className="space-y-3">
-            <p>CIVILFLOW KML 2026 es un aplicativo web de diseño hidrosanitario desarrollado por el Ing. Camilo Cardenas Chacon. Permite elaborar memorias de calculo completas para redes de Agua Fria, Agua Caliente, Sanitaria, Aguas Lluvias, Ventilación, Gas Combustible y Red Contra Incendio.</p>
+            <p>CIVILFLOW KML 2026 es un aplicativo web de diseño hidrosanitario desarrollado por el Ing. Camilo Cardenas Chacon. Permite elaborar memorias de cálculo completas para redes de Agua Fria, Agua Caliente, Sanitaria, Aguas Lluvias, Ventilación, Gas Combustible y Red Contra Incendio.</p>
             <p className="text-[13px] font-semibold">Normas aplicadas:</p>
             <div className="flex flex-wrap gap-2">
               <span className="px-3 py-1 bg-surface-container-high border border-outline-variant rounded text-[11px] font-mono">NTC 1500:2020</span>
@@ -816,21 +816,21 @@ const docData = {
                 <div className="px-3 py-2 border-b border-outline-variant">Barra superior con el logo de la firma KML, el nombre del sistema DHIDROSAN, los datos del ingeniero responsable (nombre, titulo, número de matricula profesional) y las normas tecnicas aplicables (NTC 1500, RAS 2000, NTC 3728, NSR-10). Se muestra tambien el nombre del proyecto activo.</div>
 
                 <div className="bg-surface-container-high font-semibold px-3 py-2 border-b border-outline-variant">Nav / Pestanas</div>
-                <div className="px-3 py-2 border-b border-outline-variant">Barra de navegacion con pestanas para acceder a cada modulo del aplicativo: Planos (carga de PDF o imagen), Materiales (gestion de catalogos por red), Aparatos (tabla de unidades de consumo y descarga), Cubierta (calculo de aguas lluvias por método racional), Gas (diseño de redes por Renouard), Calentadores (selección de equipos a gas), Validacion (resumen y verificacion final).</div>
+                <div className="px-3 py-2 border-b border-outline-variant">Barra de navegacion con pestanas para acceder a cada modulo del aplicativo: Planos (carga de PDF o imagen), Materiales (gestion de catalogos por red), Aparatos (tabla de unidades de consumo y descarga), Cubierta (cálculo de aguas lluvias por método racional), Gas (diseño de redes por Renouard), Calentadores (selección de equipos a gas), Validacion (resumen y verificacion final).</div>
 
                 <div className="bg-surface-container-high font-semibold px-3 py-2 border-b border-outline-variant">Sidebar</div>
-                <div className="px-3 py-2 border-b border-outline-variant">Panel lateral izquierdo con tres secciónes: Datos del proyecto (nombre, dirección, municipio, uso, empresa prestadora, presión de red, dotación), Materiales por red (selector de tipo de tubería para cada sistema: AF, AC, sanitaria, lluvias, ventilacion, gas, RCI), Redes a calcular (toggles para activar o desactivar cada red del proyecto) y Generador de niveles (configuración de sótanos, pisos, alturas y NPT).</div>
+                <div className="px-3 py-2 border-b border-outline-variant">Panel lateral izquierdo con tres secciones: Datos del proyecto (nombre, dirección, municipio, uso, empresa prestadora, presión de red, dotación), Materiales por red (selector de tipo de tubería para cada sistema: AF, AC, sanitaria, lluvias, ventilacion, gas, RCI), Redes a calcular (toggles para activar o desactivar cada red del proyecto) y Generador de niveles (configuración de sótanos, pisos, alturas y NPT).</div>
 
                 <div className="bg-surface-container-high font-semibold px-3 py-2 border-b border-outline-variant">Content</div>
-                <div className="px-3 py-2 border-b border-outline-variant">Area central donde se muestran las tablas, formularios y resultados del modulo selecciónado. Aqui se ingresan los datos de cada red, se visualizan los calculos y se revisan las verificaciones de norma.</div>
+                <div className="px-3 py-2 border-b border-outline-variant">Area central donde se muestran las tablas, formularios y resultados del modulo selecciónado. Aqui se ingresan los datos de cada red, se visualizan los cálculos y se revisan las verificaciones de norma.</div>
 
                 <div className="bg-surface-container-high font-semibold px-3 py-2">Act Bar</div>
-                <div className="px-3 py-2">Barra de accion inferior que muestra en tiempo real los totales del proyecto: unidades de consumo (UC) de agua fria y caliente, unidades de descarga (UD) sanitarias, pérdida de presión acumulada de gas (ΔP) con indicador color verde/rojo según cumpla el límite NTC 3728. Incluye los botones de exportación a Excel (.csv) y Memoria de calculo (.html).</div>
+                <div className="px-3 py-2">Barra de accion inferior que muestra en tiempo real los totales del proyecto: unidades de consumo (UC) de agua fria y caliente, unidades de descarga (UD) sanitarias, pérdida de presión acumulada de gas (ΔP) con indicador color verde/rojo según cumpla el límite NTC 3728. Incluye los botones de exportación a Excel (.csv) y Memoria de cálculo (.html).</div>
               </div>
             </div>
 
             <p className="text-[12px] text-on-surface-variant border-l-2 border-outline-variant pl-3">
-              El orden de trabajo recomendado es: datos del proyecto, generación de niveles, selección de materiales, activacion de redes, ajuste de aparatos, calculo de cubierta, diseño de red de gas, selección de calentador y finalmente validación y exportación.
+              El orden de trabajo recomendado es: datos del proyecto, generación de niveles, selección de materiales, activación de redes, ajuste de aparatos, cálculo de cubierta, diseño de red de gas, selección de calentador y finalmente validación y exportación.
             </p>
           </div>
         ),
@@ -839,7 +839,7 @@ const docData = {
         title: 'Datos del proyecto',
         body: (
           <div className="space-y-3">
-            <p>Complete los datos generales en el Sidebar. Estos datos aparecen en todas las memorias de calculo.</p>
+            <p>Complete los datos generales en el Sidebar. Estos datos aparecen en todas las memorias de cálculo.</p>
             <T>
               <Tr><Th>Campo</Th><Th>Ejemplo</Th></Tr>
               <Tr><Td>Nombre del proyecto</Td><Td>Casa No. 26 CR Monte Real</Td></Tr>
@@ -999,6 +999,19 @@ function DocsPage() {
         [data-section-color] .\\!text-primary {
           color: var(--section-color) !important;
         }
+        .docs-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .docs-scroll::-webkit-scrollbar-track {
+          background: #1a1c20;
+        }
+        .docs-scroll::-webkit-scrollbar-thumb {
+          background: #3a494a;
+          border-radius: 3px;
+        }
+        .docs-scroll::-webkit-scrollbar-thumb:hover {
+          background: #4d8ff7;
+        }
       `}</style>
       {/* Sidebar de categorías */}
       <div className="w-64 shrink-0 border border-outline-variant bg-surface-container flex flex-col">
@@ -1007,7 +1020,7 @@ function DocsPage() {
             Categorias
           </h2>
         </div>
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto docs-scroll">
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -1059,8 +1072,8 @@ function DocsPage() {
           </div>
         </div>
 
-        {/* Acordeón de secciónes */}
-        <div className="flex-1 overflow-auto space-y-2 pr-1">
+        {/* Acordeón de secciones */}
+        <div className="flex-1 overflow-auto space-y-2 pr-1 docs-scroll">
           {filteredSections.map((section) => {
             const sectionKey = `${section.categoryId}:${section.title}`
             return (

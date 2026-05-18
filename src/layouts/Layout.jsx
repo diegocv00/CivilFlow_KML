@@ -20,10 +20,10 @@ function Layout() {
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center h-14 px-4 border-b border-outline-variant">
-          <span className="material-symbols-outlined text-primary text-xl mr-2">ssid_chart</span>
+        <div className="flex items-center h-16 px-4 border-b border-outline-variant">
+          <span className="material-symbols-outlined text-primary text-2xl mr-2">ssid_chart</span>
           {!collapsed && (
-            <span className="text-[11px] font-bold tracking-widest uppercase text-primary">DHIDROSAN</span>
+            <span className="text-sm font-bold tracking-widest uppercase text-primary">DHIDROSAN</span>
           )}
         </div>
 
@@ -65,21 +65,21 @@ function Layout() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
-        <header className="h-14 flex items-center px-6 border-b border-outline-variant shrink-0">
-          <h1 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+        <header className="h-16 flex items-center px-8 border-b border-outline-variant shrink-0">
+          <h1 className="text-sm font-bold tracking-widest uppercase text-on-surface-variant">
             {location.pathname === '/' && 'Panel Principal'}
             {location.pathname === '/dashboard' && 'Panel Principal'}
             {location.pathname === '/perfil' && 'Perfil'}
             {location.pathname === '/docs' && 'Documentación'}
           </h1>
-          <div className="ml-auto flex items-center gap-3">
-            <button className="relative w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-on-surface">
-              <span className="material-symbols-outlined text-xl">notifications</span>
-              <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-error" />
+          <div className="ml-auto flex items-center gap-4">
+            <button className="relative w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface">
+              <span className="material-symbols-outlined text-2xl">notifications</span>
+              <span className="absolute top-2 right-2.5 w-2.5 h-2.5 rounded-full bg-error" />
             </button>
-            <div className="flex items-center gap-2 px-2 py-1 bg-surface-container border border-outline-variant">
-              <span className="material-symbols-outlined text-on-surface-variant text-lg">person</span>
-              <span className="text-[13px] font-medium text-on-surface">Ing. Camilo Cardenas</span>
+            <div className="flex items-center gap-2.5 px-3 py-1.5 bg-surface-container border border-outline-variant">
+              <span className="material-symbols-outlined text-on-surface-variant text-xl">person</span>
+              <span className="text-sm font-medium text-on-surface">Ing. Camilo Cardenas</span>
             </div>
           </div>
         </header>

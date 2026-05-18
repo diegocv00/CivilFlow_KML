@@ -1,10 +1,10 @@
 import React from 'react'
-import DHIDROSAN from '../components/DHIDROSAN'
+import WorkArea from '../components/workarea'
 
 function DashboardPage() {
   return (
     <div className="h-full">
-      <DHIDROSAN />
+      <WorkArea />
     </div>
   )
 }
