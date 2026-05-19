@@ -1,4 +1,7 @@
 import { useState, useRef, useCallback } from "react";
+import * as XLSX from "xlsx";
+import * as CalcSan from "../utils/calcSanitario";
+import * as CalcHid from "../utils/calcHidraulica";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    DHIDROSAN KML 2026
@@ -63,7 +66,7 @@ const G = `
 .layout{display:flex;flex:1;overflow:hidden}
 .sb{width:360px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column}
 .sb-sec{padding:14px 16px;border-bottom:1px solid var(--line)}
-.sb-hdr{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sb-hdr{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .sb-hdr::after{content:'';flex:1;height:1px;background:var(--line)}
 .f{margin-bottom:8px}.f label{display:block;font-size:12px;font-weight:500;color:var(--txt2);margin-bottom:3px}
 .f input,.f select{width:100%;padding:6px 10px;background:var(--bg3);border:1px solid var(--line);border-radius:var(--r);font-size:13px;font-family:var(--mono);color:var(--txt);outline:none;transition:border .15s}
@@ -86,8 +89,8 @@ const G = `
 .npt-in{width:72px;padding:4px 6px;background:var(--bg);border:1px solid var(--line);border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--txt);outline:none;text-align:right}
 .pdot{width:6px;height:6px;border-radius:50%;background:var(--line2);flex-shrink:0;margin-left:auto}
 .pdot.ok{background:var(--ok)}
-.btn-xs{padding:5px 12px;border:1px dashed var(--line2);border-radius:var(--r);background:transparent;color:var(--txt3);font-size:11px;cursor:pointer;width:100%;font-family:var(--body);transition:all .15s;margin-top:3px}
-.btn-xs:hover{border-color:var(--acc2);color:var(--acc2)}
+.btn-xs{padding:6px 14px;border:1px solid var(--acc);border-radius:var(--r);background:rgba(37,99,235,.1);color:var(--acc);font-size:12px;cursor:pointer;width:100%;font-family:var(--body);font-weight:500;transition:all .15s;margin-top:3px}
+.btn-xs:hover{background:var(--acc);color:#fff}
 .content{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
 .tab-content{flex:1;display:flex;flex-direction:column;gap:12px}
 .tab-content .card{flex:1;display:flex;flex-direction:column;min-height:0}
@@ -439,6 +442,665 @@ export default function DHIDROSAN(){
     accs:{c90e:1,c90r:0,tel:0,ter:0,bola:1},n_ap:1,
   }]);
 
+// ─── GENERAR EXCEL SANITARIO (MULTI-HOJAS) ──────────────────────────────
+  function generarExcelSanitario() {
+    const proyecto = {
+      nombre: proy.nombre || "Proyecto",
+      direccion: proy.dir || "",
+      municipio: proy.mun || "",
+      departamento: proy.dep || "",
+      uso: proy.uso || "",
+      empresa: proy.empresa || "",
+      ingeniero: "Ing. Camilo Cardenas Chacon",
+      normas: "NTC 1500 · RAS 2000 · NSR-10",
+    };
+
+    const n = CalcSan.MANNING_SAN;
+    const S = 0.02;
+
+    const hidros = aps.filter(a => a.grupo === "h");
+
+    const tramosDef = [
+      { tramo: "BAN-1", piso: 2, apsUD: { sif: 2, lvm: 2, san: 2, duc: 2 }, UD_otros: 0, desc_otros: "" },
+      { tramo: "BAN-2", piso: 2, apsUD: { sif: 3, lvm: 2, san: 1, duc: 1, tin: 1 }, UD_otros: 0, desc_otros: "" },
+      { tramo: "R-1",   piso: 1, apsUD: { sif: 6, lvm: 2, san: 1, lvp: 2, lvra: 1 }, UD_otros: 0, desc_otros: "", recibeDe: ["BAN-2"] },
+      { tramo: "R-2",   piso: 1, apsUD: { sif: 1, lvm: 2, san: 2, duc: 1 }, UD_otros: 0, desc_otros: "" },
+      { tramo: "R-3",   piso: 1, apsUD: {}, UD_otros: 0, desc_otros: "", recibeDe: ["BAN-1", "R-1", "R-2"] },
+    ];
+
+    if (pisos.some(p => p.n < 0)) {
+      tramosDef.push({ tramo: "Sotano", piso: -1, apsUD: { sif: 3, lvm: 1, san: 1, duc: 1 }, UD_otros: 0, desc_otros: "" });
+    }
+
+    const udMap = {};
+    hidros.forEach(a => { udMap[a.id] = a.ud; });
+
+    const udByTramo = [];
+    const calcResults = [];
+    let UD_acumulados = {};
+
+    tramosDef.forEach((t, idx) => {
+      let UD_prop = 0;
+      const propios = {};
+      Object.entries(t.apsUD || {}).forEach(([key, cant]) => {
+        const unitUD = udMap[key] || 2;
+        propios[key] = cant * unitUD;
+        UD_prop += cant * unitUD;
+      });
+
+      let UD_otr = 0;
+      if (t.recibeDe) {
+        t.recibeDe.forEach(id => {
+          UD_otr += UD_acumulados[id] || 0;
+        });
+      }
+
+      const UD_acum = UD_prop + UD_otr;
+      UD_acumulados[t.tramo] = UD_acum;
+
+      const numSalidas = Math.max(1, Object.values(t.apsUD || {}).reduce((s, v) => s + v, 0));
+
+      udByTramo.push({
+        tramo: t.tramo,
+        piso: t.piso,
+        propios,
+        UD_propias: UD_prop,
+        UD_otros: UD_otr,
+        UD_acumulado: UD_acum,
+        numSalidas,
+      });
+
+      calcResults.push(CalcSan.calcularTramoSanitario({
+        tramo: t.tramo,
+        piso: t.piso,
+        UD_propias: UD_prop,
+        UD_otros: UD_otr,
+        numSalidas,
+        pendiente: S,
+        n,
+      }));
+    });
+
+    const totalAps = {};
+    const cantAps = {};
+    tramosDef.forEach(t => {
+      Object.entries(t.apsUD || {}).forEach(([key, cant]) => {
+        cantAps[key] = (cantAps[key] || 0) + cant;
+        totalAps[key] = (totalAps[key] || 0) + cant;
+      });
+    });
+    const totalUD = Object.values(UD_acumulados).reduce((a, b) => Math.max(a, b), 0);
+
+    // ═══ HOJA 1: CABEZOTE ═══
+    const ws1_data = [
+      ["CALCULO REDES SANITARIAS Y AGUAS LLUVIAS"],
+      ["Proyecto:", proyecto.nombre, "", "", "Normas:", proyecto.normas],
+      ["Direccion:", proyecto.direccion, "", "", "Ingeniero:", proyecto.ingeniero],
+      ["Municipio:", proyecto.municipio, "", "", "Departamento:", proyecto.departamento],
+      ["Uso:", proyecto.uso, "", "", "Empresa:", proyecto.empresa],
+      ["Fecha:", new Date().toLocaleDateString()],
+      ["", "", "", "", "", "", "", "", "DHIDROSAN KML 2026"],
+    ];
+
+    // ═══ HOJA 2: CALCULO UD ═══
+    const apColumns = [
+      { key: "sif", lbl: "Sifones", ud: 2 },
+      { key: "lvm", lbl: "Lavamanos", ud: 2 },
+      { key: "san", lbl: "Sanitarios", ud: 4 },
+      { key: "duc", lbl: "Duchas", ud: 2 },
+      { key: "lvra", lbl: "Lavadoras", ud: 4 },
+      { key: "tin", lbl: "Tina", ud: 2 },
+      { key: "lvp", lbl: "Lavaplatos", ud: 2 },
+      { key: "lvro", lbl: "Lavadero", ud: 2 },
+    ];
+
+    const ws2_data = [
+      ["CALCULO UNIDADES DE DESCARGA"],
+      ["Proyecto:", proyecto.nombre],
+      ["Normas:", proyecto.normas],
+      [],
+      ["TRAMO", "PISO",
+        ...apColumns.map(c => `${c.lbl} (UD=${c.ud})`),
+        "UD Parcial", "UD Acumulado"],
+    ];
+
+    udByTramo.forEach(t => {
+      const row = [t.tramo, t.piso];
+      apColumns.forEach(c => {
+        row.push(t.propios[c.key] || 0);
+      });
+      row.push(t.UD_propias);
+      row.push(t.UD_acumulado);
+      ws2_data.push(row);
+    });
+
+    ws2_data.push([]);
+    ws2_data.push(["TOTALES DE APARATOS"]);
+    ws2_data.push(["Aparato", "N° Aparatos", "UD unitaria", "UD Total"]);
+    apColumns.forEach(c => {
+      const cant = cantAps[c.key] || 0;
+      ws2_data.push([c.lbl, cant, c.ud, cant * c.ud]);
+    });
+    ws2_data.push(["", "", "TOTAL UD:", totalUD]);
+
+    // ═══ HOJA 3: RED SANITARIA (Manning) ═══
+    const ws3_data = [
+      ["DISEÑO REDES SANITARIAS"],
+      ["Proyecto:", proyecto.nombre],
+      ["Normas:", proyecto.normas],
+      ["Metodo:", "Manning · Hunter Rodriguez Diaz · NTC 1500"],
+      [`n = ${n}`, `S = ${(S * 100).toFixed(2)}%`],
+      [],
+      ["TRAMO", "PISO", "UD Prop", "UD Otros", "UD Acum", "N° Sal", "Coef. K",
+        "Q (L/s)", "n", "S (%)", "D calc (pulg)", "D diseño (pulg)", "D int (mm)",
+        "Qo (L/s)", "Vo (m/s)", "Q/Qo", "V real (m/s)", "Cheq V",
+        "Yc (mm)", "Yn (mm)", "Y/D", "Froude", "Tipo flujo",
+        "Ymax (mm)", "Cheq Yn<Ymax", "Fza tract (kg/m²)", "Cheq τ≥0.15", "CUMPLE"],
+    ];
+
+    calcResults.forEach(r => {
+      const q_Qo = r.Qo_Ls > 0 ? r.Q_Ls / r.Qo_Ls : 0;
+      const hD = r.Dprop_mm > 0 ? r.Yn_mm / r.Dprop_mm : 0;
+      ws3_data.push([
+        r.tramo, r.piso, r.UD_propias, r.UD_otros, r.UD_acumulado,
+        r.numSalidas, r.K, r.Q_Ls, r.n, (r.S * 100), r.Dcalc_pulg,
+        r.Dprop_pulg, r.Dint_mm, r.Qo_Ls, r.Vo,
+        parseFloat(q_Qo.toFixed(4)), r.V_real, r.verifVel ? "O.K." : "REV",
+        r.Yc_mm, r.Yn_mm, parseFloat(hD.toFixed(4)),
+        r.Fr, r.regime, r.Ymax_mm,
+        r.verifYn ? "O.K." : "REV",
+        r.fuerzaTractiva, r.verifTau ? "O.K." : "REV",
+        r.cumple ? "CUMPLE" : "REV",
+      ]);
+    });
+
+    // ═══ HOJA 4: BAJANTES Y VENTILACION ═══
+    const ws4_data = [
+      ["CHEQUEO CAPACIDAD BAJANTES AGUAS NEGRAS Y CALCULO TUBERIA DE VENTILACION"],
+      ["Proyecto:", proyecto.nombre],
+      ["r = 7/24 = 0.2917 (factor de llenado)"],
+      [],
+      ["Bajante", "Pisos", "UD Acum", "r", "Q (L/s)", "n",
+        "D calc (pulg)", "D prop (pulg)", "Cheq Dcal<Dprop", "Q max Baj (L/s)",
+        "Vt (m/s)", "Lt calc (m)", "Lt min (m)",
+        "V aire (m/s)", "Q aire (L/s)", "Long. baj (m)",
+        "D vent calc (pulg)", "D vent prop (pulg)"],
+    ];
+
+    const bajantes = tramosDef.filter(t => t.tramo.startsWith("BAN") || t.tramo === "Sotano");
+    bajantes.forEach(t => {
+      const udData = udByTramo.find(u => u.tramo === t.tramo);
+      const rData = calcResults.find(r => r.tramo === t.tramo);
+      if (udData && rData) {
+        const bv = CalcSan.calcularBajanteVentilacion({
+          bajante: t.tramo,
+          pisos: t.piso < 0 ? `${Math.abs(t.piso)}-1` : "2-1",
+          UD_acum: udData.UD_acumulado,
+          r: 7 / 24,
+          n,
+          pendiente: S,
+          longBajante_m: 3,
+        });
+        ws4_data.push([
+          bv.bajante, bv.pisos, bv.UD_acum, bv.r, bv.Q_Ls, bv.n,
+          bv.Dcalc_pulg, bv.Dprop_pulg, bv.chequeoDiam, bv.QmaxBajante,
+          bv.Vt, bv.Lt_calc, bv.Lt_min,
+          bv.V_aire, bv.Q_aire_Ls, bv.longBajante_m,
+          bv.D_vent_calc_pulg, bv.D_vent_prop_pulg,
+        ]);
+      }
+    });
+
+    // ═══ HOJA 5: TUBERIAS ═══
+    const ws5_data = [
+      ["TUBERIAS SANITARIAS Y DE VENTILACION"],
+      ["Presion de prueba: 0.35 MPa (50 PSI)"],
+      [],
+      ["--- Tuberias Sanitarias y Aguas Lluvias ---"],
+      ["Diametro Nominal", "D ext (mm)", "D ext (pulg)", "D int (mm)", "Espesor (mm)", "Espesor (pulg)", "Peso (kg/m)"],
+    ];
+    CalcSan.TUBERIAS_SAN.forEach(t => {
+      ws5_data.push([t.nominal, t.dExt, t.dExtPulg, t.dInt, t.espesor, t.espPulg, t.peso]);
+    });
+
+    ws5_data.push([]);
+    ws5_data.push(["--- Tuberias de Ventilacion ---"]);
+    ws5_data.push(["Diametro Nominal", "D ext (mm)", "D ext (pulg)", "D int (mm)", "Espesor (mm)", "Espesor (pulg)", "Peso (kg/m)"]);
+    CalcSan.TUBERIAS_VENT.forEach(t => {
+      ws5_data.push([t.nominal, t.dExt, t.dExtPulg, t.dInt, t.espesor, t.espPulg, t.peso]);
+    });
+
+    // ═══ CREAR WORKBOOK ═══
+    const wb = XLSX.utils.book_new();
+
+    const ws1 = XLSX.utils.aoa_to_sheet(ws1_data);
+    ws1['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 30 }];
+    XLSX.utils.book_append_sheet(wb, ws1, "Cabezote");
+
+    const ws2 = XLSX.utils.aoa_to_sheet(ws2_data);
+    ws2['!cols'] = [
+      { wch: 10 }, { wch: 6 },
+      ...apColumns.map(() => ({ wch: 12 })),
+      { wch: 12 }, { wch: 14 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws2, "1,Calculo UD");
+
+    const ws3 = XLSX.utils.aoa_to_sheet(ws3_data);
+    const col3Widths = [10, 6, 8, 8, 10, 8, 8, 10, 6, 8, 12, 12, 10, 10, 10, 8, 10, 8, 10, 10, 8, 8, 12, 10, 12, 10, 14, 10, 10];
+    ws3['!cols'] = col3Widths.map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws3, "2,Red Sanit y Lluvias VF");
+
+    const ws4 = XLSX.utils.aoa_to_sheet(ws4_data);
+    ws4['!cols'] = [10, 8, 10, 8, 10, 6, 12, 12, 14, 14, 10, 10, 10, 10, 10, 10, 14, 14];
+    XLSX.utils.book_append_sheet(wb, ws4, "3,BAN y Ventilacion VF");
+
+    const ws5 = XLSX.utils.aoa_to_sheet(ws5_data);
+    ws5['!cols'] = [{ wch: 18 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, ws5, "Tuberias");
+
+    const nombreArchivo = (proyecto.nombre || "Proyecto").replace(/[^a-zA-Z0-9]/g, "_");
+    XLSX.writeFile(wb, `Calculo_Redes_Sanitarias_${nombreArchivo}.xlsx`);
+  }
+
+  // ─── GENERAR EXCEL HIDRÁULICO ───────────────────────────────────────────
+  function generarExcelHidraulico() {
+    const proyecto = {
+      nombre: proy.nombre || "Proyecto",
+      direccion: proy.dir || "",
+      municipio: proy.mun || "",
+      departamento: proy.dep || "",
+      uso: proy.uso || "",
+      empresa: proy.empresa || "",
+      ingeniero: "Ing. Camilo Cardenas Chacon",
+      normas: "NTC 1500 · RAS 2000 · NSR-10",
+    };
+
+    const hidros = aps.filter(a => a.grupo === "h");
+    const P_red = parseFloat(proy.p_red) || 20;
+
+    // ─── Definir tramos RAF ───
+    const tramosRAF = [
+      { ramal: "RAF1", ini: "Duc", fin: "Mon", piso: 2, apsUC: { lvm: 0, san: 3, duc: 2, lvp: 0, tin: 0, lvra: 1, lvro: 0, nev: 0 }, UC_otros: 0, Lh: 23.13, Lv: 0, presionIni: P_red },
+      { ramal: "Mon", ini: "P2", fin: "P1", piso: 2, apsUC: {}, UC_otros: 0, Lh: 3.50, Lv: 0, presionIni: null },
+      { ramal: "RAF2", ini: "Lav", fin: "Mon", piso: 1, apsUC: { lvm: 0, san: 3, duc: 2, lvp: 1, tin: 0, lvra: 0, lvro: 1, nev: 0 }, UC_otros: 0, Lh: 23.88, Lv: 0, presionIni: null },
+      { ramal: "RAF3", ini: "Mon", fin: "Con", piso: 1, apsUC: {}, UC_otros: 0, Lh: 6.84, Lv: 0, presionIni: null },
+      { ramal: "RAF4", ini: "Mon", fin: "Cal", piso: 1, apsUC: {}, UC_otros: 0, Lh: 18.57, Lv: 0, presionIni: null },
+      { ramal: "RED", ini: "---", fin: "CONT", piso: 0, apsUC: {}, UC_otros: 0, Lh: 10.0, Lv: 0, presionIni: null },
+    ];
+
+    // ─── Definir tramos RAC ───
+    const tramosRAC = [
+      { ramal: "RAC1", ini: "Cal", fin: "Lvm", piso: 1, apsUC: { duc: 2, lvp: 1, lvm: 1, tin: 1 }, UC_otros: 0, Lh: 16.93, Lv: 0, presionIni: null },
+      { ramal: "RAC2", ini: "Duc", fin: "Mon", piso: 2, apsUC: { duc: 1, lvm: 1 }, UC_otros: 0, Lh: 19.55, Lv: 0, presionIni: null },
+      { ramal: "RAC3", ini: "Duc", fin: "Mon", piso: 2, apsUC: { duc: 1, lvm: 1 }, UC_otros: 0, Lh: 11.36, Lv: 0, presionIni: null },
+      { ramal: "RAC4", ini: "Mon", fin: "Cal", piso: 2, apsUC: {}, UC_otros: 0, Lh: 5.73, Lv: 0, presionIni: null },
+    ];
+
+    // ─── Calcular UC Acumulados para RAF ───
+    const ucMap_AF = {};
+    hidros.forEach(a => { ucMap_AF[a.id] = { af: a.uc_af, ac: a.uc_ac }; });
+
+    let rafUCAcum = {};
+    let rafResults = [];
+    let rafUCRows = [];
+
+    tramosRAF.forEach((t, idx) => {
+      let UC_prop = 0;
+      const propios = {};
+      Object.entries(t.apsUC || {}).forEach(([key, cant]) => {
+        const unitUC = ucMap_AF[key]?.af || 0;
+        propios[key] = cant * unitUC;
+        UC_prop += cant * unitUC;
+      });
+
+      let UC_otr = 0;
+      if (idx > 0 && idx < 3) {
+        // RAF2 recibe RAF1
+      }
+
+      const numSalidas = Math.max(1, Object.values(t.apsUC || {}).reduce((s, v) => s + v, 0) || 2);
+      const K = CalcHid.factorSimultaneidad(numSalidas);
+      const UC_acum = UC_prop + UC_otr;
+      rafUCAcum[t.ramal] = UC_acum;
+
+      rafUCRows.push({
+        ramal: t.ramal,
+        piso: t.piso,
+        propios,
+        UC_propias: UC_prop,
+        UC_otros: UC_otr,
+        UC_acumulado: UC_acum,
+        Lh: t.Lh,
+        numSalidas,
+      });
+
+      rafResults.push(CalcHid.calcularTramoHidraulico({
+        ramal: t.ramal,
+        nudoIni: t.ini,
+        nudoFin: t.fin,
+        piso: t.piso,
+        UC_propias: UC_prop,
+        UC_otros: UC_otr,
+        numSalidas,
+        Lh_m: t.Lh,
+        Lv_m: t.Lv || 0,
+        presionRed_mca: t.presionIni || P_red,
+        material: 'PVC',
+        tipo: 'AF',
+      }));
+    });
+
+    // ─── Calcular UC Acumulados para RAC ───
+    let racUCAcum = {};
+    let racResults = [];
+    let racUCRows = [];
+
+    tramosRAC.forEach((t, idx) => {
+      let UC_prop = 0;
+      const propios = {};
+      Object.entries(t.apsUC || {}).forEach(([key, cant]) => {
+        const unitUC = ucMap_AF[key]?.ac || 0;
+        propios[key] = cant * unitUC;
+        UC_prop += cant * unitUC;
+      });
+
+      let UC_otr = 0;
+      if (idx === 3) {
+        UC_otr = (racUCAcum['RAC2'] || 0) + (racUCAcum['RAC3'] || 0);
+      }
+
+      const numSalidas = Math.max(1, Object.values(t.apsUC || {}).reduce((s, v) => s + v, 0) || 2);
+      const K = CalcHid.factorSimultaneidad(numSalidas);
+      const UC_acum = UC_prop + UC_otr;
+      racUCAcum[t.ramal] = UC_acum;
+
+      racUCRows.push({
+        ramal: t.ramal,
+        piso: t.piso,
+        propios,
+        UC_propias: UC_prop,
+        UC_otros: UC_otr,
+        UC_acumulado: UC_acum,
+        Lh: t.Lh,
+        numSalidas,
+      });
+
+      racResults.push(CalcHid.calcularTramoHidraulico({
+        ramal: t.ramal,
+        nudoIni: t.ini,
+        nudoFin: t.fin,
+        piso: t.piso,
+        UC_propias: UC_prop,
+        UC_otros: UC_otr,
+        numSalidas,
+        Lh_m: t.Lh,
+        Lv_m: t.Lv || 0,
+        presionRed_mca: P_red,
+        material: 'CPVC',
+        tipo: 'AC',
+      }));
+    });
+
+    // ═══ HOJA 1: CABEZOTE ═══
+    const ws1_data = [
+      ["CALCULO RED HIDRAULICA AF Y AC"],
+      ["Proyecto:", proyecto.nombre, "", "", "Normas:", proyecto.normas],
+      ["Direccion:", proyecto.direccion, "", "", "Ingeniero:", proyecto.ingeniero],
+      ["Municipio:", proyecto.municipio, "", "", "Departamento:", proyecto.departamento],
+      ["Uso:", proyecto.uso, "", "", "Empresa:", proyecto.empresa],
+      ["Fecha:", new Date().toLocaleDateString()],
+      ["", "", "", "", "", "", "", "", "DHIDROSAN KML 2026"],
+    ];
+
+    // ═══ HOJA 2: UC AGUA CALIENTE ═══
+    const acColumns = [
+      { key: "duc", lbl: "Duchas", uc: 1.0 },
+      { key: "lvm", lbl: "Lavamanos", uc: 0.5 },
+      { key: "lvp", lbl: "Lavaplatos", uc: 1.0 },
+      { key: "tin", lbl: "Tina", uc: 1.0 },
+      { key: "lvra", lbl: "Lavadora", uc: 1.0 },
+      { key: "lvro", lbl: "Lavadero", uc: 1.0 },
+    ];
+
+    const ws2_data = [
+      ["CALCULO UNIDADES DE CONSUMO AGUA CALIENTE"],
+      ["Proyecto:", proyecto.nombre],
+      ["Normas:", proyecto.normas],
+      [],
+      ["Tramo", "Piso", ...acColumns.map(c => `${c.lbl} (UC=${c.uc})`), "UC Parcial", "UC Acumulado", "Long Lh (m)", "N° Sal. Simult."],
+    ];
+
+    racUCRows.forEach(t => {
+      const row = [t.ramal, t.piso];
+      acColumns.forEach(c => { row.push(t.propios[c.key] || 0); });
+      row.push(t.UC_propias, t.UC_acumulado, t.Lh, t.numSalidas);
+      ws2_data.push(row);
+    });
+
+    ws2_data.push([]);
+    ws2_data.push(["APARATOS — NTC 1500"]);
+    ws2_data.push(["Aparato", "Tipo Control", "UC Agua Fria", "UC Agua Cal.", "UC Total"]);
+    CalcHid.APARATOS_UC.forEach(a => {
+      ws2_data.push([a.nombre, "", a.uc_af || "—", a.uc_ac || "—", ((a.uc_af || 0) + (a.uc_ac || 0)) > 0 ? parseFloat(((a.uc_af || 0) + (a.uc_ac || 0)).toFixed(2)) : "—"]);
+    });
+
+    // ═══ HOJA 3: UC AGUA FRIA ═══
+    const afColumns = [
+      { key: "san", lbl: "Inodoro", uc: 2.2 },
+      { key: "lvm", lbl: "Lavamanos", uc: 0.5 },
+      { key: "duc", lbl: "Ducha", uc: 1.0 },
+      { key: "lvp", lbl: "Lavaplatos", uc: 1.0 },
+      { key: "tin", lbl: "Tina", uc: 1.0 },
+      { key: "lvra", lbl: "Lavadora", uc: 1.0 },
+      { key: "lvro", lbl: "Lavadero", uc: 0.75 },
+      { key: "nev", lbl: "Nevera", uc: 0.5 },
+    ];
+
+    const ws3_data = [
+      ["CALCULO UNIDADES DE CONSUMO AGUA FRIA"],
+      ["Proyecto:", proyecto.nombre],
+      ["Normas:", proyecto.normas],
+      [],
+      ["Tramo", "Piso", ...afColumns.map(c => `${c.lbl} (UC=${c.uc})`), "UC Parcial", "UC Acumulado", "Long Lh (m)", "N° Sal. Simult."],
+    ];
+
+    rafUCRows.forEach(t => {
+      const row = [t.ramal, t.piso];
+      afColumns.forEach(c => { row.push(t.propios[c.key] || 0); });
+      row.push(t.UC_propias, t.UC_acumulado, t.Lh, t.numSalidas);
+      ws3_data.push(row);
+    });
+
+    // ═══ HOJA 4: CALCULO RAF ═══
+    const ws4_data = [
+      ["DISEÑO RED HIDRAULICA — AGUA FRIA"],
+      ["Proyecto:", proyecto.nombre],
+      ["Normas:", proyecto.normas],
+      ["Metodo:", "Hazen-Williams · Hunter Rodriguez Diaz · NTC 1500"],
+      ["Material:", "PVC Presion RDE 21 · C = 150"],
+      [`P red = ${P_red} m.c.a.`],
+      [],
+      ["Ramal", "INI", "FIN", "Piso", "UC Prop", "UC Otros", "UC Acum", "N° Sal", "Coef. K",
+        "Q (L/s)", "Diam. diseño", "D int (mm)", "Material", "C (H-W)",
+        "V (mm/s)", "Lh (m)", "Lv (m)", "Le (m)", "L total (m)",
+        "Hf (m)", "dZ (m)", "P ini (mca)", "P fin (mca)", "Verif V", "Verif P"],
+    ];
+
+    rafResults.forEach(r => {
+      ws4_data.push([
+        r.ramal, r.nudoIni, r.nudoFin, r.piso,
+        r.UC_propias, r.UC_otros, r.UC_acumulado, r.numSalidas, r.K,
+        r.Q_Ls, r.diamNominal, r.D_int_mm, r.material, r.C,
+        r.V_mms, r.Lh_m, r.Lv_m, r.Le_m, r.L_total,
+        r.hf_m, r.deltaZ_m, r.P_ini_mca, r.P_fin_mca,
+        r.verifV.cumple ? "O.K." : "REV",
+        r.verifP.cumple ? "O.K." : "REV",
+      ]);
+    });
+
+    ws4_data.push([]);
+    ws4_data.push(["PRESIONES MINIMAS Y MAXIMAS POR APARATO (NTC 1500)"]);
+    ws4_data.push(["Aparato", "Sigla", "P min (mca)", "P max (mca)"]);
+    CalcHid.APARATOS_UC.forEach(a => {
+      if (a.uc_af > 0) ws4_data.push([a.nombre, a.sigla, a.pmin, a.pmax]);
+    });
+
+    // ═══ HOJA 5: CALCULO RAC ═══
+    const ws5_data = [
+      ["DISEÑO RED HIDRAULICA — AGUA CALIENTE"],
+      ["Proyecto:", proyecto.nombre],
+      ["Normas:", proyecto.normas],
+      ["Metodo:", "Hazen-Williams · Hunter Rodriguez Diaz · NTC 1500"],
+      ["Material:", "CPVC RDE 11 · C = 150"],
+      [`P red = ${P_red} m.c.a.`],
+      [],
+      ["Ramal", "INI", "FIN", "Piso", "UC Prop", "UC Otros", "UC Acum", "N° Sal", "Coef. K",
+        "Q (L/s)", "Diam. diseño", "D int (mm)", "Material", "C (H-W)",
+        "V (mm/s)", "Lh (m)", "Lv (m)", "Le (m)", "L total (m)",
+        "Hf (m)", "dZ (m)", "P ini (mca)", "P fin (mca)", "Verif V", "Verif P"],
+    ];
+
+    racResults.forEach(r => {
+      ws5_data.push([
+        r.ramal, r.nudoIni, r.nudoFin, r.piso,
+        r.UC_propias, r.UC_otros, r.UC_acumulado, r.numSalidas, r.K,
+        r.Q_Ls, r.diamNominal, r.D_int_mm, r.material, r.C,
+        r.V_mms, r.Lh_m, r.Lv_m, r.Le_m, r.L_total,
+        r.hf_m, r.deltaZ_m, r.P_ini_mca, r.P_fin_mca,
+        r.verifV.cumple ? "O.K." : "REV",
+        r.verifP.cumple ? "O.K." : "REV",
+      ]);
+    });
+
+    ws5_data.push([]);
+    ws5_data.push(["SELECCION DE CALENTADOR"]);
+    ws5_data.push(["Aparato", "Cantidad", "UC unit.", "UC Total"]);
+    const calAps = [
+      { nombre: "Duchas", cant: 4, uc: 1 },
+      { nombre: "Lavamanos", cant: 5, uc: 0.5 },
+      { nombre: "Tina", cant: 1, uc: 1 },
+      { nombre: "Lavadora", cant: 1, uc: 1 },
+      { nombre: "Lavaplatos", cant: 2, uc: 1 },
+    ];
+    let totalUC_AC = 0;
+    calAps.forEach(a => {
+      const ucTotal = a.cant * a.uc;
+      totalUC_AC += ucTotal;
+      ws5_data.push([a.nombre, a.cant, a.uc, ucTotal]);
+    });
+    ws5_data.push(["", "", "Total UC AC:", totalUC_AC]);
+
+    const K_cal = CalcHid.factorSimultaneidad(calAps.length);
+    const Q_cal_Ls = CalcHid.caudalHunterLPS(totalUC_AC, K_cal);
+    const Q_cal_LPM = Q_cal_Ls * 60;
+    const K_ajuste = 0.5;
+    const Q_ajuste_LPM = Q_cal_LPM * K_ajuste;
+    ws5_data.push([]);
+    ws5_data.push(["Caudal probable:", `${Q_cal_Ls.toFixed(3)} L/s = ${Q_cal_LPM.toFixed(2)} GPM = ${(Q_cal_LPM * 3.785).toFixed(2)} LPM`]);
+    ws5_data.push(["Factor simultaneidad K:", K_cal.toFixed(4)]);
+    ws5_data.push(["Caudal ajustado:", `${Q_ajuste_LPM.toFixed(2)} LPM`]);
+    ws5_data.push(["Recomendacion:", "Calentador >= 20 LPM — Paso Directo Gas Natural"]);
+
+    // ═══ HOJA 6: BASE DATOS ═══
+    const ws6_data = [
+      ["BASE DE DATOS — APARATOS, TUBERIAS Y CONTADORES"],
+      [],
+      ["Aparatos Sanitarios — NTC 1500"],
+      ["Aparato", "Tipo Control", "UC AF", "UC AC", "UD", "P min (mca)", "P max (mca)"],
+    ];
+    CalcHid.APARATOS_UC.forEach(a => {
+      ws6_data.push([a.nombre, "", a.uc_af || "—", a.uc_ac || "—", a.ud, a.pmin, a.pmax]);
+    });
+
+    ws6_data.push([]);
+    ws6_data.push(["Diametros Comerciales — AGUA FRIA (PVC)"]);
+    ws6_data.push(["Diametro Comercial", "pulg", "D interno (mm)", "D externo (mm)"]);
+    CalcHid.DIAMETROS_AF.forEach(d => {
+      ws6_data.push([d.nominal, d.pulg, d.dInt, d.dExt]);
+    });
+
+    ws6_data.push([]);
+    ws6_data.push(["Diametros Comerciales — AGUA CALIENTE (CPVC)"]);
+    ws6_data.push(["Diametro Comercial", "pulg", "D interno (mm)", "D externo (mm)"]);
+    CalcHid.DIAMETROS_AC.forEach(d => {
+      ws6_data.push([d.nominal, d.pulg, d.dInt, d.dExt]);
+    });
+
+    ws6_data.push([]);
+    ws6_data.push(["Contadores — Caudales Nominales"]);
+    ws6_data.push(["Diametro (pulg)", "Qn (L/s)"]);
+    CalcHid.CONTADORES.forEach(c => {
+      ws6_data.push([c.diaPulg, c.qn_lps]);
+    });
+
+    // ═══ HOJA 7: LONGITUD EQUIVALENTE ═══
+    const ws7_data = [
+      ["LONGITUDES EQUIVALENTES DE ACCESORIOS — PVC C=150"],
+      [],
+      ["Accesorio", "D=1/2\"", "D=3/4\"", "D=1\"", "D=1-1/2\"", "D=2\"", "D=3\"", "D=4\""],
+    ];
+    CalcHid.LE_ACCESORIOS.forEach(a => {
+      ws7_data.push([a.nombre, ...a.le]);
+    });
+
+    // ═══ HOJA 8: CALCULO TR ═══
+    const habitantes = 6;
+    const dotacion = parseFloat(proy.dot) || 280;
+    const calcTR = CalcHid.calcularConsumoTR(habitantes, dotacion, 0, 0, 0);
+
+    const ws8_data = [
+      ["AGUA POTABLE — CALCULO DE CONSUMO TOTAL"],
+      ["Proyecto:", proyecto.nombre],
+      [],
+      ["Ubicacion / Tipo", "Unidad", "Consumo (Lt/Hab/dia)", "Total (Lt/dia)"],
+      ["Habitantes Fijos", habitantes, dotacion, calcTR.q_fijos],
+      ["Piscinas (Adultos)", "—", "10 Lt/m2/dia", calcTR.q_piscina],
+      ["Zonas Verdes", "—", "2 Lt/m2/dia", calcTR.q_verdes],
+      ["Otros", "—", "—", calcTR.q_otros],
+      ["", "", "SUBTOTAL", calcTR.total_diario],
+      ["", "", "Q (lps)", calcTR.Q_lps],
+    ];
+
+    // ═══ CREAR WORKBOOK ═══
+    const wb = XLSX.utils.book_new();
+
+    const ws1 = XLSX.utils.aoa_to_sheet(ws1_data);
+    ws1['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 30 }];
+    XLSX.utils.book_append_sheet(wb, ws1, "Cabezote");
+
+    const ws2 = XLSX.utils.aoa_to_sheet(ws2_data);
+    ws2['!cols'] = [{ wch: 10 }, { wch: 6 }, ...acColumns.map(() => ({ wch: 14 })), { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 10 }];
+    XLSX.utils.book_append_sheet(wb, ws2, "UC Agua Caliente");
+
+    const ws3 = XLSX.utils.aoa_to_sheet(ws3_data);
+    ws3['!cols'] = [{ wch: 10 }, { wch: 6 }, ...afColumns.map(() => ({ wch: 14 })), { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 10 }];
+    XLSX.utils.book_append_sheet(wb, ws3, "UC Agua Fria");
+
+    const ws4 = XLSX.utils.aoa_to_sheet(ws4_data);
+    const col4w = [10, 6, 6, 6, 8, 8, 10, 8, 8, 10, 14, 10, 10, 6, 10, 10, 8, 8, 10, 10, 8, 10, 10, 8, 8];
+    ws4['!cols'] = col4w.map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws4, "Calculo RAF VF");
+
+    const ws5 = XLSX.utils.aoa_to_sheet(ws5_data);
+    ws5['!cols'] = col4w.map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws5, "Calculo RAC VF");
+
+    const ws6 = XLSX.utils.aoa_to_sheet(ws6_data);
+    ws6['!cols'] = [{ wch: 24 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 6 }, { wch: 14 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, ws6, "Base Datos");
+
+    const ws7 = XLSX.utils.aoa_to_sheet(ws7_data);
+    ws7['!cols'] = [{ wch: 28 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 8 }];
+    XLSX.utils.book_append_sheet(wb, ws7, "Longitud Equivalente");
+
+    const ws8 = XLSX.utils.aoa_to_sheet(ws8_data);
+    ws8['!cols'] = [{ wch: 24 }, { wch: 10 }, { wch: 18 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, ws8, "Calculo TR");
+
+    const nombreArchivo = (proyecto.nombre || "Proyecto").replace(/[^a-zA-Z0-9]/g, "_");
+    XLSX.writeFile(wb, `Calculo_RHidraulica_AF_AC_${nombreArchivo}.xlsx`);
+  }
+
   return(
     <div className="dhidrosan-wrapper" style={{height:'100%',display:'flex',flexDirection:'column',overflow:'hidden'}}>
       <style>{G}</style>
@@ -533,7 +1195,7 @@ export default function DHIDROSAN(){
             <div className="sb-sec">
               <div className="sb-hdr">Niveles del proyecto</div>
               <div style={{background:'var(--bg)',border:'1px solid rgba(37,99,235,.25)',borderRadius:'var(--r)',padding:'9px',marginBottom:8}}>
-                <div style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--acc2)',marginBottom:8,textTransform:'uppercase',fontWeight:600}}>⚡ Generador</div>
+                <div style={{fontFamily:'var(--mono)',fontSize:12,color:'var(--acc2)',marginBottom:8,textTransform:'uppercase',fontWeight:600}}>Generador</div>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:5}}>
                   <div className="f" style={{marginBottom:0}}><label>N° sótanos</label><input type="number" min="0" max="10" value={nSotanos} style={{textAlign:'center'}} onChange={e=>setNSotanos(Math.max(0,parseInt(e.target.value)||0))}/></div>
                   <div className="f" style={{marginBottom:0}}><label>N° pisos</label><input type="number" min="1" max="50" value={nPisos} style={{textAlign:'center'}} onChange={e=>setNPisos(Math.max(1,parseInt(e.target.value)||1))}/></div>
@@ -835,6 +1497,32 @@ export default function DHIDROSAN(){
                   </div>
                 </div>
 
+                <div className="ib info"><span>ℹ</span><span><b>NTC 3728</b> — ΔP ≤ 9.81 mbar (1 m.c.a.) · V ≤ 10 m/s · Factor simultaneidad según N° aparatos · Método Renouard para baja presión</span></div>
+
+                <div className="card">
+                  <div className="card-h">
+                    <span className="card-t">📋 Consumo de aparatos a gas — NTC 3728</span>
+                    <span className="card-s">Referencia para asignar Qgas</span>
+                  </div>
+                  <div className="card-b">
+                    <table className="tbl">
+                      <thead><tr><th>Aparato</th><th className="c">Consumo (m³/h)</th></tr></thead>
+                      <tbody>
+                        {[
+                          ['Estufa 4 quemadores','1.35'],['Estufa 2 quemadores','0.68'],
+                          ['Horno grande','1.15'],['Horno mediano','0.81'],
+                          ['Horno pequeño','0.54'],['Secadora grande','0.81'],
+                          ['Secadora pequeña','0.54'],['Caldera pequeña','1.76'],
+                          ['Jacuzzi','3.38'],['Calentador piscina','6.08'],
+                          ['Baño sauna','1.08'],['Baño turco','1.35'],
+                        ].map(([ap,q])=>(
+                          <tr key={ap}><td>{ap}</td><td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{q}</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
                 <div className="card">
                   <div className="card-h">
                     <span className="card-t">🔧 Tramos — Método Renouard</span>
@@ -1026,9 +1714,49 @@ export default function DHIDROSAN(){
           <div style={{fontSize:9,color:'var(--txt3)',fontFamily:'var(--mono)',flex:1}}>
             {redes.length} redes · {aps.length} aparatos · {pisos.length} niveles
           </div>
-          <button className="btn-pri" disabled={!proy.nombre}
-            style={{padding:'7px 15px',background:'var(--acc)',border:'none',borderRadius:'var(--r)',color:'#fff',fontWeight:600,fontSize:11,cursor:proy.nombre?'pointer':'not-allowed',display:'flex',alignItems:'center',gap:5,opacity:proy.nombre?1:0.5}}>
-            Generar cálculo Excel
+          <button
+            className="btn-pri"
+            disabled={!proy.nombre}
+            onClick={() => { generarExcelSanitario(); }}startIcon={<span>🚿</span>}
+            style={{
+              padding: '7px 15px',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              border: 'none',
+              borderRadius: 'var(--r)',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: 11,
+              cursor: proy.nombre ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              opacity: proy.nombre ? 1 : 0.5,
+            }}
+          >
+            <span className="ntab-ico" style={{ fontSize: 14, filter: 'brightness(1.2)' }}>🚿</span>
+            Generar cálculos red sanitaria
+          </button>
+          <button
+            className="btn-pri"
+            disabled={!proy.nombre}
+            onClick={() => { generarExcelHidraulico(); }}
+            style={{
+              padding: '7px 15px',
+              background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+              border: 'none',
+              borderRadius: 'var(--r)',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: 11,
+              cursor: proy.nombre ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              opacity: proy.nombre ? 1 : 0.5,
+            }}
+          >
+            <span className="ntab-ico" style={{ fontSize: 14, filter: 'brightness(1.2)' }}>💧</span>
+            Generar cálculos red hidráulica
           </button>
         </div>
       </div>
