@@ -3,4 +3,13 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    watch: {
+      usePolling: true,
+      interval: 50,
+    },
+    hmr: {
+      overlay: true,
+    },
+  },
 })
