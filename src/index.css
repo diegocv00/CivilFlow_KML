@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hide spin buttons on number inputs for cleaner UI */
+input[type="number"].ni::-webkit-outer-spin-button,
+input[type="number"].ni::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"].ni {
+  -moz-appearance: textfield;
+}

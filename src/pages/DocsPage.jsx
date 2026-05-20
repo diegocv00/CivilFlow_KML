@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
+import Navbar from '../components/Navbar'
 
 /* ─────────────────────────────────────────────────────────────
-   DHIDROSAN KML 2026 — DOCUMENTACION
+   Civil Flow KML 2026 — DOCUMENTACION
    Ing. Camilo Cardenas Chacon     NTC 1500 · RAS 2000 · NTC 3728 · NSR-10
    ───────────────────────────────────────────────────────────── */
 
@@ -68,10 +69,10 @@ const docData = {
         ),
       },
       {
-        title: 'Ecuación de Manning',
+        title: 'Ecuación de maning',
         body: (
           <div className="space-y-3">
-            <p>Flujo a superficie libre según Manning:</p>
+            <p>Flujo a superficie libre según maning:</p>
             <F>
               V = (1/n) · R<sub>h</sub><sup>2/3</sup> · √S
             </F>
@@ -82,7 +83,7 @@ const docData = {
             <div><span className="text-on-surface-variant">Donde:</span></div>
             <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-[13px] ml-4">
               <span className="font-semibold text-primary">V</span><span>velocidad (m/s)</span>
-              <span className="font-semibold text-primary">n</span><span>coeficiente de rugosidad de Manning</span>
+              <span className="font-semibold text-primary">n</span><span>coeficiente de rugosidad de maning</span>
               <span className="font-semibold text-primary">R<sub>h</sub></span><span>radio hidráulico (m)</span>
               <span className="font-semibold text-primary">S</span><span>pendiente (m/m)</span>
               <span className="font-semibold text-primary">A</span><span>área de la sección (m²)</span>
@@ -268,7 +269,7 @@ const docData = {
         title: 'Bajantes sanitarios',
         body: (
           <div className="space-y-3">
-            <p>Diametro de bajante por Manning:</p>
+            <p>Diametro de bajante por maning:</p>
             <F>
               D = ((Q · n) / (0.312 · &radic;S))<sup>3/8</sup> &times; 1000 / 25.4 &nbsp;&nbsp;[pulg]
             </F>
@@ -279,7 +280,7 @@ const docData = {
             <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-[13px] ml-4">
               <span className="font-semibold text-primary">D</span><span>diámetro (pulgadas)</span>
               <span className="font-semibold text-primary">Q</span><span>caudal (m³/s)</span>
-              <span className="font-semibold text-primary">n</span><span>coeficiente de Manning</span>
+              <span className="font-semibold text-primary">n</span><span>coeficiente de maning</span>
               <span className="font-semibold text-primary">S</span><span>pendiente (m/m)</span>
             </div>
             <div className="text-[12px] text-on-surface-variant border-l-2 border-outline-variant pl-3">
@@ -309,7 +310,7 @@ const docData = {
               <span className="font-semibold text-primary">V<sub>t</sub></span><span>velocidad del aire en la tubería (m/s)</span>
               <span className="font-semibold text-primary">D</span><span>diámetro de la bajante (m)</span>
               <span className="font-semibold text-primary">D<sub>vent</sub></span><span>diámetro de ventilacion (m)</span>
-              <span className="font-semibold text-primary">n</span><span>coeficiente de Manning</span>
+              <span className="font-semibold text-primary">n</span><span>coeficiente de maning</span>
               <span className="font-semibold text-primary">S</span><span>pendiente (m/m)</span>
             </div>
           </div>
@@ -372,7 +373,7 @@ const docData = {
               <span className="font-semibold text-primary">D</span><span>diámetro de bajante (mm)</span>
               <span className="font-semibold text-primary">Q</span><span>caudal de diseño (m³/s)</span>
               <span className="font-semibold text-primary">Q<sub>max</sub></span><span>caudal máximo del canal (m³/s)</span>
-              <span className="font-semibold text-primary">n</span><span>coeficiente de Manning</span>
+              <span className="font-semibold text-primary">n</span><span>coeficiente de maning</span>
               <span className="font-semibold text-primary">S</span><span>pendiente (m/m)</span>
               <span className="font-semibold text-primary">A</span><span>área hidráulica del canal (m²)</span>
               <span className="font-semibold text-primary">R<sub>h</sub></span><span>radio hidráulico (m)</span>
@@ -683,7 +684,7 @@ const docData = {
     color: '#C9A227',
     sections: [
       {
-        title: 'Manning — coeficientes n',
+        title: 'maning — coeficientes n',
         body: (
           <T>
             <Tr><Th>Material</Th><Th>n</Th></Tr>
@@ -813,7 +814,7 @@ const docData = {
             <div className="border border-outline-variant rounded overflow-hidden">
               <div className="grid grid-cols-[140px,1fr] gap-0 text-[13px]">
                 <div className="bg-surface-container-high font-semibold px-3 py-2 border-b border-outline-variant">Topbar</div>
-                <div className="px-3 py-2 border-b border-outline-variant">Barra superior con el logo de la firma KML, el nombre del sistema DHIDROSAN, los datos del ingeniero responsable (nombre, titulo, número de matricula profesional) y las normas tecnicas aplicables (NTC 1500, RAS 2000, NTC 3728, NSR-10). Se muestra tambien el nombre del proyecto activo.</div>
+                <div className="px-3 py-2 border-b border-outline-variant">Barra superior con el logo de la firma KML, el nombre del sistema Civil Flow, los datos del ingeniero responsable (nombre, titulo, número de matricula profesional) y las normas tecnicas aplicables (NTC 1500, RAS 2000, NTC 3728, NSR-10). Se muestra tambien el nombre del proyecto activo.</div>
 
                 <div className="bg-surface-container-high font-semibold px-3 py-2 border-b border-outline-variant">Nav / Pestanas</div>
                 <div className="px-3 py-2 border-b border-outline-variant">Barra de navegacion con pestanas para acceder a cada modulo del aplicativo: Planos (carga de PDF o imagen), Materiales (gestion de catalogos por red), Aparatos (tabla de unidades de consumo y descarga), Cubierta (cálculo de aguas lluvias por método racional), Gas (diseño de redes por Renouard), Calentadores (selección de equipos a gas), Validacion (resumen y verificacion final).</div>
@@ -912,7 +913,7 @@ const docData = {
           <T>
             <Tr><Th>Norma</Th><Th>Aplicación</Th></Tr>
             <Tr><Td>NTC 1500:2020</Td><Td>UC, UD, presiónes, velocidades, diámetros mínimos</Td></Tr>
-            <Tr><Td>RAS 2000</Td><Td>Dotaciones, Manning, método racional</Td></Tr>
+            <Tr><Td>RAS 2000</Td><Td>Dotaciones, maning, método racional</Td></Tr>
             <Tr><Td>NTC 3728</Td><Td>Renouard, caudales gas, factor fs</Td></Tr>
             <Tr><Td>NSR-10 Título J</Td><Td>Protección contra incendio</Td></Tr>
             <Tr><Td>NFPA 13:2022</Td><Td>Rociadores, densidad, área operación</Td></Tr>
@@ -993,7 +994,9 @@ function DocsPage() {
         })
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-120px)]">
+    <div className="min-h-screen bg-surface-bg flex flex-col">
+      <Navbar />
+      <div className="flex gap-4 h-[calc(100vh-64px)] pt-16">
       <style>{`
         [data-section-color] .text-primary,
         [data-section-color] .\\!text-primary {
@@ -1094,6 +1097,7 @@ function DocsPage() {
           )}
         </div>
       </div>
+    </div>
     </div>
   )
 }
