@@ -24,8 +24,7 @@ export default function BajantesTable() {
   return (
     <div className="card">
       <div className="card-h">
-        <span className="card-t">📊 Bajantes A.N. y Ventilación</span>
-        <span className="card-s">Hoja 3 · Capacidad · NTC 1500</span>
+          <span className="card-t">📊 Bajantes A.N. y Ventilación</span>
       </div>
       <div className="card-b" style={{overflowX:'auto'}}>
         <table className="tbl" style={{fontSize:13}}>
@@ -51,7 +50,7 @@ export default function BajantesTable() {
               <th className="col-h ven" rowSpan={2} style={{textAlign:'center'}}>ƒ<br/><small>Darcy</small></th>
               <th className="col-h ven" rowSpan={2} style={{textAlign:'center'}}>Q aire<br/><small>LPS</small></th>
               <th className="col-h ven" rowSpan={2} style={{textAlign:'center'}}>Longitud<br/>bajante<br/><small>m</small></th>
-              <th className="col-h ven" colSpan={2} style={{textAlign:'center'}}>D</th>
+              <th className="col-h ven" colSpan={2} style={{textAlign:'center'}}>Diámetro</th>
             </tr>
             <tr>
               <th className="col-h san" style={{textAlign:'center'}}>Parcial<br/><small>UD</small></th>
@@ -99,7 +98,7 @@ export default function BajantesTable() {
                 const DventPropPulg=DventProp?DventProp.pulg:0;
                 return(
                   <tr key={t.id}>
-                    <td><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
+                    <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
                     <td className="c" style={{minWidth:80}}>
                       <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>
                         <input type="text" inputMode="numeric" pattern="[0-9]*" className="ni" style={{width:32,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.pisoDesde!==undefined?String(t.pisoDesde):(t.piso?'2':'1')} onChange={e=>updTramoSan(t.id,'pisoDesde',parseInt(e.target.value.replace(/\D/g,''))||0)}/>
@@ -108,7 +107,7 @@ export default function BajantesTable() {
                       </div>
                     </td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{udParcial}</td>
-                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--san)'}}>{udAcum}</td>
+                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700}}>{udAcum}</td>
                     <td className="c">
                       <select className="ni" style={{width:44,padding:'2px 3px',fontSize:10}}
                         value={rStr} onChange={e=>updTramoSan(t.id,'bajR',e.target.value==='7/24'?7/24:1/4)}>
@@ -125,7 +124,7 @@ export default function BajantesTable() {
                         {DIAM_BAN.map(d=><option key={d.pulg} value={d.pulg}>{d.nom}</option>)}
                       </select>
                     </td>
-                    <td className="c" style={{color:chequeo==='O.K.'?'var(--ok)':'var(--err)'}}>{chequeo}</td>
+                    <td className="c">{chequeo}</td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{QmaxB>0?QmaxB.toFixed(2):'—'}</td>
                     <td className="c">{Vt>0?Vt.toFixed(2):'—'}</td>
                     <td className="c">{Ltcalc>0?Ltcalc.toFixed(2):'—'}</td>

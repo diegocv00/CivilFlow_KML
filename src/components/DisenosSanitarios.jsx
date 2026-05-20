@@ -8,33 +8,32 @@ export default function DisenosSanitarios() {
   return (
     <div className="card">
       <div className="card-h">
-        <span className="card-t">📊 Diseño Red Sanitaria</span>
-        <span className="card-s">Hoja 2 · maning · RAS 2000</span>
+          <span className="card-t">📊 Diseño Red Sanitaria</span>
       </div>
       <div className="card-b" style={{overflowX:'auto'}}>
         <table className="tbl" style={{fontSize:13}}>
           <thead>
             <tr>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Tramo<br/>o Ramal</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Piso</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Tramo<br/>o Ramal</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Piso</th>
               <th className="col-h san" colSpan={4} style={{textAlign:'center',fontSize:11}}>UNIDADES DE DESCARGA</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>No.<br/>Salidas</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Coeficiente<br/>K</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q<br/><small>LPS</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center',minWidth:70}}>Maning</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>S<br/><small>%</small></th>
-              <th className="col-h ok" colSpan={3} style={{textAlign:'center',fontSize:11}}>Diámetro - D</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Qo<br/><small>LPS</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Vo<br/><small>m/s</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q/Qo</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Vreal<br/><small>m/s</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Chequeo<br/><small>0.45&lt;Vr&lt;4.0</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Yc<br/><small>mm</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Yn<br/><small>mm</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Froude</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Tipo de<br/>Flujo</th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Ymax=<br/>0.75D<br/><small>mm</small></th>
-              <th rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Yn vs Yc</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>No.<br/>Salidas</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Coeficiente<br/>K</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q<br/><small>LPS</small></th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center',minWidth:70}}>Maning</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>S %</th>
+              <th className="col-h ok" colSpan={3} style={{textAlign:'center',fontSize:11}}>Diámetro</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Qo<br/><small>LPS</small></th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Vo<br/><small>m/s</small></th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q/Qo</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Vreal<br/><small>m/s</small></th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Chequeo<br/><small>0.45&lt;Vr&lt;4.0</small></th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Yc<br/><small>mm</small></th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Yn<br/><small>mm</small></th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Froude</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Tipo de<br/>Flujo</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Ymax= 0.75D mm</th>
+              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Yn vs Yc</th>
               <th className="col-h ven" colSpan={2} style={{textAlign:'center',fontSize:11}}>Fuerza Tractiva</th>
             </tr>
             <tr>
@@ -96,9 +95,9 @@ export default function DisenosSanitarios() {
                 const otrosTramos=tramosSan.filter(o=>o.id!==t.id);
                 return(
                   <tr key={t.id}>
-                    <td><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
+                    <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
                     <td className="c" style={{fontSize:12}}>{pisos.find(p=>p.n===t.piso)?pisoLbl(t.piso):t.piso}</td>
-                    <td className="c" style={{fontFamily:'var(--mono)',color:'var(--san)'}}>{udPropias}</td>
+                    <td className="c" style={{fontFamily:'var(--mono)'}}>{udPropias}</td>
                     <td className="c" style={{fontFamily:'var(--mono)',color:'var(--txt3)'}}>{udOtros||'—'}</td>
                     <td className="c" style={{minWidth:120,maxWidth:200}}>
                       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(48px, 1fr))',gap:3,fontSize:10}}>
@@ -108,7 +107,7 @@ export default function DisenosSanitarios() {
                         })}
                       </div>
                     </td>
-                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--san)',fontSize:13}}>{udAcum}</td>
+                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,fontSize:13}}>{udAcum}</td>
                     <td className="c"><input type="text" inputMode="numeric" pattern="[0-9]*" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.nSalidas!==undefined?String(t.nSalidas):'2'} onChange={e=>{const v=e.target.value.replace(/\D/g,'');updTramoSan(t.id,'nSalidas',v===''?0:parseInt(v)||2);}}/></td>
                     <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{K.toFixed(2)}</td>
                     <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{Q>0?Q.toFixed(3):'—'}</td>
@@ -126,15 +125,15 @@ export default function DisenosSanitarios() {
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{Vo>0?Vo.toFixed(2):'—'}</td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{qqo>0?qqo.toFixed(2):'—'}</td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{Vreal>0?Vreal.toFixed(2):'—'}</td>
-                    <td className="c" style={{color:chequeoV==='O.K.'?'var(--ok)':'var(--err)'}}>{chequeoV}</td>
+                    <td className="c">{chequeoV}</td>
                     <td className="c">{Yc>0?Yc.toFixed(2):'—'}</td>
                     <td className="c">{Yn>0?Yn.toFixed(2):'—'}</td>
                     <td className="c">{Froude>0?Froude.toFixed(2):'—'}</td>
                     <td className="c" style={{fontSize:10}}>{tipoFlujo}</td>
                     <td className="c">{Ymax>0?Ymax.toFixed(2):'—'}</td>
-                    <td className="c" style={{color:chequeoYn==='O.K.'?'var(--ok)':'var(--err)'}}>{chequeoYn}</td>
+                    <td className="c">{chequeoYn}</td>
                     <td className="c">{fuerzaTractiva>0?fuerzaTractiva.toFixed(2):'—'}</td>
-                    <td className="c" style={{color:chequeoFT==='O.K.'?'var(--ok)':'var(--err)'}}>{chequeoFT}</td>
+                    <td className="c">{chequeoFT}</td>
                   </tr>
                 );
               });

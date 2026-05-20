@@ -9,11 +9,10 @@ export default function CalculoUD() {
       <div className="card">
         <div className="card-h">
           <span className="card-t">📊 Valores base UD por dispositivo</span>
-          <span className="card-s">NTC 1500 · Editable</span>
         </div>
         <div className="card-b">
           <table className="tbl">
-            <thead><tr><th>Dispositivo</th><th className="c" style={{textAlign:'right',paddingRight:24}}>Unidades de Descarga</th></tr></thead>
+            <thead><tr><th className="col-h">Dispositivo</th><th className="c col-h" style={{textAlign:'right',paddingRight:24}}>Unidades de Descarga</th></tr></thead>
             <tbody>
               {udBase.map(d=>(
                 <tr key={d.id}>
@@ -37,12 +36,12 @@ export default function CalculoUD() {
           <table className="tbl" style={{minWidth:900}}>
             <thead>
               <tr>
-                <th rowSpan={2} style={{minWidth:70,textAlign:'center'}}>Tramo</th>
-                <th rowSpan={2} style={{minWidth:52,textAlign:'center'}}>Piso</th>
+                <th className="col-h" rowSpan={2} style={{minWidth:70,textAlign:'center'}}>Tramo</th>
+                <th className="col-h" rowSpan={2} style={{minWidth:52,textAlign:'center'}}>Piso</th>
                 <th className="col-h san" colSpan={udBase.length} style={{textAlign:'center'}}>Aparatos</th>
                 <th className="col-h ok" colSpan={2} style={{textAlign:'center'}}>Unidades de Descarga</th>
-                <th rowSpan={2} style={{minWidth:52,textAlign:'center'}}>Bajante</th>
-                <th rowSpan={2} style={{minWidth:34,textAlign:'center'}}></th>
+                <th className="col-h" rowSpan={2} style={{minWidth:52,textAlign:'center'}}>Bajante</th>
+                <th className="col-h" rowSpan={2} style={{minWidth:34,textAlign:'center'}}></th>
               </tr>
               <tr>
                 {udBase.map(d=>(
@@ -59,9 +58,9 @@ export default function CalculoUD() {
                 const acum=acumMap[t.id]||0;
                 return(
                   <tr key={i}>
-                    <td><input className="ni" style={{width:64,padding:'3px 6px',fontSize:11,textAlign:'center'}} value={t.id} onChange={e=>updTramoSan(t.id,'id',e.target.value)}/></td>
-                    <td>
-                      <select className="ni" style={{width:50,padding:'3px 4px',fontSize:11}} value={t.piso} onChange={e=>updTramoSan(t.id,'piso',parseInt(e.target.value))}>
+                    <td className="c"><input className="ni" style={{width:64,padding:'3px 6px',fontSize:11,textAlign:'center'}} value={t.id} onChange={e=>updTramoSan(t.id,'id',e.target.value)}/></td>
+                    <td className="c">
+                      <select className="ni" style={{width:50,padding:'3px 4px',fontSize:11,textAlign:'center'}} value={t.piso} onChange={e=>updTramoSan(t.id,'piso',parseInt(e.target.value))}>
                         {pisos.map(p=><option key={p.id} value={p.n}>{p.n<0?'St'+Math.abs(p.n):'P'+p.n}</option>)}
                       </select>
                     </td>
@@ -71,8 +70,8 @@ export default function CalculoUD() {
                           onChange={e=>updTramoSanFix(t.id,d.id,parseInt(e.target.value)||0)}/>
                       </td>
                     ))}
-                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--ok)',fontSize:13}}>{parcial}</td>
-                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--san)',fontSize:14}}>{acum}</td>
+                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--txt)',fontSize:13}}>{parcial}</td>
+                    <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--txt)',fontSize:14}}>{acum}</td>
                     <td className="c">
                       <input type="checkbox" checked={t.esBajante||false} onChange={e=>updTramoSan(t.id,'esBajante',e.target.checked)} style={{cursor:'pointer'}}/>
                     </td>
@@ -106,9 +105,9 @@ export default function CalculoUD() {
                     <div className="tot-s">{d.cant*d.ud} UD</div>
                   </div>
                 ))}
-                <div className="tot" style={{borderColor:'var(--san)',background:'var(--san-bg)'}}>
-                  <div className="tot-l" style={{color:'var(--san)'}}>TOTAL UD</div>
-                  <div className="tot-v" style={{color:'var(--san)',fontSize:24}}>{totalUD}</div>
+                <div className="tot" style={{borderColor:'var(--line)',background:'var(--bg4)'}}>
+                  <div className="tot-l">TOTAL UD</div>
+                  <div className="tot-v" style={{color:'var(--txt)',fontSize:24}}>{totalUD}</div>
                   <div className="tot-s">unidades de descarga</div>
                 </div>
               </>
