@@ -195,9 +195,9 @@ function CIVILFLOWInner(){
                   {EMPRES.map(u=><option key={u}>{u}</option>)}</select></div>
               <div className="f2">
                 <div className="f"><label>P red (m.c.a.)</label>
-                  <input type="number" value={proy.p_red} onChange={e=>setP('p_red',e.target.value)}/></div>
+                  <input type="text" inputMode="decimal" defaultValue={proy.p_red??''} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setP('p_red',v);}}/></div>
                 <div className="f"><label>Dotación (L/h/d)</label>
-                  <input type="number" value={proy.dot} onChange={e=>setP('dot',e.target.value)}/></div>
+                  <input type="text" inputMode="decimal" defaultValue={proy.dot??''} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setP('dot',v);}}/></div>
               </div>
               <div className="f2">
                 <div className="f"><label>Población fija</label>
@@ -207,15 +207,15 @@ function CIVILFLOWInner(){
               </div>
               <div className="f2">
                 <div className="f"><label>Área piscina (m²)</label>
-                  <input type="number" step="0.01" value={proy.areaPiscina} onChange={e=>setP('areaPiscina',e.target.value)}/></div>
+                  <input type="text" inputMode="decimal" defaultValue={proy.areaPiscina??''} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setP('areaPiscina',v);}}/></div>
                 <div className="f"><label>Área verdes (m²)</label>
-                  <input type="number" step="0.01" value={proy.areaVerdes} onChange={e=>setP('areaVerdes',e.target.value)}/></div>
+                  <input type="text" inputMode="decimal" defaultValue={proy.areaVerdes??''} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setP('areaVerdes',v);}}/></div>
               </div>
               <div className="f2">
                 <div className="f"><label>Pendiente sanitaria</label>
-                  <input type="number" step="0.001" value={proy.pendienteSan} onChange={e=>setP('pendienteSan',e.target.value)}/></div>
+                  <input type="text" inputMode="decimal" defaultValue={proy.pendienteSan??''} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setP('pendienteSan',v);}}/></div>
                 <div className="f"><label>C escorrentía</label>
-                  <input type="number" step="0.01" value={proy.C_escorrentia} onChange={e=>setP('C_escorrentia',e.target.value)}/></div>
+                  <input type="text" inputMode="decimal" defaultValue={proy.C_escorrentia??''} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setP('C_escorrentia',v);}}/></div>
               </div>
             </div>
 
@@ -260,10 +260,10 @@ function CIVILFLOWInner(){
                   <div className="f" style={{marginBottom:0}}><label>N° pisos</label><input type="number" min="1" max="50" value={nPisos} style={{textAlign:'center'}} onChange={e=>setNPisos(Math.max(1,parseInt(e.target.value)||1))}/></div>
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:5}}>
-                  <div className="f" style={{marginBottom:0}}><label>H. entrepiso</label><input type="number" step="0.05" value={altPiso} style={{textAlign:'center'}} onChange={e=>setAltPiso(parseFloat(e.target.value)||3.10)}/></div>
-                  <div className="f" style={{marginBottom:0}}><label>H. sótano</label><input type="number" step="0.05" value={altSotano} style={{textAlign:'center'}} onChange={e=>setAltSotano(parseFloat(e.target.value)||3.00)}/></div>
+                  <div className="f" style={{marginBottom:0}}><label>H. entrepiso</label><input type="text" inputMode="decimal" defaultValue={altPiso??''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setAltPiso(v);}}/></div>
+                  <div className="f" style={{marginBottom:0}}><label>H. sótano</label><input type="text" inputMode="decimal" defaultValue={altSotano??''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setAltSotano(v);}}/></div>
                 </div>
-                <div className="f" style={{marginBottom:6}}><label>NPT Piso 1 (m)</label><input type="number" step="0.01" value={nptPiso1} style={{textAlign:'center'}} onChange={e=>setNptPiso1(parseFloat(e.target.value)||0)}/></div>
+                <div className="f" style={{marginBottom:6}}><label>NPT Piso 1 (m)</label><input type="text" inputMode="decimal" defaultValue={nptPiso1??''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setNptPiso1(v);}}/></div>
 <label style={{display:'flex',alignItems:'center',gap:7,fontFamily:'var(--mono)',fontSize:11,color:'var(--txt2)',cursor:'pointer',marginBottom:7}}>
 <input type="checkbox" checked={conCubierta} onChange={e=>setConCubierta(e.target.checked)} style={{width:18,height:18,accentColor:'var(--acc)',cursor:'pointer'}}/>Incluir cubierta
 </label>
@@ -272,9 +272,9 @@ function CIVILFLOWInner(){
 {[...pisos].sort((a,b)=>a.n-b.n).map(p=>(
 <div key={p.id} className="piso-r" style={{padding:'6px 8px'}}>
 <span className={p.tipo==='cubierta'?'piso-tag cub':p.n<0?'piso-tag sot':'piso-tag'} style={{fontSize:11,padding:'3px 8px'}}>{p.tipo==='cubierta'?'Cubierta':p.n<0?'Sótano '+Math.abs(p.n):'Piso '+p.n}</span>
-<input type="number" step="0.01" value={p.npt} className="npt-in" style={{fontSize:12,width:70}}
-onChange={e=>setPisos(prev=>prev.map(x=>
-x.id===p.id?{...x,npt:parseFloat(e.target.value)||0}:x))}/>
+<input type="text" inputMode="decimal" defaultValue={p.npt??''} key={p.id+'npt'} className="npt-in" style={{fontSize:12,width:70}}
+onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setPisos(prev=>prev.map(x=>
+x.id===p.id?{...x,npt:v}:x));}}/>
 <span style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--txt3)'}}>m</span>
 <div className={`pdot ${p.ok?'ok':''}`}/>
 </div>
@@ -491,6 +491,7 @@ onClick={()=>fileRef.current?.click()}>
                 <DisenoLluvias />
                 <ChequeoBajantesLluvias />
                 <ChequeoCanalesLluvias />
+                <CalculoHidraulicoLluvias />
               </div>
             )}
 

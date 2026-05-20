@@ -131,7 +131,7 @@ export default function BajantesTable() {
                     <td className="c">{Ltmin>0?Ltmin.toFixed(2):'—'}</td>
                     <td className="c">{Vair>0?Vair.toFixed(2):'—'}</td>
                     <td className="c">
-                      <input type="number" className="ni" style={{width:46,padding:'2px 3px',fontSize:10}} value={fDarcy} step="0.001" min="0" onChange={e=>updTramoSan(t.id,'bajFDarcy',parseFloat(e.target.value)||0.025)}/>
+                      <input type="text" inputMode="decimal" className="ni" style={{width:46,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={fDarcy??''} key={t.id+'fd'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'bajFDarcy',v);}}/>
                     </td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{Qair>0?Qair.toFixed(2):'—'}</td>
                     <td className="c">

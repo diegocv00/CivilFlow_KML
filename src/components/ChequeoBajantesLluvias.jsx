@@ -49,10 +49,10 @@ export default function ChequeoBajantesLluvias() {
               return(
                 <tr key={b.id}>
                   <td className="c"><input className="ni" style={{width:80,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.bajante} onChange={e=>updBajanteLL(b.id,'bajante',e.target.value)}/></td>
-                  <td className="c"><input type="number" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.areaParcial} step="0.01" onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'))||0;updBajanteLL(b.id,'areaParcial',v);}}/></td>
-                  <td className="c"><input type="number" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.areaAcumulada} step="0.01" onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'))||0;updBajanteLL(b.id,'areaAcumulada',v);}}/></td>
-                  <td className="c"><input type="number" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.intensidad} step="0.01" onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'))||0;updBajanteLL(b.id,'intensidad',v);}}/></td>
-                  <td className="c"><input type="number" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.coeficienteC} step="0.01" onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'))||0;updBajanteLL(b.id,'coeficienteC',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.areaParcial??''} key={b.id+'ap'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'areaParcial',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.areaAcumulada??''} key={b.id+'aa'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'areaAcumulada',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.intensidad??''} key={b.id+'in'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'intensidad',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.coeficienteC??''} key={b.id+'cc'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'coeficienteC',v);}}/></td>
                   <td className="c">
                     <select className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.R} onChange={e=>updBajanteLL(b.id,'R',e.target.value)}>
                       <option value="1/4">1/4</option>
@@ -60,9 +60,9 @@ export default function ChequeoBajantesLluvias() {
                     </select>
                   </td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,fontSize:13}}>{Q.toFixed(2)}</td>
-                  <td className="c"><input type="number" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.manning} step="0.001" onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'))||0;updBajanteLL(b.id,'manning',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.manning??''} key={b.id+'mn'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'manning',v);}}/></td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600,fontSize:12}}>{diamCalc > 0 ? diamCalc.toFixed(2) : '—'}</td>
-                  <td className="c"><input type="number" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.diamPropuesto} step="0.01" onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'))||0;updBajanteLL(b.id,'diamPropuesto',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.diamPropuesto??''} key={b.id+'dp'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'diamPropuesto',v);}}/></td>
                   <td className="c" style={{fontWeight:700}}>{chequeo}</td>
                   <td className="c">
                     <button onClick={()=>delBajanteLL(b.id)} style={{background:'var(--err-bg)',border:'1px solid var(--err-b)',borderRadius:'var(--r)',color:'var(--err)',padding:'1px 5px',fontSize:10,cursor:'pointer'}}>✕</button>
