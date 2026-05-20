@@ -34,18 +34,56 @@ export function SanitarioProvider({ children }) {
     C_escorrentia:0.95, pendienteSan:0.02,
   });
 
+  const [tramosLl, setTramosLl] = useState([
+    {id:'BAJ-1',piso:2,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2},
+    {id:'BAJ-2',piso:1,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2},
+    {id:'RLL-1',piso:1,esBajante:false,desde:'BAJ-1',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2},
+  ]);
+
+  const [bajantesLl, setBajantesLl] = useState([
+    {id:'BLL-1',bajante:'Baj 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0.009,diamPropuesto:0},
+    {id:'BLL-2',bajante:'Baj 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0.009,diamPropuesto:0},
+  ]);
+
+  const [canalesLl, setCanalesLl] = useState([
+    {id:'CLL-1',sector:'Sector 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0.009,pendiente:0,b:0,h:0,bl:0},
+    {id:'CLL-2',sector:'Sector 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0.009,pendiente:0,b:0,h:0,bl:0},
+  ]);
+
+  const addCanalLL = () => setCanalesLl(p => [...p, {
+    id:`CLL-${p.length+1}`,sector:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0.009,pendiente:0,b:0,h:0,bl:0,
+  }]);
+  const delCanalLL = (id) => setCanalesLl(p => p.filter(t => t.id !== id));
+  const updCanalLL = (id, field, val) => setCanalesLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
+
+  const addBajanteLL = () => setBajantesLl(p => [...p, {
+    id:`BLL-${p.length+1}`,bajante:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0.009,diamPropuesto:0,
+  }]);
+  const delBajanteLL = (id) => setBajantesLl(p => p.filter(t => t.id !== id));
+  const updBajanteLL = (id, field, val) => setBajantesLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
+
   const addTramoSan = () => setTramosSan(p => [...p, {
     id:`T-${p.length+1}`,piso:1,pisoDesde:1,pisoHasta:1,fixtures:{sif:0,lvm:0,san:0,duc:0,lvra:0,tin:0,lvp:0,lvro:0},recibeDe:[],esBajante:false,descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:parseFloat(proy.pendienteSan)*100||2,bajR:(7/24),bajLong:3,bajFDarcy:0.025,bajDprop:0,ventDprop:0,
   }]);
   const delTramoSan = (id) => setTramosSan(p => p.filter(t => t.id !== id));
   const updTramoSan = (id, field, val) => setTramosSan(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
   const updTramoSanFix = (id, fix, val) => setTramosSan(p => p.map(t => t.id === id ? { ...t, fixtures: { ...t.fixtures, [fix]: val } } : t));
+
+  const addTramoLL = () => setTramosLl(p => [...p, {
+    id:`RLL-${p.length+1}`,piso:1,esBajante:false,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2,
+  }]);
+  const delTramoLL = (id) => setTramosLl(p => p.filter(t => t.id !== id));
+  const updTramoLL = (id, field, val) => setTramosLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
+
   const setP = (k, v) => setProy(p => ({ ...p, [k]: v }));
 
   return (
     <SanitarioContext.Provider value={{
-      tramosSan, udBase, pisos, proy,
+      tramosSan, tramosLl, udBase, pisos, proy,
       addTramoSan, delTramoSan, updTramoSan, updTramoSanFix,
+      addTramoLL, delTramoLL, updTramoLL,
+      bajantesLl, addBajanteLL, delBajanteLL, updBajanteLL,
+      canalesLl, addCanalLL, delCanalLL, updCanalLL,
       setUdBase, setPisos, setProy, setP,
     }}>
       {children}

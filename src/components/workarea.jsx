@@ -6,6 +6,11 @@ import { NumIn } from "./utils";
 import CalculoUD from "./CalculoUD";
 import DisenosSanitarios from "./DisenosSanitarios";
 import BajantesTable from "./BajantesTable";
+import DisenoLluvias from "./DisenoLluvias";
+import ChequeoBajantesLluvias from "./ChequeoBajantesLluvias";
+import ChequeoCanalesLluvias from "./ChequeoCanalesLluvias";
+import CalculoHidraulicoLluvias from "./CalculoHidraulicoLluvias";
+import CalculoHidraulicoSanitario from "./CalculoHidraulicoSanitario";
 import { generarExcelSanitario } from "../utils/generarExcelSanitario";
 import PdfViewer from "./PdfViewer";
 
@@ -152,12 +157,12 @@ function CIVILFLOWInner(){
       <div className="app">
 
         <div className="nav">
-          {TABS.filter(t=>t.id!=='cud'||redes==='san').map(t=>(
+          {TABS.filter(t=>t.id!=='cud'||redes==='san'||redes==='ll').map(t=>(
             <div key={t.id} className={`ntab ${tab===t.id?'on':''}`}
               onClick={()=>setTab(t.id)}>
               <span className="ntab-ico">{t.ico}</span>
-              {t.lbl}
-              {t.id==='apars'&&<span className="nbadge">{aps.length}</span>}
+              {t.id==='cud'&&redes==='ll'?'Cálculo Aguas Lluvias':t.lbl}
+
             </div>
           ))}
         </div>
@@ -280,95 +285,7 @@ x.id===p.id?{...x,npt:parseFloat(e.target.value)||0}:x))}/>
               </div>
 </div>
 
-<div className="sb-sec">
-              <div className="sb-hdr">Tramos agua fría (AF)</div>
-              {tramosAF.map(t=>(
-                <div key={t.id} style={{background:'var(--bg)',border:'1px solid var(--line)',borderRadius:'var(--r)',padding:'6px 8px',marginBottom:5}}>
-                  <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:4}}>
-                    <input className="ni" style={{width:50}} value={t.id} onChange={e=>updTramoAF(t.id,'id',e.target.value)}/>
-                    <select className="ni" style={{width:60}} value={t.piso} onChange={e=>updTramoAF(t.id,'piso',parseInt(e.target.value))}>
-                      {pisos.map(p=><option key={p.id} value={p.n}>{p.n<0?'Sot'+Math.abs(p.n):'P'+p.n}</option>)}
-                    </select>
-                    <button onClick={()=>delTramoAF(t.id)} style={{background:'var(--err-bg)',border:'1px solid var(--err-b)',borderRadius:'var(--r)',color:'var(--err)',padding:'1px 5px',fontSize:9,cursor:'pointer',marginLeft:'auto'}}>✕</button>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:3,marginBottom:3}}>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>ini</span>
-                      <input className="ni" style={{flex:1}} value={t.ini} onChange={e=>updTramoAF(t.id,'ini',e.target.value)}/>
-                    </div>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>fin</span>
-                      <input className="ni" style={{flex:1}} value={t.fin} onChange={e=>updTramoAF(t.id,'fin',e.target.value)}/>
-                    </div>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:3,marginBottom:3}}>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>Lh</span>
-                      <input type="number" className="ni" style={{flex:1}} value={t.Lh} step="0.01" onChange={e=>updTramoAF(t.id,'Lh',parseFloat(e.target.value)||0)}/>
-                    </div>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>UCₒ</span>
-                      <input type="number" className="ni" style={{flex:1}} value={t.UC_otros||0} step="0.1" onChange={e=>updTramoAF(t.id,'UC_otros',parseFloat(e.target.value)||0)}/>
-                    </div>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3}}>
-                    {['san','duc','lvp','lvra','lvro','lvm','tin'].map(f=>(
-                      <div key={f} style={{display:'flex',alignItems:'center',gap:2}}>
-                        <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>{f}</span>
-                        <input type="number" className="ni" style={{width:35}} value={t.fixtures[f]||0} min={0}
-                          onChange={e=>updTramoAFFix(t.id,f,parseInt(e.target.value)||0)}/>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <button className="btn-xs" onClick={addTramoAF}>+ Agregar tramo AF</button>
-            </div>
 
-            <div className="sb-sec">
-              <div className="sb-hdr">Tramos agua caliente (AC)</div>
-              {tramosAC.map(t=>(
-                <div key={t.id} style={{background:'var(--bg)',border:'1px solid var(--line)',borderRadius:'var(--r)',padding:'6px 8px',marginBottom:5}}>
-                  <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:4}}>
-                    <input className="ni" style={{width:50}} value={t.id} onChange={e=>updTramoAC(t.id,'id',e.target.value)}/>
-                    <select className="ni" style={{width:60}} value={t.piso} onChange={e=>updTramoAC(t.id,'piso',parseInt(e.target.value))}>
-                      {pisos.map(p=><option key={p.id} value={p.n}>{p.n<0?'Sot'+Math.abs(p.n):'P'+p.n}</option>)}
-                    </select>
-                    <button onClick={()=>delTramoAC(t.id)} style={{background:'var(--err-bg)',border:'1px solid var(--err-b)',borderRadius:'var(--r)',color:'var(--err)',padding:'1px 5px',fontSize:9,cursor:'pointer',marginLeft:'auto'}}>✕</button>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:3,marginBottom:3}}>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>ini</span>
-                      <input className="ni" style={{flex:1}} value={t.ini} onChange={e=>updTramoAC(t.id,'ini',e.target.value)}/>
-                    </div>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>fin</span>
-                      <input className="ni" style={{flex:1}} value={t.fin} onChange={e=>updTramoAC(t.id,'fin',e.target.value)}/>
-                    </div>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:3,marginBottom:3}}>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>Lh</span>
-                      <input type="number" className="ni" style={{flex:1}} value={t.Lh} step="0.01" onChange={e=>updTramoAC(t.id,'Lh',parseFloat(e.target.value)||0)}/>
-                    </div>
-                    <div style={{display:'flex',alignItems:'center',gap:2}}>
-                      <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>UCₒ</span>
-                      <input type="number" className="ni" style={{flex:1}} value={t.UC_otros||0} step="0.1" onChange={e=>updTramoAC(t.id,'UC_otros',parseFloat(e.target.value)||0)}/>
-                    </div>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3}}>
-                    {['duc','lvp','lvm','tin'].map(f=>(
-                      <div key={f} style={{display:'flex',alignItems:'center',gap:2}}>
-                        <span style={{fontFamily:'var(--mono)',fontSize:7,color:'var(--txt3)',width:22}}>{f}</span>
-                        <input type="number" className="ni" style={{width:35}} value={t.fixtures[f]||0} min={0}
-                          onChange={e=>updTramoACFix(t.id,f,parseInt(e.target.value)||0)}/>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <button className="btn-xs" onClick={addTramoAC}>+ Agregar tramo AC</button>
-            </div>
           </div>)}
           </div>
 
@@ -388,7 +305,7 @@ x.id===p.id?{...x,npt:parseFloat(e.target.value)||0}:x))}/>
                       </div>
                       <div style={{overflowX:'auto'}}>
                         <table className="tbl">
-                          <thead><tr><th style={{width:32,textAlign:'center'}}>#</th><th>Material</th><th style={{width:90,textAlign:'center'}}>Acción</th></tr></thead>
+                          <thead><tr><th className="col-h" style={{width:32,textAlign:'center'}}>#</th><th className="col-h">Material</th><th className="col-h" style={{width:90,textAlign:'center'}}>Acción</th></tr></thead>
                           <tbody>
                             {items.map((item,ix)=>(
                               <tr key={item.id}>
@@ -467,15 +384,7 @@ x.id===p.id?{...x,npt:parseFloat(e.target.value)||0}:x))}/>
 onClick={()=>fileRef.current?.click()}>
                           <div className="dz-ico">📐</div>
                         <div className="dz-t">SUBIR PLANO</div>
-                        <div className="dz-s">
-                          Solo se aceptan archivos PDF<br/>
-                          Una página por nivel · Escala y cotas NPT requeridas
-                        </div>
-                        <div style={{display:'flex',gap:5,flexWrap:'wrap',justifyContent:'center',marginTop:4}}>
-                          {['PDF multipágina','Escala 1:50·75·100','Capas por color'].map(t=>(
-                            <span key={t} className="pill">{t}</span>
-                          ))}
-                        </div>
+
 </div>
 )}
 </div>
@@ -518,21 +427,21 @@ onClick={()=>fileRef.current?.click()}>
                   <table className="tbl">
                     <thead>
                       <tr>
-                        <th rowSpan={2}>Sigla</th>
-                        <th rowSpan={2}>Aparato</th>
-                        <th colSpan={2} className="col-h af">UC</th>
-                        <th className="col-h san">UD</th>
-                        <th colSpan={2} className="col-h ok">Presión (m.c.a.)</th>
-                        <th className="col-h gas">Q Gas</th>
-                        <th rowSpan={2} style={{textAlign:'center',fontSize:8,color:'var(--txt3)'}}>Norma</th>
+                        <th className="col-h" rowSpan={2} style={{textAlign:'center'}}>Sigla</th>
+                        <th className="col-h" rowSpan={2} style={{textAlign:'center'}}>Aparato</th>
+                        <th colSpan={2} className="col-h af" style={{textAlign:'center'}}>UC</th>
+                        <th className="col-h san" style={{textAlign:'center'}}>UD</th>
+                        <th colSpan={2} className="col-h ok" style={{textAlign:'center'}}>Presión (m.c.a.)</th>
+                        <th className="col-h gas" style={{textAlign:'center'}}>Q Gas</th>
+                        <th className="col-h" rowSpan={2} style={{textAlign:'center',fontSize:8}}>Norma</th>
                       </tr>
                       <tr>
-                        <th className="c" style={{background:'var(--af-bg)',fontSize:8}}>AF</th>
-                        <th className="c" style={{background:'var(--ac-bg)',fontSize:8}}>AC</th>
-                        <th className="c" style={{background:'var(--san-bg)',fontSize:8}}>UD</th>
-                        <th className="c" style={{background:'var(--ok-bg)',fontSize:8}}>Mín</th>
-                        <th className="c" style={{background:'var(--ok-bg)',fontSize:8}}>Máx</th>
-                        <th className="c" style={{background:'var(--gas-bg)',fontSize:8}}>m³/hr</th>
+                        <th className="col-h af" style={{fontSize:8}}>AF</th>
+                        <th className="col-h af" style={{fontSize:8}}>AC</th>
+                        <th className="col-h san" style={{fontSize:8}}>UD</th>
+                        <th className="col-h ok" style={{fontSize:8}}>Mín</th>
+                        <th className="col-h ok" style={{fontSize:8}}>Máx</th>
+                        <th className="col-h gas" style={{fontSize:8}}>m³/hr</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -574,6 +483,14 @@ onClick={()=>fileRef.current?.click()}>
                 <CalculoUD />
                 <DisenosSanitarios />
                 <BajantesTable />
+                <CalculoHidraulicoSanitario />
+              </div>
+            )}
+            {tab==='cud'&&redes==='ll'&&(
+              <div className="fu" style={{display:'flex',flexDirection:'column',gap:12}}>
+                <DisenoLluvias />
+                <ChequeoBajantesLluvias />
+                <ChequeoCanalesLluvias />
               </div>
             )}
 
@@ -631,11 +548,7 @@ padding: '7px 15px',
 background: generando
 ? 'linear-gradient(135deg, #b45309 0%, #92400e 100%)'
 : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-border: 'none',
-borderRadius: 'var(--r)',
-color: '#fff',
-fontWeight: 600,
-fontSize: 11,
+border: 'none', borderRadius: 'var(--r)',color: '#fff',fontWeight: 600,fontSize: 11,
 cursor: proy.nombre && !generando ? 'pointer' : 'not-allowed',
 display: 'flex',
 alignItems: 'center',
