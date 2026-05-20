@@ -14,8 +14,6 @@ export default function CalculoHidraulicoLluvias() {
           <thead>
             <tr>
               <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Tramo</th>
-              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q<br/>LPS</th>
-              <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q0<br/>LPS</th>
               <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q/Q0</th>
               <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>V/Vo</th>
               <th className="col-h" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Y/D</th>
@@ -49,8 +47,6 @@ export default function CalculoHidraulicoLluvias() {
               return(
                 <tr key={t.id}>
                   <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
-                  <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{Q>0?Q.toFixed(3):'—'}</td>
-                  <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{Qo>0?Qo.toFixed(2):'—'}</td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700}}>{qqo>0?qqo.toFixed(4):'—'}</td>
                   <td className="c" style={{fontFamily:'var(--mono)'}}>{v>0?v.toFixed(6):'—'}</td>
                   <td className="c" style={{fontFamily:'var(--mono)'}}>{y_D>0?y_D.toFixed(6):'—'}</td>

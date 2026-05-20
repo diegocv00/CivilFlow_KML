@@ -18,8 +18,6 @@ export default function DisenoLluvias() {
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>De</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>A</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center',minWidth:100}}>Bajantes</th>
-              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>No.<br/>Salidas</th>
-              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Coeficiente<br/>K</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q<br/><small>LPS</small></th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center',minWidth:70}}>Maning</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>S %</th>
@@ -47,8 +45,6 @@ export default function DisenoLluvias() {
           </thead>
           <tbody>
             {tramosLl.map(t=>{
-              const nSalidas=t.nSalidas||2;
-              const K=Math.round(nSalidas<=1?1:1/Math.sqrt(nSalidas-1)*100)/100;
               const n=t.nmaning||0.009;
               const sVal=t.sPercent||2;
               const S=sVal/100;
@@ -99,11 +95,9 @@ export default function DisenoLluvias() {
                       })}
                     </div>
                   </td>
-                  <td className="c"><input type="text" inputMode="numeric" pattern="[0-9]*" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.nSalidas!==undefined?String(t.nSalidas):'2'} onChange={e=>{const v=e.target.value.replace(/\D/g,'');updTramoLL(t.id,'nSalidas',v===''?0:parseInt(v)||2);}}/></td>
-                  <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{K.toFixed(2)}</td>
-                  <td className="c"><input type="number" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} value={t.qLps||''} step="0.001" min={0} onChange={e=>updTramoLL(t.id,'qLps',parseFloat(e.target.value)||0)}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:12,textAlign:'center'}} value={t.nmaning!==undefined?String(t.nmaning):'0'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v))updTramoLL(t.id,'nmaning',v);}}/></td>
-                  <td className="c"><input type="number" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={sVal} step="0.1" min={0} onChange={e=>updTramoLL(t.id,'sPercent',parseFloat(e.target.value)||2)}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.qLps??''} key={t.id+'q'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'qLps',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.nmaning??''} key={t.id+'nm'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'nmaning',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={sVal??''} key={t.id+'sp'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'sPercent',v);}}/></td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DcalcPulg>0?DcalcPulg.toFixed(2)+'"':'—'}</td>
                   <td className="c">
                     <select className="ni" style={{width:56,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.diamDisPulg||''} onChange={e=>updTramoLL(t.id,'diamDisPulg',parseFloat(e.target.value))}>
