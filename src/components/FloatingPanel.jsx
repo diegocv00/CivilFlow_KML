@@ -1,10 +1,20 @@
 import { useState, useCallback } from "react";
 
+let _zCounter = 50;
+export function nextZ() { return ++_zCounter; }
+export function useZIndex() {
+  const [z, setZ] = useState(() => nextZ());
+  const bringToFront = useCallback(() => setZ(nextZ()), []);
+  return [z, bringToFront];
+}
+
 export default function FloatingPanel({ title, icon, count, onClose, children, defaultPos = { x: 40, y: 40 }, minW = 460 }) {
   const [pos, setPos] = useState(defaultPos);
   const [collapsed, setCollapsed] = useState(false);
+  const [zIndex, bringToFront] = useZIndex();
 
   const onMouseDown = useCallback((e) => {
+    bringToFront();
     if (e.target.closest('.no-drag')) return;
     if (e.target.closest('input') || e.target.closest('select') || e.target.closest('button') || e.target.closest('label')) return;
     const startX = e.clientX;
@@ -20,7 +30,7 @@ export default function FloatingPanel({ title, icon, count, onClose, children, d
     };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
-  }, [pos]);
+  }, [pos, bringToFront]);
 
   return (
     <div
@@ -29,7 +39,7 @@ export default function FloatingPanel({ title, icon, count, onClose, children, d
         position: 'absolute',
         left: pos.x,
         top: pos.y,
-        zIndex: 50,
+        zIndex,
         minWidth: collapsed ? 180 : minW,
         maxWidth: '95vw',
         maxHeight: '80vh',

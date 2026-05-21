@@ -2,16 +2,19 @@ import { useState, useCallback } from "react";
 import { useSanitario } from "../context/SanitarioContext";
 import { calcUDparcial, calcUDacumulado } from "./utils";
 import { pisoCorto } from "./constants";
+import { useZIndex } from "./FloatingPanel";
 
 export default function DisenoUDPanel({ onClose }) {
   const { tramosSan, udBase, pisos, addTramoSan, delTramoSan, updTramoSan, updTramoSanFix } = useSanitario();
 
   const [pos, setPos] = useState({ x: 40, y: 40 });
   const [collapsed, setCollapsed] = useState(false);
+  const [zIndex, bringToFront] = useZIndex();
 
   const pisosSelect = pisos.filter(p => p.tipo !== 'cubierta');
 
   const onMouseDown = useCallback((e) => {
+    bringToFront();
     if (e.target.closest('.no-drag')) return;
     if (e.target.closest('input') || e.target.closest('select') || e.target.closest('button') || e.target.closest('label')) return;
     const startX = e.clientX;
@@ -27,7 +30,7 @@ export default function DisenoUDPanel({ onClose }) {
     };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
-  }, [pos]);
+  }, [pos, bringToFront]);
 
   const acumMap = calcUDacumulado(tramosSan, udBase);
   const colCount = 2 + udBase.length + 2 + 1 + 1;
@@ -39,7 +42,7 @@ export default function DisenoUDPanel({ onClose }) {
         position: 'absolute',
         left: pos.x,
         top: pos.y,
-        zIndex: 50,
+        zIndex,
         minWidth: collapsed ? 180 : 520,
         maxWidth: '95vw',
         maxHeight: '80vh',
