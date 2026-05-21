@@ -23,7 +23,7 @@ const WIDTHS = [
 export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan, onRemovePlan }) {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.5);
+  const [scale, setScale] = useState(1);
   const [mode, setMode] = useState("draw");
   const [color, setColor] = useState(COLORS[0].hex);
   const [stroke, setStroke] = useState(2);
