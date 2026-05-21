@@ -26,7 +26,8 @@ export default function BajantesTable() {
       <div className="card-h">
           <span className="card-t">📊 Bajantes A.N. y Ventilación</span>
       </div>
-      <div className="card-b" style={{overflowX:'auto'}}>
+      <div className="scroll-top" style={{padding:'16px'}}>
+        <div className="scroll-inner" style={{minWidth:'max-content'}}>
         <table className="tbl" style={{fontSize:13}}>
           <thead>
             <tr>
@@ -69,33 +70,34 @@ export default function BajantesTable() {
               const banTramos=tramosSan.filter(t=>t.esBajante);
               if(banTramos.length===0) return <tr><td colSpan={20} style={{textAlign:'center',color:'var(--txt3)',padding:20}}>No hay bajantes definidos. Marque un tramo como "Bajante" en la tabla de Cálculo UD.</td></tr>;
               return banTramos.map(t=>{
-                const rVal=t.bajR!==undefined?t.bajR:(7/24);
-                const rStr=Math.abs(rVal-7/24)<0.001?'7/24':'1/4';
-                const udParcial=calcUDparcial(t,udBase);
-                const descArr=(t.recibeDe||[]).join('+');
-                const udOtros=(t.recibeDe||[]).reduce((s,id)=>s+(acumMapALL[id]||0),0);
-                const udAcum=udParcial+udOtros;
-                const n=t.nmaning!==undefined?t.nmaning:0;
-                const Q=(udAcum>0?0.1163*Math.pow(udAcum,0.6875):0);
-                const DcalcMm=(Q>0?Math.pow(Q/(1.754*Math.pow(rVal,5/3)),3/8)*25.4:0);
-                const DcalcPulg=DcalcMm/25.4;
-                const Dprop=DIAM_BAN.find(d=>Number(d.pulg)===Number(t.bajDprop))||null;
-                const DpropPulg=Dprop?Dprop.pulg:0;
-                const DpropMm=Dprop?Dprop.mm:0;
-                const chequeo=(DcalcMm>0&&DpropPulg>0)?(DcalcPulg<=DpropPulg?'O.K.':'NO CUMPLE'):'—';
-                const QmaxB=(DpropPulg>0?1.754*Math.pow(rVal,5/3)*Math.pow(DpropPulg,8/3):0);
-                const Vt=Math.round((DpropPulg>0&&Q>0?2.76*Math.pow(Q/DpropPulg,0.4):0)*100)/100;
-                const Ltcalc=(Vt>0?0.17*Vt*Vt:0);
-                const Ltmin=(DpropPulg>0?Math.max(Ltcalc,10*DpropPulg*2.54/100):0);
-                const fDarcy=t.bajFDarcy!==undefined?t.bajFDarcy:0.025;
-                const Vair=Vt;
-                const Qair=(DpropPulg>0?1000*Vair*(17/24)*(Math.PI/4)*Math.pow(DpropPulg*2.54/100,2):0);
-                const Lbaj=t.bajLong||3;
-                const DventPulgRaw=(Lbaj>0&&Qair>0?Math.pow((Lbaj*fDarcy*Qair*Qair)/3.25,1/5):0);
-                const DventMm=DventPulgRaw*25.4;
-                const DventCalcPulg=DventMm/25.4;
-                const DventProp=DIAM_VENT.find(d=>Number(d.pulg)===Number(t.ventDprop))||null;
-                const DventPropPulg=DventProp?DventProp.pulg:0;
+const rVal=t.bajR;
+const rStr=rVal!=null?(Math.abs(rVal-7/24)<0.001?'7/24':'1/4'):null;
+const udParcial=calcUDparcial(t,udBase);
+const descArr=(t.recibeDe||[]).join('+');
+const udOtros=(t.recibeDe||[]).reduce((s,id)=>s+(acumMapALL[id]||0),0);
+const udAcum=udParcial+udOtros;
+const n=t.nmaning;
+const Q=(udAcum>0&&rVal>0?0.1163*Math.pow(udAcum,0.6875):0);
+const DcalcMm=(Q>0&&rVal!=null&&rVal>0?Math.pow(Q/(1.754*Math.pow(rVal,5/3)),3/8)*25.4:0);
+const DcalcPulg=DcalcMm/25.4;
+const Dprop=DIAM_BAN.find(d=>Number(d.pulg)===Number(t.bajDprop))||null;
+const DpropPulg=Dprop?Dprop.pulg:0;
+const DpropMm=Dprop?Dprop.mm:0;
+const chequeo=(DcalcMm>0&&DpropPulg>0)?(DcalcPulg<=DpropPulg?'O.K.':'NO CUMPLE'):(DcalcMm>0?'Sin diseño':'—');
+const QmaxB=(DpropPulg>0&&rVal!=null&&rVal>0?1.754*Math.pow(rVal,5/3)*Math.pow(DpropPulg,8/3):0);
+const Vt=Math.round((Q>0&&rVal!=null&&rVal>0?2.76*Math.pow(Q/Math.max(DpropPulg,DcalcPulg||0),0.4):0)*100)/100;
+const Ltcalc=(Vt>0?0.17*Vt*Vt:0);
+const Ltmin=(DpropPulg>0?Math.max(Ltcalc,10*DpropPulg*2.54/100):Ltcalc);
+const fDarcy=t.bajFDarcy;
+const Vair=Vt;
+const Qair=(DpropPulg>0&&Vair>0?1000*Vair*(17/24)*(Math.PI/4)*Math.pow(DpropPulg*2.54/100,2):0);
+const Lbaj=t.bajLong;
+const DventPulgRaw=(Lbaj!=null&&Lbaj>0&&Qair>0&&fDarcy!=null&&fDarcy>0?Math.pow((Lbaj*fDarcy*Qair*Qair)/3.25,1/5):0);
+const DventMm=DventPulgRaw*25.4;
+const DventCalcPulg=DventMm/25.4;
+const DventProp=DIAM_VENT.find(d=>Number(d.pulg)===Number(t.ventDprop))||null;
+const DventPropPulg=DventProp?DventProp.pulg:0;
+const chequeoVent=DventMm>0&&DventPropPulg>0?(DventCalcPulg<=DventPropPulg?'O.K.':'NO CUMPLE'):(DventMm>0?'Sin diseño':'—');
                 return(
                   <tr key={t.id}>
                     <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
@@ -131,7 +133,7 @@ export default function BajantesTable() {
                     <td className="c">{Ltmin>0?Ltmin.toFixed(2):'—'}</td>
                     <td className="c">{Vair>0?Vair.toFixed(2):'—'}</td>
                     <td className="c">
-                      <input type="text" inputMode="decimal" className="ni" style={{width:46,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={fDarcy??''} key={t.id+'fd'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'bajFDarcy',v);}}/>
+                      <input type="text" inputMode="decimal" className="ni" style={{width:46,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={fDarcy||''} key={t.id+'fd'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'bajFDarcy',v);}}/>
                     </td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{Qair>0?Qair.toFixed(2):'—'}</td>
                     <td className="c">
@@ -150,6 +152,7 @@ export default function BajantesTable() {
             })()}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

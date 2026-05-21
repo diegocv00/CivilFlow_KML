@@ -5,43 +5,44 @@ import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const COLORS = [
-  { id: "af",  hex: "#2563EB", label: "AF" },
-  { id: "ac",  hex: "#ff6b6b", label: "AC" },
+  { id: "af", hex: "#2563EB", label: "AF" },
+  { id: "ac", hex: "#ff6b6b", label: "AC" },
   { id: "san", hex: "#f5a623", label: "SAN" },
-  { id: "ll",  hex: "#22d3ee", label: "LL" },
+  { id: "ll", hex: "#22d3ee", label: "LL" },
   { id: "ven", hex: "#a3e635", label: "VEN" },
   { id: "gas", hex: "#c084fc", label: "GAS" },
   { id: "blk", hex: "#e2e2e8", label: "Negro" },
 ];
 
 const WIDTHS = [
-  { id: "thin",   value: 2, label: "Fino" },
+  { id: "thin", value: 2, label: "Fino" },
   { id: "medium", value: 4, label: "Medio" },
-  { id: "thick",  value: 8, label: "Grueso" },
+  { id: "thick", value: 8, label: "Grueso" },
 ];
 
 export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan, onRemovePlan }) {
-  const [numPages, setNumPages]     = useState(0);
+  const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale]           = useState(1.5);
-  const [mode, setMode]             = useState("draw");
-  const [color, setColor]           = useState(COLORS[0].hex);
-  const [stroke, setStroke]         = useState(2);
-  const [error, setError]           = useState(null);
-  const [loading, setLoading]       = useState(true);
+  const [scale, setScale] = useState(1.5);
+  const [mode, setMode] = useState("draw");
+  const [color, setColor] = useState(COLORS[0].hex);
+  const [stroke, setStroke] = useState(2);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const currentFile = files[activeIndex]?.file;
   const currentId = files[activeIndex]?.id;
 
-  const pdfDocRef   = useRef(null);
+  const pdfDocRef = useRef(null);
   const pdfCanvasRef= useRef(null);
   const drawCanvasRef=useRef(null);
   const containerRef= useRef(null);
-  const isDrawing   = useRef(false);
-  const pathsRef    = useRef({});
+  const isDrawing = useRef(false);
+  const pathsRef = useRef({});
   const currentPath = useRef(null);
-  const mountId      = useRef(0);
-  const pagePathsRef = useRef({}); // { [planId]: { [pageNum]: [{color, width, points}] } }
+  const mountId = useRef(0);
+  const renderTaskRef = useRef(null);
+  const pagePathsRef = useRef({});
 
   /* ── Cargar PDF cuando cambia el archivo activo ───────────────────────── */
   useEffect(() => {
@@ -82,7 +83,14 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
     };
 
     reader.readAsArrayBuffer(currentFile);
-  }, [currentId, scale]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Re-renderizar cuando cambia el zoom ─────────────────────────────── */
+  useEffect(() => {
+    if (!pdfDocRef.current) return;
+    mountId.current += 1;
+    renderPage(pageNumber, scale, mountId.current);
+  }, [scale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Renderizar página ──────────────────────────────────────────────── */
   const renderPage = async (pageNum, sc, mountCheck) => {
@@ -90,13 +98,21 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
     const pdfCanvas = pdfCanvasRef.current;
     if (!pdf || !pdfCanvas) return;
 
+    if (renderTaskRef.current) {
+      try { renderTaskRef.current.cancel(); } catch (_) {}
+      renderTaskRef.current = null;
+    }
+
     try {
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale: sc });
       pdfCanvas.width = viewport.width;
       pdfCanvas.height = viewport.height;
       const ctx = pdfCanvas.getContext("2d");
-      await page.render({ canvasContext: ctx, viewport }).promise;
+      const task = page.render({ canvasContext: ctx, viewport });
+      renderTaskRef.current = task;
+      await task.promise;
+      renderTaskRef.current = null;
 
       const drawCanvas = drawCanvasRef.current;
       if (drawCanvas) {
@@ -105,6 +121,7 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
         redrawPaths(pageNum);
       }
     } catch (err) {
+      if (err?.name === 'RenderingCancelledException') return;
       if (mountCheck && mountCheck !== mountId.current) return;
       console.error("Error renderizando página:", err);
       setError(err);
@@ -193,21 +210,16 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
   }, [pageNumber]);
 
   /* ── Navegación / Zoom ──────────────────────────────────────────────── */
-  const goToPage = useCallback(async (target) => {
+  const goToPage = useCallback((target) => {
     if (target < 1 || target > numPages) return;
     setPageNumber(target);
-    setLoading(true);
-    await renderPage(target, scale, mountId.current);
-    setLoading(false);
+    mountId.current += 1;
+    renderPage(target, scale, mountId.current);
   }, [numPages, scale]);
 
-  const changeZoom = useCallback(async (delta) => {
-    const ns = Math.max(0.5, Math.min(3, scale + delta));
-    setScale(ns);
-    setLoading(true);
-    await renderPage(pageNumber, ns, mountId.current);
-    setLoading(false);
-  }, [scale, pageNumber]);
+  const changeZoom = useCallback((delta) => {
+    setScale(s => Math.max(0.5, Math.min(3, s + delta)));
+  }, []);
 
   /* ── Undo / Clear ───────────────────────────────────────────────────── */
   const handleUndo = useCallback(() => {
@@ -273,22 +285,22 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
               >
                 {f.file.name.replace('.pdf', '').substring(0, 12)}
               </button>
-<button
-            onClick={() => onRemovePlan(i)}
-            style={{
-              padding: "5px 6px",
-              background: "#1e2024",
-              border: "1px solid #3a494a",
-              borderLeft: "none",
-              borderRadius: i === files.length - 1 ? "0 4px 4px 0" : "0",
-              color: "#ffb4ab",
-              cursor: "pointer",
-              fontSize: 10,
-            }}
-            title={files.length === 1 ? "Cerrar visor" : "Eliminar plano"}
-          >
-            ✕
-          </button>
+              <button
+                onClick={() => onRemovePlan(i)}
+                style={{
+                  padding: "5px 6px",
+                  background: "#1e2024",
+                  border: "1px solid #3a494a",
+                  borderLeft: "none",
+                  borderRadius: i === files.length - 1 ? "0 4px 4px 0" : "0",
+                  color: "#ffb4ab",
+                  cursor: "pointer",
+                  fontSize: 10,
+                }}
+                title={files.length === 1 ? "Cerrar visor" : "Eliminar plano"}
+              >
+                ✕
+              </button>
             </div>
           ))}
           <button

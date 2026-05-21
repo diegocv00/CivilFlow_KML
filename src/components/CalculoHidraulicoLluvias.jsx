@@ -5,6 +5,7 @@ export default function CalculoHidraulicoLluvias() {
   const { tramosLl } = useSanitario();
 
   return (
+    <div style={{display:'none'}}>
     <div className="card">
       <div className="card-h">
         <span className="card-t">🌧️ Cálculo de Vreal, Y real, Rh real</span>
@@ -31,9 +32,9 @@ export default function CalculoHidraulicoLluvias() {
               const dSel=DIAM_OPTIONS.find(d=>d.pulg===(t.diamDisPulg||0))||null;
               const DintMm=dSel?dSel.mm:0;
 
-              let Qo=0, qqo=0, v=0, y_D=0, alpha=0, Rh_D=0, Rh=0;
+      let Qo=0, qqo=0, v=0, y_D=0, alpha=0, Rh_D=0, Rh=0;
 
-              if(Q>0&&S>0&&DintMm>0){
+      if(Q>0&&S>0&&n>0&&DintMm>0){
                 Qo=Math.round(0.312*Math.pow(DintMm/1000,8/3)*Math.sqrt(S)/n*1000*100)/100;
                 const q=Q/Qo;
                 qqo=Math.round(q*100)/100;
@@ -59,6 +60,7 @@ export default function CalculoHidraulicoLluvias() {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 }

@@ -8,7 +8,8 @@ export default function ChequeoCanalesLluvias() {
       <div className="card-h">
         <span className="card-t">🌧️ Chequeo capacidad canal cubierta aguas lluvias</span>
       </div>
-      <div className="card-b" style={{overflowX:'auto'}}>
+      <div className="scroll-top" style={{padding:'16px'}}>
+        <div className="scroll-inner" style={{minWidth:'max-content'}}>
         <table className="tbl" style={{fontSize:13}}>
           <thead>
             <tr>
@@ -55,23 +56,23 @@ export default function ChequeoCanalesLluvias() {
                 ? Math.round(1000 * b_m * h_m / n * Math.sqrt(S) * Math.pow(b_m * h_m / (b_m + 2 * h_m), 2/3) * 100) / 100
                 : 0;
 
-              const chequeo = Qmax > 0 && Qreal > 0
-                ? Qmax > Qreal ? 'O.K.' : 'No Cumple'
-                : '—';
+      const chequeo = Qmax > 0 && Qreal > 0
+        ? Qmax > Qreal ? 'O.K.' : 'No Cumple'
+        : (Qreal > 0 ? 'Sin sección' : '—');
 
               return(
                 <tr key={c.id}>
                   <td className="c"><input className="ni" style={{width:90,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={c.sector} onChange={e=>updCanalLL(c.id,'sector',e.target.value)}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.areaParcial??''} key={c.id+'ap'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaParcial',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.areaAcumulada??''} key={c.id+'aa'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaAcumulada',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.intensidad??''} key={c.id+'in'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'intensidad',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.coeficienteC??''} key={c.id+'cc'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'coeficienteC',v);}}/></td>
-                  <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,fontSize:13}}>{Qreal.toFixed(2)}</td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.manning??''} key={c.id+'mn'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'manning',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.pendiente??''} key={c.id+'pe'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'pendiente',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.b??''} key={c.id+'b'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'b',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.h??''} key={c.id+'h'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'h',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.bl??''} key={c.id+'bl'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'bl',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.areaParcial||''} key={c.id+'ap'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaParcial',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaParcial',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.areaAcumulada||''} key={c.id+'aa'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaAcumulada',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaAcumulada',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.intensidad||''} key={c.id+'in'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'intensidad',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'intensidad',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.coeficienteC||''} key={c.id+'cc'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'coeficienteC',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'coeficienteC',v);}}/></td>
+                  <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,fontSize:13}}>{Qreal>0?Qreal.toFixed(2):'—'}</td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.manning||''} key={c.id+'mn'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'manning',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'manning',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.pendiente||''} key={c.id+'pe'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'pendiente',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'pendiente',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.b||''} key={c.id+'b'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'b',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'b',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.h||''} key={c.id+'h'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'h',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'h',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.bl||''} key={c.id+'bl'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'bl',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'bl',v);}}/></td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600,fontSize:11}}>{totalStr}</td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,fontSize:12}}>{Qmax > 0 ? Qmax.toFixed(2) : '—'}</td>
                   <td className="c" style={{fontWeight:700}}>{chequeo}</td>
@@ -88,6 +89,7 @@ export default function ChequeoCanalesLluvias() {
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
