@@ -101,7 +101,7 @@ function CIVILFLOWInner(){
   const [drag,setDrag]=useState(false);
   const [files,setFiles]=useState([]);
   const [activePlanIndex,setActivePlanIndex]=useState(0);
-  const [showDisenoUD,setShowDisenoUD]=useState(true);
+  const [showDisenoUD,setShowDisenoUD]=useState(false);
   const [showValoresUD,setShowValoresUD]=useState(false);
   const [showBajantesLL,setShowBajantesLL]=useState(false);
   const [showCanalesLL,setShowCanalesLL]=useState(false);
