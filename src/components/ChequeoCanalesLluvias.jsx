@@ -1,4 +1,5 @@
 import { useSanitario } from "../context/SanitarioContext";
+import { chequeoCanalLluvia } from "../utils/calcSanitario";
 
 export default function ChequeoCanalesLluvias() {
   const { canalesLl, addCanalLL, delCanalLL, updCanalLL } = useSanitario();
@@ -35,32 +36,9 @@ export default function ChequeoCanalesLluvias() {
             </tr>
           </thead>
           <tbody>
-            {canalesLl.map(c=>{
-              const areaAcum = c.areaAcumulada || 0;
-              const inten = c.intensidad || 0;
-              const cVal = c.coeficienteC || 0;
-              const n = c.manning || 0.009;
-              const S = (c.pendiente || 0) / 100;
-              const b_cm = c.b || 0;
-              const h_cm = c.h || 0;
-              const b_m = b_cm / 100;
-              const h_m = h_cm / 100;
-
-              const Qreal = areaAcum > 0 && inten > 0 && cVal > 0
-                ? Math.round(areaAcum * inten * cVal / 100 * 100) / 100
-                : 0;
-
-              const totalStr = b_cm > 0 || h_cm > 0 ? `${b_cm} x ${h_cm}` : '—';
-
-              const Qmax = b_m > 0 && h_m > 0 && n > 0 && S > 0
-                ? Math.round(1000 * b_m * h_m / n * Math.sqrt(S) * Math.pow(b_m * h_m / (b_m + 2 * h_m), 2/3) * 100) / 100
-                : 0;
-
-      const chequeo = Qmax > 0 && Qreal > 0
-        ? Qmax > Qreal ? 'O.K.' : 'No Cumple'
-        : (Qreal > 0 ? 'Sin sección' : '—');
-
-              return(
+{canalesLl.map(c=>{
+const { Qreal: Qreal, Qmax, chequeo, totalStr } = chequeoCanalLluvia(c);
+return(
                 <tr key={c.id}>
                   <td className="c"><input className="ni" style={{width:90,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={c.sector} onChange={e=>updCanalLL(c.id,'sector',e.target.value)}/></td>
                   <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={c.areaParcial||''} key={c.id+'ap'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaParcial',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updCanalLL(c.id,'areaParcial',v);}}/></td>

@@ -1,4 +1,5 @@
 import { useSanitario } from "../context/SanitarioContext";
+import { chequeoBajanteLluvia } from "../utils/calcSanitario";
 import FloatingPanel from "./FloatingPanel";
 
 export default function PanelBajantesLluvias({ onClose }) {
@@ -15,13 +16,9 @@ export default function PanelBajantesLluvias({ onClose }) {
           </tr>
         </thead>
         <tbody>
-          {bajantesLl.map(b=>{
-            const Q = (b.areaAcumulada||0) > 0 && (b.intensidad||0) > 0 && (b.coeficienteC||0) > 0
-              ? Math.round(b.areaAcumulada * b.intensidad * b.coeficienteC / 100 * 100) / 100 : 0;
-            const Rv = b.R === '1/4' ? 0.25 : (b.R === '7/24' ? 7/24 : 7/24);
-            const dCalc = Q > 0 && Rv > 0 ? Math.round(Math.pow(Q / (1.754 * Math.pow(Rv, 5/3)), 3/8) * 100) / 100 : 0;
-            const chk = dCalc > 0 && (b.diamPropuesto||0) > 0 ? (dCalc < b.diamPropuesto ? 'O.K.' : 'No Cumple') : (dCalc > 0 ? 'Sin diseño' : '—');
-            return(
+{bajantesLl.map(b=>{
+const { Q, dCalc, chequeo: chk } = chequeoBajanteLluvia(b);
+return(
               <tr key={b.id} style={{borderBottom:'1px solid #2a2c30'}}>
                 <td style={tdS}><input style={inp(72)} value={b.bajante} onChange={e=>updBajanteLL(b.id,'bajante',e.target.value)}/></td>
                 <td style={tdS}><input style={inp(60)} defaultValue={b.areaParcial||''} key={b.id+'ap'} onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'));if(!isNaN(v))updBajanteLL(b.id,'areaParcial',v);}}/></td>
@@ -29,14 +26,14 @@ export default function PanelBajantesLluvias({ onClose }) {
                 <td style={tdS}><input style={inp(56)} defaultValue={b.intensidad||''} key={b.id+'in'} onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'));if(!isNaN(v))updBajanteLL(b.id,'intensidad',v);}}/></td>
                 <td style={tdS}><input style={inp(50)} defaultValue={b.coeficienteC||''} key={b.id+'cc'} onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'));if(!isNaN(v))updBajanteLL(b.id,'coeficienteC',v);}}/></td>
                 <td style={tdS}>
-                  <select style={{...inp(52),padding:'2px 2px'}} value={b.R} onChange={e=>updBajanteLL(b.id,'R',e.target.value)}>
-                    <option value="1/4">1/4</option><option value="7/24">7/24</option>
+<select style={{...inp(52),padding:'2px 2px'}} value={b.R} onChange={e=>updBajanteLL(b.id,'R',e.target.value)}>
+  <option value="">—</option><option value="1/4">1/4</option><option value="7/24">7/24</option>
                   </select>
                 </td>
                 <td style={{...tdS,fontWeight:700,fontSize:13}}>{Q>0?Q.toFixed(2):'—'}</td>
                 <td style={tdS}><input style={inp(50)} defaultValue={b.manning||''} key={b.id+'mn'} onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'));if(!isNaN(v))updBajanteLL(b.id,'manning',v);}}/></td>
                 <td style={tdS}>{dCalc > 0 ? dCalc.toFixed(2) : '—'}</td>
-                <td style={tdS}><input style={inp(56)} defaultValue={b.diamPropuesto||''} key={b.id+'dp'} onChange={e=>{const v=parseFloat(e.target.value.replace(/,/g,'.'));if(!isNaN(v))updBajanteLL(b.id,'diamPropuesto',v);}}/></td>
+                <td style={tdS}><select style={{...inp(56),padding:'2px 2px'}} value={b.diamPropuesto||''} onChange={e=>updBajanteLL(b.id,'diamPropuesto',e.target.value?Number(e.target.value):0)}><option value="">—</option><option value="1.5">1½"</option><option value="2">2"</option><option value="3">3"</option><option value="4">4"</option><option value="6">6"</option></select></td>
                 <td style={{...tdS,fontWeight:700,color:chk==='O.K.'?'#2ff801':'#ffb4ab'}}>{chk}</td>
                 <td style={tdS}><button onClick={()=>delBajanteLL(b.id)} style={{background:'transparent',border:'1px solid rgba(255,100,100,.3)',borderRadius:3,color:'#ffb4ab',padding:'1px 4px',fontSize:9,cursor:'pointer'}}>✕</button></td>
               </tr>
