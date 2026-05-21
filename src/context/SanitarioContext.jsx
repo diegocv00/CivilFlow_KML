@@ -41,23 +41,23 @@ export function SanitarioProvider({ children }) {
   ]);
 
   const [bajantesLl, setBajantesLl] = useState([
-    {id:'BLL-1',bajante:'Baj 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0.009,diamPropuesto:0},
-    {id:'BLL-2',bajante:'Baj 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0.009,diamPropuesto:0},
+    {id:'BLL-1',bajante:'Baj 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0,diamPropuesto:0},
+    {id:'BLL-2',bajante:'Baj 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0,diamPropuesto:0},
   ]);
 
   const [canalesLl, setCanalesLl] = useState([
-    {id:'CLL-1',sector:'Sector 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0.009,pendiente:0,b:0,h:0,bl:0},
-    {id:'CLL-2',sector:'Sector 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0.009,pendiente:0,b:0,h:0,bl:0},
+    {id:'CLL-1',sector:'Sector 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0,pendiente:0,b:0,h:0,bl:0},
+    {id:'CLL-2',sector:'Sector 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0,pendiente:0,b:0,h:0,bl:0},
   ]);
 
   const addCanalLL = () => setCanalesLl(p => [...p, {
-    id:`CLL-${p.length+1}`,sector:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0.009,pendiente:0,b:0,h:0,bl:0,
+    id:`CLL-${p.length+1}`,sector:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0,pendiente:0,b:0,h:0,bl:0,
   }]);
   const delCanalLL = (id) => setCanalesLl(p => p.filter(t => t.id !== id));
   const updCanalLL = (id, field, val) => setCanalesLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
 
   const addBajanteLL = () => setBajantesLl(p => [...p, {
-    id:`BLL-${p.length+1}`,bajante:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0.009,diamPropuesto:0,
+    id:`BLL-${p.length+1}`,bajante:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'7/24',manning:0,diamPropuesto:0,
   }]);
   const delBajanteLL = (id) => setBajantesLl(p => p.filter(t => t.id !== id));
   const updBajanteLL = (id, field, val) => setBajantesLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
