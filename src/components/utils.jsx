@@ -32,6 +32,6 @@ export function calcUDacumulado(tramos,udB){
 
 export function NumIn({val,onChange,cls='',w=52,step=0.01,min=0}){
   return <input type="number" className={`ni ${cls}`} style={{width:w}}
-    value={val} step={step} min={min}
-    onChange={e=>onChange(parseFloat(e.target.value)||0)}/>;
+    value={val === 0 ? '' : val} step={step} min={min}
+    onChange={e => onChange(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}/>;
 }
