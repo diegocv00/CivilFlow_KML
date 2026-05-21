@@ -7,11 +7,11 @@ export function SanitarioProvider({ children }) {
   const [udBase, setUdBase] = useState([...UD_BASE_INIT]);
 
   const [tramosSan, setTramosSan] = useState([
-    {id:'BAN-1',piso:2,pisoDesde:2,pisoHasta:1,fixtures:{sif:2,lvm:2,san:2,duc:2},recibeDe:[],esBajante:true,descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2,bajR:(7/24),bajLong:3,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
-    {id:'BAN-2',piso:2,pisoDesde:2,pisoHasta:1,fixtures:{sif:3,lvm:2,san:1,duc:1,tin:1},recibeDe:[],esBajante:true,descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2,bajR:(7/24),bajLong:3,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
-    {id:'R-1',piso:1,pisoDesde:1,pisoHasta:1,fixtures:{sif:1,lvm:2,san:1,lvp:2,lvra:1},recibeDe:['BAN-2'],esBajante:false,descripcion:'BAN 2',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2,bajR:(7/24),bajLong:0,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
-    {id:'R-2',piso:1,pisoDesde:1,pisoHasta:1,fixtures:{sif:1,lvm:2,san:2,duc:1},recibeDe:[],esBajante:false,descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2,bajR:(7/24),bajLong:0,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
-    {id:'R-3',piso:1,pisoDesde:1,pisoHasta:1,fixtures:{},recibeDe:['BAN-1','R-1','R-2'],esBajante:false,descripcion:'BAN-1+R-1+R-2',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2,bajR:(7/24),bajLong:0,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
+    {id:'BAN-1',piso:2,pisoDesde:2,pisoHasta:1,fixtures:{},recibeDe:[],esBajante:true,descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2,bajR:(7/24),bajLong:3,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
+    {id:'BAN-2',piso:2,pisoDesde:2,pisoHasta:1,fixtures:{},recibeDe:[],esBajante:true,descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2,bajR:(7/24),bajLong:3,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
+    {id:'R-1',piso:1,pisoDesde:1,pisoHasta:1,fixtures:{},recibeDe:['BAN-2'],esBajante:false,descripcion:'BAN 2',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2,bajR:(7/24),bajLong:0,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
+    {id:'R-2',piso:1,pisoDesde:1,pisoHasta:1,fixtures:{},recibeDe:[],esBajante:false,descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2,bajR:(7/24),bajLong:0,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
+    {id:'R-3',piso:1,pisoDesde:1,pisoHasta:1,fixtures:{},recibeDe:['BAN-1','R-1','R-2'],esBajante:false,descripcion:'BAN-1+R-1+R-2',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2,bajR:(7/24),bajLong:0,bajFDarcy:0.025,bajDprop:0,ventDprop:0},
   ]);
 
   const [pisos, setPisos] = useState([
@@ -35,9 +35,9 @@ export function SanitarioProvider({ children }) {
   });
 
   const [tramosLl, setTramosLl] = useState([
-    {id:'BAJ-1',piso:2,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2},
-    {id:'BAJ-2',piso:1,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2},
-    {id:'RLL-1',piso:1,esBajante:false,desde:'BAJ-1',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2},
+    {id:'BAJ-1',piso:2,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2},
+    {id:'BAJ-2',piso:1,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2},
+    {id:'RLL-1',piso:1,esBajante:false,desde:'BAJ-1',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2},
   ]);
 
   const [bajantesLl, setBajantesLl] = useState([
@@ -63,14 +63,14 @@ export function SanitarioProvider({ children }) {
   const updBajanteLL = (id, field, val) => setBajantesLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
 
   const addTramoSan = () => setTramosSan(p => [...p, {
-    id:`T-${p.length+1}`,piso:1,pisoDesde:1,pisoHasta:1,fixtures:{sif:0,lvm:0,san:0,duc:0,lvra:0,tin:0,lvp:0,lvro:0},recibeDe:[],esBajante:false,descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:parseFloat(proy.pendienteSan)*100||2,bajR:(7/24),bajLong:3,bajFDarcy:0.025,bajDprop:0,ventDprop:0,
+    id:`T-${p.length+1}`,piso:1,pisoDesde:1,pisoHasta:1,fixtures:{},recibeDe:[],esBajante:false,descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:parseFloat(proy.pendienteSan)*100||2,bajR:(7/24),bajLong:3,bajFDarcy:0.025,bajDprop:0,ventDprop:0,
   }]);
   const delTramoSan = (id) => setTramosSan(p => p.filter(t => t.id !== id));
   const updTramoSan = (id, field, val) => setTramosSan(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
   const updTramoSanFix = (id, fix, val) => setTramosSan(p => p.map(t => t.id === id ? { ...t, fixtures: { ...t.fixtures, [fix]: val } } : t));
 
   const addTramoLL = () => setTramosLl(p => [...p, {
-    id:`RLL-${p.length+1}`,piso:1,esBajante:false,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:2,nmaning:0,sPercent:2,
+    id:`RLL-${p.length+1}`,piso:1,esBajante:false,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:2,
   }]);
   const delTramoLL = (id) => setTramosLl(p => p.filter(t => t.id !== id));
   const updTramoLL = (id, field, val) => setTramosLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));

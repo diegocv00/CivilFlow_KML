@@ -118,7 +118,7 @@ const chequeoVent=DventMm>0&&DventPropPulg>0?(DventCalcPulg<=DventPropPulg?'O.K.
                       </select>
                     </td>
                     <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{Q>0?Q.toFixed(3):'—'}</td>
-                    <td className="c" style={{fontSize:10}}>{n}</td>
+                    <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:50,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={n||''} key={t.id+'nm'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'nmaning',v);}}/></td>
                     <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DcalcMm>0?DcalcPulg.toFixed(2)+'"':'—'}</td>
                     <td className="c">
                       <select className="ni" style={{width:54,padding:'2px 3px',fontSize:11,textAlign:'center'}} value={t.bajDprop||''} onChange={e=>updTramoSan(t.id,'bajDprop',parseFloat(e.target.value)||0)}>
