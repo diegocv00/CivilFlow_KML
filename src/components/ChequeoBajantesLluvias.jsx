@@ -19,7 +19,7 @@ export default function ChequeoBajantesLluvias() {
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Coeficiente de<br/>Escorrentía C</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>R</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q = C×I×A<br/>LPS</th>
-              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Maning<br/>n</th>
+              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Maning</th>
               <th className="col-h ok" colSpan={2} style={{textAlign:'center',fontSize:11}}>Diámetro</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Chequeo<br/>Dcal&lt;Dprop</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}></th>
