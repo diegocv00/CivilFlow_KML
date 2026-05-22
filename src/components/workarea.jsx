@@ -113,18 +113,20 @@ function CIVILFLOWInner(){
   const [mats,setMats]=useState(MATS_DEFAULT);
   const [matEdit,setMatEdit]=useState({key:null,newVal:''});
 
-  const [nSotanos,setNSotanos]=useState(1);
-  const [nPisos,setNPisos]=useState(2);
-  const [altPiso,setAltPiso]=useState(3.10);
-  const [altSotano,setAltSotano]=useState(3.00);
-  const [nptPiso1,setNptPiso1]=useState(0.00);
-  const [conCubierta,setConCubierta]=useState(true);
+  const [nSotanos,setNSotanos]=useState('');
+  const [nPisos,setNPisos]=useState('');
+  const [altPiso,setAltPiso]=useState(0);
+  const [altSotano,setAltSotano]=useState(0);
+  const [nptPiso1,setNptPiso1]=useState(0);
+  const [conCubierta,setConCubierta]=useState(false);
 
   const generarPisos=()=>{
     const lista=[];
-    for(let i=nSotanos;i>=1;i--) lista.push({id:'s'+i,n:-i,npt:parseFloat((nptPiso1-(i*altSotano)).toFixed(2)),ok:false,tipo:'sotano'});
-    for(let i=1;i<=nPisos;i++) lista.push({id:'p'+i,n:i,npt:parseFloat((nptPiso1+((i-1)*altPiso)).toFixed(2)),ok:false,tipo:'piso'});
-    if(conCubierta) lista.push({id:'cub',n:99,npt:parseFloat((nptPiso1+(nPisos*altPiso)).toFixed(2)),ok:false,tipo:'cubierta'});
+    const ns=Number(nSotanos)||0;
+    const np=Number(nPisos)||0;
+    for(let i=ns;i>=1;i--) lista.push({id:'s'+i,n:-i,npt:parseFloat((nptPiso1-(i*altSotano)).toFixed(2)),ok:false,tipo:'sotano'});
+    for(let i=1;i<=np;i++) lista.push({id:'p'+i,n:i,npt:parseFloat((nptPiso1+((i-1)*altPiso)).toFixed(2)),ok:false,tipo:'piso'});
+    if(conCubierta) lista.push({id:'cub',n:99,npt:parseFloat((nptPiso1+(np*altPiso)).toFixed(2)),ok:false,tipo:'cubierta'});
     setPisos(lista);
   };
 
@@ -230,9 +232,9 @@ function CIVILFLOWInner(){
     <div className="f"><label>Municipio</label><input value={proy.mun} onChange={e=>setP('mun',e.target.value)}/></div>
     <div className="f"><label>Departamento</label><input value={proy.dep} onChange={e=>setP('dep',e.target.value)}/></div>
     <div className="f"><label>Uso / Destinación</label>
-      <select value={proy.uso} onChange={e=>setP('uso',e.target.value)}>{USOS.map(u=><option key={u}>{u}</option>)}</select></div>
+      <select value={proy.uso} onChange={e=>setP('uso',e.target.value)}><option value="">—</option>{USOS.map(u=><option key={u}>{u}</option>)}</select></div>
     <div className="f"><label>Empresa prestadora</label>
-      <select value={proy.empresa} onChange={e=>setP('empresa',e.target.value)}>{EMPRES.map(u=><option key={u}>{u}</option>)}</select></div>
+      <select value={proy.empresa} onChange={e=>setP('empresa',e.target.value)}><option value="">—</option>{EMPRES.map(u=><option key={u}>{u}</option>)}</select></div>
     <div className="f"><label>Presión disponible red (m.c.a.)</label>
       <input type="text" inputMode="decimal" defaultValue={proy.p_red??''} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setP('p_red',v);}}/></div>
     <div className="f"><label>Dotación de diseño (L/hab/día)</label>
@@ -248,14 +250,14 @@ function CIVILFLOWInner(){
 <div className="card-b" style={{overflow:'visible'}}>
 <div style={{display:'flex',flexDirection:'column',justifyContent:'space-between',gap:6}}>
   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:4}}>
-    <div className="f" style={{marginBottom:0}}><label>N° sótanos</label><input type="number" min="0" max="10" value={nSotanos} style={{textAlign:'center'}} onChange={e=>setNSotanos(Math.max(0,parseInt(e.target.value)||0))}/></div>
-    <div className="f" style={{marginBottom:0}}><label>N° pisos</label><input type="number" min="1" max="50" value={nPisos} style={{textAlign:'center'}} onChange={e=>setNPisos(Math.max(1,parseInt(e.target.value)||1))}/></div>
+<div className="f" style={{marginBottom:0}}><label>N° sótanos</label><input type="text" inputMode="numeric" pattern="[0-9]*" value={nSotanos} style={{textAlign:'center'}} onChange={e=>setNSotanos(e.target.value.replace(/\D/g,''))}/></div>
+      <div className="f" style={{marginBottom:0}}><label>N° pisos</label><input type="text" inputMode="numeric" pattern="[0-9]*" value={nPisos} style={{textAlign:'center'}} onChange={e=>setNPisos(e.target.value.replace(/\D/g,''))}/></div>
   </div>
   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:4}}>
-    <div className="f" style={{marginBottom:0}}><label>H. entrepiso</label><input type="text" inputMode="decimal" defaultValue={altPiso??''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setAltPiso(v);}}/></div>
-    <div className="f" style={{marginBottom:0}}><label>H. sótano</label><input type="text" inputMode="decimal" defaultValue={altSotano??''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setAltSotano(v);}}/></div>
+    <div className="f" style={{marginBottom:0}}><label>Altura entrepiso</label><input type="text" inputMode="decimal" defaultValue={altPiso||''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setAltPiso(v);}}/></div>
+    <div className="f" style={{marginBottom:0}}><label>Altura sótano</label><input type="text" inputMode="decimal" defaultValue={altSotano||''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setAltSotano(v);}}/></div>
   </div>
-  <div className="f" style={{marginBottom:4}}><label>NPT Piso 1 (m)</label><input type="text" inputMode="decimal" defaultValue={nptPiso1??''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setNptPiso1(v);}}/></div>
+  <div className="f" style={{marginBottom:4}}><label>NPT Piso 1 (m)</label><input type="text" inputMode="decimal" defaultValue={nptPiso1||''} style={{textAlign:'center'}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setNptPiso1(v);}}/></div>
   <label style={{display:'flex',alignItems:'center',gap:7,fontFamily:'var(--mono)',fontSize:13,color:'var(--txt2)',cursor:'pointer',marginBottom:4}}>
     <input type="checkbox" checked={conCubierta} onChange={e=>setConCubierta(e.target.checked)} style={{width:18,height:18,accentColor:'var(--acc)',cursor:'pointer'}}/>Incluir cubierta
   </label>
@@ -268,7 +270,7 @@ function CIVILFLOWInner(){
   {[...pisos].sort((a,b)=>a.n-b.n).map(p=>(
     <div key={p.id} style={{display:'flex',alignItems:'center',gap:6,padding:'6px 10px',background:'var(--bg3)',border:'1px solid var(--line)',borderRadius:'var(--r)',borderLeft:'3px solid '+(p.tipo==='cubierta'?'var(--ll)':p.n<0?'var(--txt3)':'var(--acc2)')}}>
       <span className={p.tipo==='cubierta'?'piso-tag cub':p.n<0?'piso-tag sot':'piso-tag'} style={{fontSize:12,padding:'3px 8px',minWidth:65}}>{p.tipo==='cubierta'?'Cubierta':p.n<0?'Sótano '+Math.abs(p.n):'Piso '+p.n}</span>
-      <input type="text" inputMode="decimal" defaultValue={p.npt??''} key={p.id+'npt'} className="npt-in" style={{fontSize:13,width:60}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setPisos(prev=>prev.map(x=>x.id===p.id?{...x,npt:v}:x));}}/>
+      <input type="text" inputMode="decimal" defaultValue={p.npt||''} key={p.id+'npt'} className="npt-in" style={{fontSize:13,width:60}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')setPisos(prev=>prev.map(x=>x.id===p.id?{...x,npt:v}:x));}}/>
       <span style={{fontFamily:'var(--mono)',fontSize:11,color:'var(--txt3)'}}>m</span>
       <div className={`pdot ${p.ok?'ok':''}`} style={{marginLeft:'auto'}}/>
     </div>
