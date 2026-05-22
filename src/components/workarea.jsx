@@ -310,13 +310,15 @@ function CIVILFLOWInner(){
   <input id="add-plan-input" ref={fileRef} type="file" accept=".pdf" multiple style={{display:'none'}} onChange={(e) => { addFiles(e.target.files); e.target.value=''; }}/>
 {files.length > 0 ? (
   <div style={{position:'relative',flex:1,minHeight:0,display:'flex',flexDirection:'column'}}>
-    <PdfViewer files={files} activeIndex={activePlanIndex} onSelectPlan={setActivePlanIndex}
-      onAddPlan={() => document.getElementById('add-plan-input').click()}
-      onRemovePlan={(index) => {
-        const newFiles = files.filter((_, i) => i !== index); setFiles(newFiles);
-        if (activePlanIndex >= newFiles.length) setActivePlanIndex(Math.max(0, newFiles.length - 1));
-        if (newFiles.length === 0) { setMeta(null); setVals([]); setPisos(p => p.map(x => ({...x, ok: false}))); }
-      }}/>
+                <PdfViewer files={files} activeIndex={activePlanIndex} onSelectPlan={setActivePlanIndex}
+                onAddPlan={() => document.getElementById('add-plan-input').click()}
+                onRemovePlan={(index) => {
+                  const newFiles = files.filter((_, i) => i !== index); setFiles(newFiles);
+                  if (activePlanIndex >= newFiles.length) setActivePlanIndex(Math.max(0, newFiles.length - 1));
+                  if (newFiles.length === 0) { setMeta(null); setVals([]); setPisos(p => p.map(x => ({...x, ok: false}))); }
+                }}
+                pisos={pisos}
+                />
     {showDisenoUD && <DisenoUDPanel onClose={()=>setShowDisenoUD(false)} />}
     {showValoresUD && <PanelValoresUD onClose={()=>setShowValoresUD(false)} />}
     {showBajantesLL && <PanelBajantesLluvias onClose={()=>setShowBajantesLL(false)} />}
