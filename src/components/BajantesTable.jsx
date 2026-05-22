@@ -1,4 +1,5 @@
 import { useSanitario } from "../context/SanitarioContext";
+import { pisoCorto } from "./constants";
 import { calcUDparcial, calcUDacumulado } from "./utils";
 
 const DIAM_BAN=[
@@ -19,7 +20,7 @@ const DIAM_VENT=[
 ];
 
 export default function BajantesTable() {
-  const { tramosSan, udBase, updTramoSan } = useSanitario();
+  const { tramosSan, udBase, pisos, updTramoSan } = useSanitario();
 
   return (
     <div className="card">
@@ -103,9 +104,15 @@ const chequeoVent=DventMm>0&&DventPropPulg>0?(DventCalcPulg<=DventPropPulg?'O.K.
                     <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
                     <td className="c" style={{minWidth:80}}>
                       <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>
-                        <input type="text" inputMode="numeric" pattern="[0-9]*" className="ni" style={{width:32,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.pisoDesde!==undefined?String(t.pisoDesde):(t.piso?'2':'1')} onChange={e=>updTramoSan(t.id,'pisoDesde',parseInt(e.target.value.replace(/\D/g,''))||0)}/>
+                        <select className="ni" style={{width:50,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.pisoDesde||''} onChange={e=>updTramoSan(t.id,'pisoDesde',parseInt(e.target.value)||0)}>
+                          <option value="">—</option>
+                          {pisos.map(p=><option key={p.id} value={p.n}>{pisoCorto(p.n)}</option>)}
+                        </select>
                         <span style={{color:'var(--txt3)',fontSize:9}}>-</span>
-                        <input type="text" inputMode="numeric" pattern="[0-9]*" className="ni" style={{width:32,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.pisoHasta!==undefined?String(t.pisoHasta):'1'} onChange={e=>updTramoSan(t.id,'pisoHasta',parseInt(e.target.value.replace(/\D/g,''))||0)}/>
+                        <select className="ni" style={{width:50,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.pisoHasta||''} onChange={e=>updTramoSan(t.id,'pisoHasta',parseInt(e.target.value)||0)}>
+                          <option value="">—</option>
+                          {pisos.map(p=><option key={p.id} value={p.n}>{pisoCorto(p.n)}</option>)}
+                        </select>
                       </div>
                     </td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{udParcial}</td>
