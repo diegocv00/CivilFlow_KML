@@ -1,5 +1,5 @@
 import { useSanitario } from "../context/SanitarioContext";
-import { pisoLbl, DIAM_OPTIONS } from "./constants";
+import { pisoCorto, DIAM_OPTIONS } from "./constants";
 
 export default function DisenoLluvias() {
   const { tramosLl, pisos, updTramoLL, addTramoLL, delTramoLL } = useSanitario();
@@ -16,9 +16,9 @@ export default function DisenoLluvias() {
             <tr>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Tramo<br/>o Ramal</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Piso</th>
-              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>De</th>
-              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>A</th>
-              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center',minWidth:100}}>Bajantes</th>
+<th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Inicio</th>
+               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Fin</th>
+              <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center',minWidth:100}}>Puntos de conexión</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Q<br/><small>LPS</small></th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center',minWidth:70}}>Maning</th>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>S %</th>
@@ -85,25 +85,25 @@ const Q=t.qLps||0;
               const bajantes=tramosLl.filter(o=>o.esBajante);
               const descIds=(t.descripcion||'').split('+').map(s=>s.trim()).filter(Boolean);
               return(
-                <tr key={t.id}>
-                  <td className="c"><input className="ni" style={{width:72,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.id} onChange={e=>updTramoLL(t.id,'id',e.target.value)}/></td>
-                  <td className="c" style={{fontSize:12}}>{pisos.find(p=>p.n===t.piso)?pisoLbl(t.piso):t.piso}</td>
-                  <td className="c"><input className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.desde||''} onChange={e=>updTramoLL(t.id,'desde',e.target.value)}/></td>
-                  <td className="c"><input className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.hasta||''} onChange={e=>updTramoLL(t.id,'hasta',e.target.value)}/></td>
+                <tr key={t._key}>
+                  <td className="c"><input className="ni" style={{width:72,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.id} onChange={e=>updTramoLL(t._key,'id',e.target.value)}/></td>
+                  <td className="c"><select className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.piso||''} onChange={e=>updTramoLL(t._key,'piso',parseInt(e.target.value)||0)}><option value="">—</option>{pisos.map(p=><option key={p.id} value={p.n}>{pisoCorto(p.n)}</option>)}</select></td>
+                  <td className="c"><input className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.desde||''} onChange={e=>updTramoLL(t._key,'desde',e.target.value)}/></td>
+                  <td className="c"><input className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.hasta||''} onChange={e=>updTramoLL(t._key,'hasta',e.target.value)}/></td>
                   <td className="c" style={{minWidth:120,maxWidth:200}}>
                     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(48px, 1fr))',gap:3,fontSize:10}}>
                       {bajantes.map(b=>{
-                        const sel=descIds.includes(b.id);
-                        return(<span key={b.id} onClick={()=>{const next=sel?descIds.filter(x=>x!==b.id):[...descIds,b.id];updTramoLL(t.id,'descripcion',next.join('+'));}} style={{padding:'3px 6px',borderRadius:8,cursor:'pointer',background:sel?'var(--ll)':'var(--bg4)',color:sel?'#fff':'var(--txt)',border:`1.5px solid ${sel?'var(--ll)':'var(--line)'}`,fontWeight:sel?600:400,textAlign:'center',userSelect:'none',boxShadow:sel?'0 1px 3px rgba(0,0,0,0.12)':'none'}}>{b.id}</span>);
+                        const sel=descIds.includes(b._key);
+                        return(<span key={b._key} onClick={()=>{const next=sel?descIds.filter(x=>x!==b._key):[...descIds,b._key];updTramoLL(t._key,'descripcion',next.join('+'));}} style={{padding:'3px 6px',borderRadius:8,cursor:'pointer',background:sel?'var(--ll)':'var(--bg4)',color:sel?'#fff':'var(--txt)',border:`1.5px solid ${sel?'var(--ll)':'var(--line)'}`,fontWeight:sel?600:400,textAlign:'center',userSelect:'none',boxShadow:sel?'0 1px 3px rgba(0,0,0,0.12)':'none'}}>{b.id || b._key}</span>);
                       })}
                     </div>
                   </td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.qLps||''} key={t.id+'q'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'qLps',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'qLps',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.nmaning||''} key={t.id+'nm'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'nmaning',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'nmaning',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={sVal||''} key={t.id+'sp'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'sPercent',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t.id,'sPercent',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.qLps||''} key={t._key+'q'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'qLps',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'qLps',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.nmaning||''} key={t._key+'nm'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'nmaning',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'nmaning',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={sVal||''} key={t._key+'sp'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'sPercent',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'sPercent',v);}}/></td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DcalcPulg>0?DcalcPulg.toFixed(2)+'"':'—'}</td>
                   <td className="c">
-                    <select className="ni" style={{width:56,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.diamDisPulg||''} onChange={e=>updTramoLL(t.id,'diamDisPulg',parseFloat(e.target.value))}>
+                    <select className="ni" style={{width:56,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.diamDisPulg||''} onChange={e=>updTramoLL(t._key,'diamDisPulg',parseFloat(e.target.value))}>
                       <option value="">—</option>
                       {DIAM_OPTIONS.map(d=><option key={d.pulg} value={d.pulg}>{d.label}</option>)}
                     </select>
@@ -123,7 +123,7 @@ const Q=t.qLps||0;
                   <td className="c">{fuerzaTractiva>0?fuerzaTractiva.toFixed(2):'—'}</td>
                   <td className="c">{chequeoFT}</td>
                   <td className="c">
-                    <button onClick={()=>delTramoLL(t.id)} style={{background:'var(--err-bg)',border:'1px solid var(--err-b)',borderRadius:'var(--r)',color:'var(--err)',padding:'1px 5px',fontSize:10,cursor:'pointer'}}>✕</button>
+                    <button onClick={()=>delTramoLL(t._key)} style={{background:'var(--err-bg)',border:'1px solid var(--err-b)',borderRadius:'var(--r)',color:'var(--err)',padding:'1px 5px',fontSize:10,cursor:'pointer'}}>✕</button>
                   </td>
                 </tr>
               );

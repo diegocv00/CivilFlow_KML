@@ -204,7 +204,7 @@ export async function generarExcelLluvias({ proyecto, tramosLl = [], bajantesLl 
   let rowNum = 12;
   const results = tramosLl.map(t => {
     const r = calcTramo(t, diamOpts);
-    return { ...r, tramo: t.id, piso: t.piso, desde: t.desde || '', hasta: t.hasta || '', bajantes: t.descripcion || '', qLps: t.qLps || 0, nmaning: t.nmaning || 0.009, sPercent: t.sPercent || 2 };
+    return { ...r, tramo: t.id || t._key, piso: t.piso, desde: t.desde || '', hasta: t.hasta || '', bajantes: t.descripcion || '', qLps: t.qLps || 0, nmaning: t.nmaning || 0.009, sPercent: t.sPercent || 2 };
   });
 
   results.forEach((r, idx) => {

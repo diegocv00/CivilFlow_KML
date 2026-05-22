@@ -46,8 +46,8 @@ export default function CalculoHidraulicoLluvias() {
               }
 
               return(
-                <tr key={t.id}>
-                  <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
+                <tr key={t._key}>
+                  <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id || t._key}</span></td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700}}>{qqo>0?qqo.toFixed(4):'—'}</td>
                   <td className="c" style={{fontFamily:'var(--mono)'}}>{v>0?v.toFixed(6):'—'}</td>
                   <td className="c" style={{fontFamily:'var(--mono)'}}>{y_D>0?y_D.toFixed(6):'—'}</td>

@@ -2,6 +2,8 @@ import { useState, createContext, useContext } from "react";
 import { UD_BASE_INIT } from "../components/constants";
 
 const SanitarioContext = createContext(null);
+let _llKey = 0;
+function nextLlKey() { return `_ll_${++_llKey}`; }
 
 export function SanitarioProvider({ children }) {
   const [udBase, setUdBase] = useState([...UD_BASE_INIT]);
@@ -15,17 +17,17 @@ export function SanitarioProvider({ children }) {
   ]);
 
   const [pisos, setPisos] = useState([
-    {id:1,n:-1,npt:-3.00,ok:false,tipo:'sotano'},
-    {id:2,n:1, npt: 0.00,ok:false,tipo:'piso'},
-    {id:3,n:2, npt: 3.10,ok:false,tipo:'piso'},
-    {id:4,n:99,npt: 6.20,ok:false,tipo:'cubierta'},
+    {id:1,n:-1,npt:0,ok:false,tipo:'sotano'},
+    {id:2,n:1, npt:0,ok:false,tipo:'piso'},
+    {id:3,n:2, npt:0,ok:false,tipo:'piso'},
+    {id:4,n:99,npt:0,ok:false,tipo:'cubierta'},
   ]);
 
   const [proy, setProy] = useState({
-    nombre:'Casa No. 26 CR Monte Real', dir:'CR 10 No. 25-40',
-    mun:'Floridablanca', dep:'Santander',
-    uso:'Vivienda unifamiliar', empresa:'EMAB - Floridablanca',
-    p_red:'20', dot:'280',
+    nombre:'', dir:'',
+    mun:'', dep:'',
+    uso:'', empresa:'',
+    p_red:'', dot:'',
     mat_af:'PVC presión', mat_ac:'CPVC', mat_rci:'Acero SCH 40',
     mat_san:'PVC sanitario', mat_ll:'PVC sanitario',
     mat_ven:'PVC sanitario', mat_gas:'PE al PE',
@@ -35,19 +37,19 @@ export function SanitarioProvider({ children }) {
   });
 
   const [tramosLl, setTramosLl] = useState([
-    {id:'BAJ-1',piso:2,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0},
-    {id:'BAJ-2',piso:1,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0},
-    {id:'RLL-1',piso:1,esBajante:false,desde:'BAJ-1',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0},
+    {_key:nextLlKey(),id:'',piso:0,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0},
+    {_key:nextLlKey(),id:'',piso:0,esBajante:true,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0},
+    {_key:nextLlKey(),id:'',piso:0,esBajante:false,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0},
   ]);
 
   const [bajantesLl, setBajantesLl] = useState([
-{id:'BLL-1',bajante:'Baj 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'',manning:0,diamPropuesto:0},
-  {id:'BLL-2',bajante:'Baj 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'',manning:0,diamPropuesto:0},
+{id:'BLL-1',bajante:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'',manning:0,diamPropuesto:0},
+  {id:'BLL-2',bajante:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,R:'',manning:0,diamPropuesto:0},
   ]);
 
   const [canalesLl, setCanalesLl] = useState([
-    {id:'CLL-1',sector:'Sector 1',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0,pendiente:0,b:0,h:0,bl:0},
-    {id:'CLL-2',sector:'Sector 2',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0,pendiente:0,b:0,h:0,bl:0},
+    {id:'CLL-1',sector:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0,pendiente:0,b:0,h:0,bl:0},
+    {id:'CLL-2',sector:'',areaParcial:0,areaAcumulada:0,intensidad:0,coeficienteC:0,manning:0,pendiente:0,b:0,h:0,bl:0},
   ]);
 
   const addCanalLL = () => setCanalesLl(p => [...p, {
@@ -70,10 +72,10 @@ export function SanitarioProvider({ children }) {
   const updTramoSanFix = (id, fix, val) => setTramosSan(p => p.map(t => t.id === id ? { ...t, fixtures: { ...t.fixtures, [fix]: val } } : t));
 
   const addTramoLL = () => setTramosLl(p => [...p, {
-    id:`RLL-${p.length+1}`,piso:1,esBajante:false,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0,
+    _key:nextLlKey(),id:'',piso:0,esBajante:false,desde:'',hasta:'',descripcion:'',diamDisPulg:0,nSalidas:0,nmaning:0,sPercent:0,
   }]);
-  const delTramoLL = (id) => setTramosLl(p => p.filter(t => t.id !== id));
-  const updTramoLL = (id, field, val) => setTramosLl(p => p.map(t => t.id === id ? { ...t, [field]: val } : t));
+  const delTramoLL = (key) => setTramosLl(p => p.filter(t => t._key !== key));
+  const updTramoLL = (key, field, val) => setTramosLl(p => p.map(t => t._key === key ? { ...t, [field]: val } : t));
 
   const setP = (k, v) => setProy(p => ({ ...p, [k]: v }));
 
