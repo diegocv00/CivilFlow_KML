@@ -11,8 +11,9 @@ function Navbar() {
     <nav className="fixed top-0 w-full z-50 border-b border-outline-variant flex justify-between items-center h-16 px-6 lg:px-8"
       style={{ background: '#111317' }}>
       <div className="flex items-center gap-8">
-        <Link to="/" className="font-mono font-bold text-xl tracking-tighter uppercase text-primary">
-          CIVIL FLOW
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/logos/civilCorelogo.png" alt="CivilCore" className="h-8 w-8 object-contain" />
+          <span className="font-bold text-xl tracking-tighter uppercase text-primary" style={{ fontFamily: 'Hanken Grotesk, sans-serif' }}>CIVILCORE</span>
         </Link>
         <div className="hidden md:flex gap-6 items-center h-full">
           <Link to="/" className={path === '/' ? active : inactive} style={{ fontFamily: 'Geist, monospace' }}>INICIO</Link>
