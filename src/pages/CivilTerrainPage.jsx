@@ -26,7 +26,7 @@ export default function CivilTerrainPage() {
               Modelado Digital de Elevación de Próxima Generación
             </h1>
             <p className="text-base text-on-surface-variant max-w-xl">
-              Herramientas avanzadas para topografía, cálculo preciso de movimiento de tierras y análisis geoespacial de alta densidad, integradas en un flujo de trabajo brutalmente eficiente.
+              Herramientas avanzadas para topografía, cálculo preciso de movimiento de tierras y análisis  de alta densidad, integradas en un flujo de trabajo brutalmente eficiente.
             </p>
             <div className="flex gap-4 mt-4">
               <Link to="/dashboard" className="bg-primary text-on-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-primary-fixed transition-colors border border-primary" style={{ fontFamily: 'Geist, monospace' }}>
@@ -96,7 +96,7 @@ export default function CivilTerrainPage() {
             <Link to="/docs" className="text-outline uppercase tracking-widest hover:text-primary transition-colors" style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Geist, monospace' }}>API</Link>
             <Link to="/docs" className="text-outline uppercase tracking-widest hover:text-primary transition-colors" style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Geist, monospace' }}>SDK</Link>
           </div>
-          <span className="text-outline text-sm">© 2026 CivilCore. Ingeniería de Precisión Geoespacial.</span>
+          <span className="text-outline text-sm">© 2026 CivilCore. Ingeniería de Precisión .</span>
         </div>
       </footer>
     </div>

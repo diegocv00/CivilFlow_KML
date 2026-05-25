@@ -116,7 +116,7 @@ export default function CivilStructurePage() {
             <Link to="/docs" className="text-outline uppercase tracking-widest hover:text-primary transition-colors" style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Geist, monospace' }}>API</Link>
             <Link to="/docs" className="text-outline uppercase tracking-widest hover:text-primary transition-colors" style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Geist, monospace' }}>SDK</Link>
           </div>
-          <span className="text-outline text-sm">© 2026 CivilCore. Ingeniería de Precisión Geoespacial.</span>
+          <span className="text-outline text-sm">© 2026 CivilCore. Ingeniería de Precisión .</span>
         </div>
       </footer>
     </div>

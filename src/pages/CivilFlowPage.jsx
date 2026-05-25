@@ -139,7 +139,7 @@ export default function CivilFlowPage() {
             <Link to="/docs" className="text-outline uppercase tracking-widest hover:text-primary transition-colors" style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Geist, monospace' }}>Documentación</Link>
             <Link to="/pricing" className="text-outline uppercase tracking-widest hover:text-primary transition-colors" style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Geist, monospace' }}>Precios</Link>
           </div>
-          <span className="text-outline text-sm">© 2026 CivilCore. Ingeniería de Precisión Geoespacial.</span>
+          <span className="text-outline text-sm">© 2026 CivilCore. Ingeniería de Precisión .</span>
         </div>
       </footer>
     </div>

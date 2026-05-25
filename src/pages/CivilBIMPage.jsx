@@ -32,7 +32,7 @@ export default function CivilBIMPage() {
                 CivilBIM: El Nexo Digital de la Construcción
               </h1>
               <p className="text-base text-on-surface-variant max-w-xl">
-                Integración total de modelos inteligentes en flujos de trabajo geoespaciales. Conecte diseño, análisis y gestión en un entorno unificado de alta precisión para proyectos de infraestructura civil.
+                Integración total de modelos inteligentes en flujos de trabajo es. Conecte diseño, análisis y gestión en un entorno unificado de alta precisión para proyectos de infraestructura civil.
               </p>
               <div className="flex gap-4 mt-4">
                 <Link to="/dashboard" className="border border-outline-variant text-on-surface px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2 hover:border-[#d946ef] transition-colors" style={{ fontFamily: 'Geist, monospace', background: '#333539' }}>

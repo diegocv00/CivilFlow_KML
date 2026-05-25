@@ -1,112 +1,123 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const navigate = useNavigate()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    navigate('/dashboard')
-  }
+    e.preventDefault();
+    navigate('/dashboard');
+  };
 
   return (
-    <div className="min-h-screen bg-surface-bg flex flex-col">
-      <Navbar />
-      <div className="flex-1 flex items-center justify-center relative pt-16">
-        {/* Tech Grid Background */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: 'linear-gradient(to right, #3a494a 1px, transparent 1px), linear-gradient(to bottom, #3a494a 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-            opacity: 0.15,
-          }}
-        />
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,rgba(0,220,229,0.05)_0%,transparent_80%)]" />
+    <div className="min-h-screen flex flex-col" style={{ background: '#0a0e14', color: '#e2e2e8' }}>
+      <style>{`
+        .login-grid {
+          background-image: linear-gradient(rgba(0,170,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,170,255,0.03) 1px, transparent 1px);
+          background-size: 60px 60px;
+        }
+      `}</style>
 
-        <div className="relative z-10 w-full max-w-[400px] mx-4">
-          <div className="border border-outline-variant bg-surface-bg">
-            <div className="px-6 pt-8 pb-6 text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 mb-4 border border-primary bg-primary/5">
-                <span className="material-symbols-outlined text-primary text-2xl">ssid_chart</span>
+      <Navbar />
+
+      <div className="flex-1 flex items-center justify-center relative pt-16">
+        <div className="absolute inset-0 login-grid pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none"
+          style={{ background: 'rgba(0,170,255,0.06)' }} />
+
+        <div className="relative z-10 w-full max-w-[420px] mx-4">
+          <div className="border border-outline-variant" style={{ background: 'rgba(10,14,20,0.8)', backdropFilter: 'blur(16px)' }}>
+
+            <div className="px-8 pt-10 pb-6 text-center">
+              <div className="flex justify-center mb-5">
+                <img src="/logos/civilCorelogo.png" alt="CivilCore" className="w-16 h-16 object-contain"
+                  style={{ filter: 'drop-shadow(0 0 20px rgba(0,170,255,0.25))' }} />
               </div>
-              <h1 className="text-headline-sm font-bold text-primary tracking-tight">CIVIL FLOW</h1>
-              <p className="mt-1 text-body-md text-on-surface-variant">Ingeniería Civil - Hidrosanitaria</p>
+              <h1 className="text-2xl font-black tracking-tight uppercase mb-1"
+                style={{ fontFamily: 'Hanken Grotesk, sans-serif' }}>
+                <span style={{ color: '#e8f4fd' }}>CIVIL</span>
+                <span style={{ color: '#00dce5' }}>CORE</span>
+              </h1>
+              <p className="text-xs uppercase tracking-widest" style={{ color: '#6b8cae', fontFamily: 'Geist, monospace', fontWeight: 600 }}>
+                Ingeniería de Precisión 
+              </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
+            <form onSubmit={handleSubmit} className="px-8 pb-6 space-y-5">
               <div>
-                <label className="block text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-1.5">
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-2"
+                  style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>
                   CORREO ELECTRÓNICO
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant text-on-surface text-[13px] font-mono focus:border-primary focus:outline-none transition-colors"
-                  placeholder="usuario@civilflow.com"
+                  className="w-full h-11 px-4 border text-sm focus:outline-none transition-colors"
+                  style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+                  onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+                  onBlur={(e) => e.target.style.borderColor = '#3a494a'}
+                  placeholder="usuario@civilcore.com"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-1.5">
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-2"
+                  style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>
                   CONTRASEÑA
                 </label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant text-on-surface text-[13px] font-mono focus:border-primary focus:outline-none transition-colors"
+                  className="w-full h-11 px-4 border text-sm focus:outline-none transition-colors"
+                  style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+                  onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+                  onBlur={(e) => e.target.style.borderColor = '#3a494a'}
                   placeholder="••••••••"
                 />
               </div>
 
-              <div className="flex items-center justify-between text-[13px]">
+              <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 border border-outline-variant bg-surface-container-low accent-primary" />
-                  <span className="text-on-surface-variant">Recordarme</span>
+                  <input type="checkbox" className="w-4 h-4 border accent-[#00dce5]"
+                    style={{ borderColor: '#3a494a', background: '#0a0e14' }} />
+                  <span className="text-xs" style={{ color: '#6b8cae' }}>Recordarme</span>
                 </label>
-                <button type="button" className="text-primary hover:text-primary-fixed underline text-[13px]">
+                <button type="button" className="text-xs hover:underline" style={{ color: '#00dce5' }}>
                   ¿Olvidó su contraseña?
                 </button>
               </div>
 
               <button
                 type="submit"
-                className="w-full h-12 bg-primary text-on-primary font-bold text-[11px] tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-colors"
+                className="w-full h-12 font-bold text-[11px] tracking-widest uppercase transition-all"
+                style={{ background: '#00dce5', color: '#0a0e14', fontFamily: 'Geist, monospace',
+                  boxShadow: '0 0 20px rgba(0,220,229,0.2)' }}
+                onMouseEnter={(e) => e.target.style.boxShadow = '0 0 30px rgba(0,220,229,0.4)'}
+                onMouseLeave={(e) => e.target.style.boxShadow = '0 0 20px rgba(0,220,229,0.2)'}
               >
                 INICIAR SESIÓN
               </button>
             </form>
 
-            <div className="px-6 py-4 border-t border-outline-variant text-center">
-              <p className="text-[13px] text-on-surface-variant">
+            <div className="px-8 py-5 border-t text-center" style={{ borderColor: '#3a494a' }}>
+              <p className="text-xs" style={{ color: '#6b8cae' }}>
                 ¿No tiene cuenta?{' '}
-                <button className="text-primary hover:text-primary-fixed underline">
+                <Link to="/register" className="font-bold hover:underline" style={{ color: '#00dce5' }}>
                   Registrarse
-                </button>
+                </Link>
               </p>
-            </div>
-
-            <div className="px-6 pb-6 flex justify-center gap-2">
-              <span className="px-2 py-1 text-[11px] text-on-surface-variant bg-surface-container border border-outline-variant">
-                NTC 1500
-              </span>
-              <span className="px-2 py-1 text-[11px] text-on-surface-variant bg-surface-container border border-outline-variant">
-                RAS 2000
-              </span>
-              <span className="px-2 py-1 text-[11px] text-on-surface-variant bg-surface-container border border-outline-variant">
-                NTC 3728
-              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;

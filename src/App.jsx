@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import Layout from './layouts/Layout'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 import WorkArea from './components/workarea'
 import ProfilePage from './pages/ProfilePage'
 import DocsPage from './pages/DocsPage'
@@ -21,6 +22,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/civilflow" element={<CivilFlowPage />} />

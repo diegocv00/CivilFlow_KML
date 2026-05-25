@@ -27,7 +27,7 @@ export default function CivilMEPPage() {
               <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, #00dce5, #79ff5b)' }}>Instalaciones Especiales</span>
             </h1>
             <p className="text-base text-on-surface-variant max-w-xl">
-              Modelado avanzado de sistemas mecánicos, eléctricos e hidrosanitarios. Diseñado para workflows de alta densidad y precisión geoespacial.
+              Modelado avanzado de sistemas mecánicos, eléctricos e hidrosanitarios. Diseñado para workflows de alta densidad y precisión .
             </p>
             <div className="flex flex-wrap items-center gap-4 mt-4">
               <Link to="/dashboard" className="text-on-primary px-8 py-3 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2" style={{ fontFamily: 'Geist, monospace', background: '#00dce5' }}>
