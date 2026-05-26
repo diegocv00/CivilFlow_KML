@@ -6,13 +6,14 @@ import PlanoEngine, { NETS } from "./PlanoEngine";
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const TOOLS = [
-  { id: "sel", label: "Seleccionar", ico: "🖱", key: "S", icoCol: "#849495" },
-  { id: "line", label: "Ramal", ico: "╱", key: "L", icoCol: "#4D8FF7" },
-  { id: "dim", label: "Cota", ico: "📏", key: "D", icoCol: "#22D3EE" },
-  { id: "text", label: "Texto", ico: "T", key: "T", icoCol: "#A855F7" },
-  { id: "baj", label: "Bajante", ico: "↓", key: "B", icoCol: "#F04545" },
-  { id: "erase", label: "Borrar", ico: "🧹", key: "E", icoCol: "#ffb4ab" },
-  { id: "pan", label: "Mover", ico: "✋", key: "Espacio", icoCol: "#10B981" },
+  { id: "sel", label: "Seleccionar", ico: "🖱", key: "S", icoCol: "#849495", shortcut: "S" },
+  { id: "line", label: "Ramal", ico: "╱", key: "L", icoCol: "#4D8FF7", shortcut: "L" },
+  { id: "area", label: "Área", ico: "⬡", key: "A", icoCol: "#22D3EE", shortcut: "A" },
+  { id: "dim", label: "Cota", ico: "📏", key: "D", icoCol: "#22D3EE", shortcut: "D" },
+  { id: "text", label: "Texto", ico: "T", key: "T", icoCol: "#A855F7", shortcut: "T" },
+  { id: "baj", label: "Bajante", ico: "↓", key: "B", icoCol: "#F04545", shortcut: "B" },
+  { id: "erase", label: "Borrar", ico: "🧹", key: "E", icoCol: "#ffb4ab", shortcut: "E" },
+  { id: "pan", label: "Mover", ico: "✋", key: "Espacio", icoCol: "#10B981", shortcut: "Espacio" },
 ];
 
 const TIPOS_TRAMO = [
@@ -33,6 +34,8 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
   const [scaleM, setScaleM] = useState("0.5");
   const [statusMsg, setStatusMsg] = useState("Seleccionar");
   const [selElement, setSelElement] = useState(null);
+  const toolRef = useRef(tool);
+  toolRef.current = tool;
 
   const currentFile = files[activeIndex]?.file;
   const currentId = files[activeIndex]?.id;
@@ -60,13 +63,6 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
   useEffect(() => { syncEngine(); }, [syncEngine]);
 
   useEffect(() => {
-    const eng = engineRef.current;
-    if (!eng) return;
-    eng.onSelect((el) => setSelElement(el));
-    eng.onStatus((msg) => setStatusMsg(msg));
-  }, [tool, activeNet, tipoTramo]);
-
-  useEffect(() => {
     if (!cwRef.current || !drawCanvasRef.current) return;
     const cw = cwRef.current;
     const canv = drawCanvasRef.current;
@@ -76,7 +72,15 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
     engineRef.current = eng;
     eng.onSelect((el) => setSelElement(el));
     eng.onStatus((msg) => setStatusMsg(msg));
-    return () => { eng.destroy(); };
+    const origSetTool = eng.setTool.bind(eng);
+    eng.setTool = (t) => {
+      origSetTool(t);
+      setTool(t);
+    };
+    return () => {
+      eng.setTool = origSetTool;
+      eng.destroy();
+    };
   }, []);
 
   useEffect(() => {
@@ -229,10 +233,11 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
       background: "#111317", border: "1px solid #3a494a", overflow: "hidden",
     }}>
       {/* Left toolbar */}
-      <div style={{
-        width: 190, flexShrink: 0, display: "flex", flexDirection: "column",
-        background: "#14161a", borderRight: "1px solid #3a494a", overflowY: "auto",
-      }}>
+    <div className="visor-sidebar" style={{
+      width: 190, flexShrink: 0, display: "flex", flexDirection: "column",
+      background: "#14161a", borderRight: "1px solid #3a494a",
+      overflowY: "auto", overflowX: "hidden",
+    }}>
 
       {/* Planos — agregar plano */}
       <div style={{ padding: "6px 8px 4px", borderBottom: "1px solid #3a494a" }}>
@@ -265,37 +270,86 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
       {/* Selected element info */}
       {selElement && (
         <div style={{ padding: "6px 8px 4px", borderBottom: "1px solid #3a494a" }}>
-          <div style={{ fontFamily: "'Geist',monospace", fontSize: 9, color: "#849495", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Seleccion</div>
           {selElement.id?.startsWith('T') ? (
             <span style={{
               fontFamily: "'Geist',monospace", fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4,
               color: '#e2e2e8',
               background: '#1e2024', padding: '2px 8px', borderRadius: 3,
             }}>Texto</span>
+          ) : selElement.id?.startsWith('AR') ? (
+            <span style={{
+              fontFamily: "'Geist',monospace", fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4,
+              color: '#22D3EE',
+              background: '#1e2024', padding: '2px 8px', borderRadius: 3,
+            }}>Área: {selElement.areaM2} m²</span>
+          ) : selElement.pts ? (
+            <span style={{
+              fontFamily: "'Geist',monospace", fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4,
+              color: NETS.find(n => n.id === selElement.net)?.col || '#e2e2e8',
+              background: '#1e2024', padding: '2px 8px', borderRadius: 3,
+            }}>
+              {selElement.label || selElement.id}
+            </span>
           ) : selElement.id?.startsWith('B') ? (
             <span style={{
               fontFamily: "'Geist',monospace", fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4,
               color: '#fff',
               background: '#1e2024', padding: '2px 8px', borderRadius: 3,
             }}>
-              {selElement.code || 'Bajante'}
+              {selElement.code || '—'}
             </span>
-          ) : (
-            <span style={{
-              fontFamily: "'Geist',monospace", fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4,
-              color: NETS.find(n => n.id === selElement.net)?.col || '#e2e2e8',
-              background: '#1e2024', padding: '2px 8px', borderRadius: 3,
-            }}>
-              {selElement.label || selElement.code || selElement.id}
-            </span>
-          )}
-          {selElement.pts && (
+          ) : null}
+          {selElement.pts && !selElement.id?.startsWith('AR') && (
             <div style={{ fontFamily: "'Geist',monospace", fontSize: 9, color: "#849495", marginBottom: 3 }}>
               L={selElement.totalL}m · {selElement.pts.length} pts
             </div>
           )}
-          {selElement.tipo && !selElement.id?.startsWith('T') && (
+          {selElement.tipo && selElement.pts && (
             <div style={{ fontFamily: "'Geist',monospace", fontSize: 9, color: "#849495", marginBottom: 3 }}>{selElement.tipo.toUpperCase()}</div>
+          )}
+
+{/* Etiqueta editable — para todos excepto texto */}
+        {!selElement.id?.startsWith('T') && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 3, marginBottom: 4 }}>
+            <input
+              value={selElement.id?.startsWith('AR') ? (selElement.label ?? '') : selElement.id?.startsWith('B') ? (selElement.code ?? '') : (selElement.label ?? '')}
+              placeholder="Etiqueta"
+              onChange={e => {
+                if (selElement.id?.startsWith('AR')) setSelElement({ ...selElement, label: e.target.value });
+                else if (selElement.id?.startsWith('B')) setSelElement({ ...selElement, code: e.target.value });
+                else setSelElement({ ...selElement, label: e.target.value });
+              }}
+              style={{ width: "100%", ...smInput }}
+            />
+              {selElement.id?.startsWith('AR') && (
+                <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                  <span style={{ fontFamily: "'Geist',monospace", fontSize: 9, color: "#849495", whiteSpace: 'nowrap' }}>Color</span>
+                  <input
+                    type="color"
+                    value={selElement.color ? (selElement.color.startsWith('#') ? selElement.color.slice(0, 7) : '#22D3EE') : '#22D3EE'}
+                    onChange={e => setSelElement({ ...selElement, color: e.target.value + '33' })}
+                    style={{ width: 24, height: 20, padding: 0, border: '1px solid #3a494a', borderRadius: 2, background: 'transparent', cursor: 'pointer' }}
+                  />
+                </div>
+              )}
+              <button onClick={() => {
+                if (engineRef.current && selElement) {
+if (selElement.id?.startsWith('AR')) {
+          engineRef.current.updateSelected({ label: selElement.label, color: selElement.color });
+        } else if (selElement.id?.startsWith('B')) {
+          engineRef.current.updateSelected({ code: selElement.code, hVert: selElement.hVert, dNominal: selElement.dNominal });
+        } else {
+                    engineRef.current.updateSelected({ label: selElement.label });
+                  }
+                  engineRef.current.selId = null;
+                  setSelElement(null);
+                }
+              }} style={{
+                padding: "4px 8px", background: "#10B981", border: "1px solid #10B981",
+                borderRadius: 4, color: "#fff", cursor: "pointer", fontSize: 10,
+                fontFamily: "'Geist',monospace", fontWeight: 600, textAlign: "center",
+              }}>✓ Aplicar</button>
+            </div>
           )}
 
           {selElement.id?.startsWith('T') && (
@@ -316,26 +370,18 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
             </div>
           )}
 
-          {!selElement.id?.startsWith('T') && selElement.code !== undefined && (
-            <input value={selElement.code || ''} placeholder="Codigo" onChange={e => handleUpdateSel('code', e.target.value)}
-              style={{ width: "100%", ...smInput, marginBottom: 4 }} />
-          )}
-          {!selElement.id?.startsWith('T') && (
+          {!selElement.id?.startsWith('T') && !selElement.id?.startsWith('AR') && (
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
               <button onClick={() => { if (engineRef.current) { engineRef.current.rotateLabelSnap(); const el = engineRef.current.getSelected(); if (el) setSelElement({...el}); }}} style={smBtn} title="Rotar elemento 45°">↻ Rotar</button>
             </div>
           )}
-          {!selElement.id?.startsWith('T') && selElement.hVert !== undefined && (
-            <input value={selElement.hVert || ''} placeholder="H(m)" onChange={e => handleUpdateSel('hVert', e.target.value)}
-              style={{ width: "100%", ...smInput, marginBottom: 3 }} />
-          )}
-          {!selElement.id?.startsWith('T') && selElement.dNominal !== undefined && (
-            <input value={selElement.dNominal || ''} placeholder="Diam" onChange={e => handleUpdateSel('dNominal', e.target.value)}
-              style={{ width: "100%", ...smInput, marginBottom: 3 }} />
-          )}
-          {!selElement.id?.startsWith('T') && selElement.uc !== undefined && (
-            <input value={selElement.uc || ''} placeholder="UC" type="number" onChange={e => handleUpdateSel('uc', parseFloat(e.target.value) || 0)}
-              style={{ width: "100%", ...smInput }} />
+          {selElement.id?.startsWith('B') && (
+            <>
+<input value={selElement.hVert && selElement.hVert !== 0 ? selElement.hVert : ''} placeholder="H(m)" onChange={e => handleUpdateSel('hVert', e.target.value)}
+          style={{ width: "100%", ...smInput, marginBottom: 3 }} />
+          <input value={selElement.dNominal && selElement.dNominal !== '0' ? selElement.dNominal : ''} placeholder="D(mm)" onChange={e => handleUpdateSel('dNominal', e.target.value)}
+          style={{ width: "100%", ...smInput, marginBottom: 3 }} />
+            </>
           )}
         </div>
       )}
@@ -345,31 +391,40 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
           <div style={{ fontFamily: "'Geist',monospace", fontSize: 9, color: "#849495", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Herramientas</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {TOOLS.map(t => (
-          <button key={t.id} onClick={() => setTool(t.id)} title={`${t.label} (${t.key})`} style={{
-            padding: "5px 8px", background: tool === t.id ? "#2563EB" : "#1e2024",
-            border: `1px solid ${tool === t.id ? "#2563EB" : "#3a494a"}`, borderRadius: "3px",
-            color: "#b9caca",
-            cursor: "pointer",
-            fontFamily: "'Geist',monospace", fontWeight: 600, transition: "all .12s",
-            display: "flex", alignItems: "center", gap: 6, width: "100%",
-          }}>
-            <span style={{ fontSize: 14, width: 18, textAlign: "center", color: tool === t.id ? "#fff" : t.icoCol }}>{t.ico}</span>
-            <span style={{ fontSize: 10 }}>{t.label}</span>
-          </button>
+              <button key={t.id} onClick={() => setTool(t.id)} title={`${t.label} (${t.shortcut})`} style={{
+                padding: "5px 8px", background: tool === t.id ? "#2563EB" : "#1e2024",
+                border: `1px solid ${tool === t.id ? "#2563EB" : "#3a494a"}`, borderRadius: "3px",
+                color: "#b9caca",
+                cursor: "pointer",
+                fontFamily: "'Geist',monospace", fontWeight: 600, transition: "all .12s",
+                display: "flex", alignItems: "center", gap: 6, width: "100%",
+              }}>
+                <span style={{ fontSize: 14, width: 18, textAlign: "center", color: tool === t.id ? "#fff" : t.icoCol }}>{t.ico}</span>
+                <span style={{ fontSize: 10, flex: 1 }}>{t.label}</span>
+                <span style={{ fontSize: 8, color: tool === t.id ? 'rgba(255,255,255,.6)' : '#6b8cae', fontFamily: "'Geist',monospace", marginLeft: 'auto' }}>{t.shortcut}</span>
+              </button>
         ))}
       </div>
         </div>
 
-        {/* Redes — sin titulo, 12 circulos centrados */}
-        <div style={{ padding: "8px 8px 6px", borderBottom: "1px solid #3a494a" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, justifyContent: "center" }}>
+        {/* Redes — lista vertical con nombre y color */}
+        <div style={{ padding: "6px 8px 4px", borderBottom: "1px solid #3a494a" }}>
+          <div style={{ fontFamily: "'Geist',monospace", fontSize: 9, color: "#849495", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Redes</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {NETS.map(n => (
-              <button key={n.id} onClick={() => setActiveNet(n.id)} title={n.lbl} style={{
-                width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-                border: activeNet === n.id ? `2px solid #fff` : `2px solid ${n.col}`,
-                background: n.col, cursor: "pointer", padding: 0, outline: "none",
-                boxShadow: activeNet === n.id ? `0 0 6px ${n.col}` : "none", transition: "all .15s",
-              }} />
+          <button key={n.id} onClick={() => setActiveNet(n.id)} title={`${n.emoji || ''} ${n.name || n.lbl}`} style={{
+            padding: "3px 6px", background: activeNet === n.id ? n.col + '22' : "transparent",
+            border: `1px solid ${activeNet === n.id ? n.col : '#3a494a'}`,
+            borderLeft: `3px solid ${n.col}`,
+            borderRadius: "3px", color: activeNet === n.id ? n.col : "#849495",
+            cursor: "pointer", fontFamily: "'Geist',monospace", fontWeight: 600,
+            transition: "all .15s", display: "flex", alignItems: "center", gap: 6, width: "100%",
+            fontSize: 10, textAlign: "left",
+          }}>
+            <span style={{ fontSize: 12, width: 16, textAlign: "center" }}>{n.emoji || ''}</span>
+            <span style={{ flex: 1, color: activeNet === n.id ? '#e2e2e8' : '#849495' }}>{n.name || n.lbl}</span>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: n.col, flexShrink: 0, border: '1px solid rgba(255,255,255,.15)' }} />
+              </button>
             ))}
           </div>
         </div>
@@ -417,12 +472,11 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
       {/* Acciones */}
       <div style={{ padding: "6px 8px 4px", borderBottom: "1px solid #3a494a" }}>
         <div style={{ fontFamily: "'Geist',monospace", fontSize: 9, color: "#849495", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Acciones</div>
-        <div style={{ display: "flex", gap: 0 }}>
-          <button onClick={handleSave} style={{ ...iconBtn, flex: 1, borderRadius: "3px 0 0 3px", borderRight: "1px solid #3a494a" }} title="Guardar (JSON)">💾</button>
-          <button onClick={() => setTool('erase')} style={{ ...iconBtn, flex: 1, borderRadius: 0, borderRight: "none", color: tool === 'erase' ? '#ffb4ab' : undefined }} title="Borrar elemento">🧹</button>
-          <button onClick={handleUndo} style={{ ...iconBtn, flex: 1, borderRadius: 0, borderRight: "none" }} title="Deshacer (Ctrl+Z)">↩</button>
-          <button onClick={handleClear} style={{ ...iconBtn, flex: 1, borderRadius: "0 3px 3px 0", color: "#ffb4ab" }} title="Limpiar todo">🗑</button>
-        </div>
+      <div style={{ display: "flex", gap: 0 }}>
+        <button onClick={handleSave} style={{ ...iconBtn, flex: 1, borderRadius: "3px 0 0 3px", borderRight: "1px solid #3a494a" }} title="Guardar (JSON)">💾</button>
+        <button onClick={handleUndo} style={{ ...iconBtn, flex: 1, borderRadius: 0, borderRight: "none" }} title="Deshacer (Ctrl+Z)">↩</button>
+        <button onClick={handleClear} style={{ ...iconBtn, flex: 1, borderRadius: "0 3px 3px 0", color: "#ffb4ab" }} title="Limpiar todo">🗑</button>
+      </div>
       </div>
 
         <div style={{ flex: 1 }} />
@@ -472,6 +526,16 @@ export default function PdfViewer({ files, activeIndex, onSelectPlan, onAddPlan,
         }}>
           <span>{statusMsg}</span>
           <div style={{ flex: 1 }} />
+          {tool === 'line' && (
+            <span style={{ color: '#6b8cae', fontSize: 9 }}>
+              Enter/Doble-clic:Guardar · Esc:Cancelar
+            </span>
+          )}
+          {tool === 'area' && (
+            <span style={{ color: '#6b8cae', fontSize: 9 }}>
+              Enter/Doble-clic:Cerrar · Esc:Cancelar
+            </span>
+          )}
           {snapOn && <span style={{ color: '#10B981' }}>Alinear</span>}
         </div>
       </div>
