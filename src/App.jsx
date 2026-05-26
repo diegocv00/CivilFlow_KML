@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './layouts/Layout'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -8,7 +8,6 @@ import WorkAreaPage from './pages/WorkAreaPage'
 import ProfilePage from './pages/ProfilePage'
 import DocsPage from './pages/DocsPage'
 import PricingPage from './pages/PricingPage'
-import PlanosPage from './pages/PlanosPage'
 import ViewerPage from './pages/ViewerPage'
 import CivilFlowPage from './pages/CivilFlowPage'
 import CivilStructurePage from './pages/CivilStructurePage'
@@ -23,30 +22,31 @@ import { SanitarioProvider } from './context/SanitarioContext'
 function App() {
   return (
     <SanitarioProvider>
-    <PlanosProvider>
-      <div className="min-h-screen bg-surface-bg text-on-surface font-sans">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="/planos" element={<PlanosPage />} />
-          <Route path="/visor" element={<ViewerPage />} />
-          <Route path="/civilflow" element={<CivilFlowPage />} />
-          <Route path="/civilstructure" element={<CivilStructurePage />} />
-          <Route path="/civilterrain" element={<CivilTerrainPage />} />
-          <Route path="/civilbim" element={<CivilBIMPage />} />
-          <Route path="/civilmanage" element={<CivilManagePage />} />
-          <Route path="/civilmep" element={<CivilMEPPage />} />
-          <Route path="/civilroads" element={<CivilRoadsPage />} />
-          <Route element={<Layout />}>
-            <Route path="/dashboard" element={<WorkAreaPage />} />
-            <Route path="/perfil" element={<ProfilePage />} />
-          </Route>
-        </Routes>
-      </div>
-    </PlanosProvider>
+      <PlanosProvider>
+        <div className="min-h-screen bg-surface-bg text-on-surface font-sans">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/planos" element={<Navigate to="/civilflowareatrabajo" replace />} />
+            <Route path="/visor" element={<ViewerPage />} />
+            <Route path="/civilflow" element={<CivilFlowPage />} />
+            <Route path="/civilstructure" element={<CivilStructurePage />} />
+            <Route path="/civilterrain" element={<CivilTerrainPage />} />
+            <Route path="/civilbim" element={<CivilBIMPage />} />
+            <Route path="/civilmanage" element={<CivilManagePage />} />
+            <Route path="/civilmep" element={<CivilMEPPage />} />
+            <Route path="/civilroads" element={<CivilRoadsPage />} />
+            <Route element={<Layout />}>
+              <Route path="/civilflowareatrabajo" element={<WorkAreaPage />} />
+              <Route path="/perfil" element={<ProfilePage />} />
+            </Route>
+            <Route path="/dashboard" element={<Navigate to="/civilflowareatrabajo" replace />} />
+          </Routes>
+        </div>
+      </PlanosProvider>
     </SanitarioProvider>
   )
 }

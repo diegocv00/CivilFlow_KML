@@ -30,7 +30,7 @@ export default function CivilMEPPage() {
               Modelado avanzado de sistemas mecánicos, eléctricos e hidrosanitarios. Diseñado para workflows de alta densidad y precisión .
             </p>
             <div className="flex flex-wrap items-center gap-4 mt-4">
-              <Link to="/dashboard" className="text-on-primary px-8 py-3 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2" style={{ fontFamily: 'Geist, monospace', background: '#00dce5' }}>
+              <Link to="/civilflowareatrabajo" className="text-on-primary px-8 py-3 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2" style={{ fontFamily: 'Geist, monospace', background: '#00dce5' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>precision_manufacturing</span> INICIAR MODELADO
               </Link>
               <Link to="/docs" className="border border-outline-variant text-on-surface px-8 py-3 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2 hover:border-primary transition-colors" style={{ fontFamily: 'Geist, monospace' }}>

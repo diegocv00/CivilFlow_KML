@@ -1,357 +1,254 @@
-import React from 'react'
-
-function StatCard({ title, value, unit, status, icon }) {
-  const statusColors = {
-    ok: 'border-l-primary text-primary',
-    warn: 'border-l-secondary text-secondary',
-    error: 'border-l-error text-error',
-  }
-  return (
-    <div className={`border-l-2 ${statusColors[status] || statusColors.ok} bg-surface-container px-4 py-5`}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">{title}</span>
-        <span className="material-symbols-outlined text-on-surface-variant text-lg">{icon}</span>
-      </div>
-      <div className="text-3xl font-bold font-mono text-on-surface tracking-tight">
-        {value}
-        <span className="text-[13px] font-normal font-sans text-on-surface-variant ml-1">{unit}</span>
-      </div>
-    </div>
-  )
-}
-
-function ProjectCard({ code, name, status, date, progress }) {
-  const statusConfig = {
-    'completo': { color: 'bg-secondary text-on-secondary-container', label: 'COMPLETO' },
-    'revision': { color: 'bg-tertiary text-on-tertiary-container', label: 'EN REVISIÓN' },
-    'activo': { color: 'bg-primary text-on-primary-container', label: 'ACTIVO' },
-  }
-  const s = statusConfig[status] || statusConfig.activo
-
-  return (
-    <div className="border border-outline-variant bg-surface-container p-4 hover:border-primary transition-colors">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">PROYECTO</span>
-          <h3 className="text-headline-sm font-bold text-on-surface mt-1">{code}</h3>
-        </div>
-        <span className={`px-2 py-1 text-[11px] font-bold tracking-wider uppercase ${s.color}`}>
-          {s.label}
-        </span>
-      </div>
-      <p className="text-body-md text-on-surface-variant mb-4 line-clamp-2">{name}</p>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[13px] text-on-surface-variant">Progreso</span>
-        <span className="text-[13px] font-mono text-on-surface">{progress}%</span>
-      </div>
-      <div className="h-1 bg-surface-container-low border border-outline-variant">
-        <div
-          className="h-full bg-primary transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      <div className="mt-4 pt-3 border-t border-outline-variant flex items-center justify-between">
-        <span className="text-[11px] text-on-surface-variant">{date}</span>
-        <button className="text-primary hover:text-primary-fixed text-[13px] flex items-center gap-1">
-          Ver detalles <span className="material-symbols-outlined text-sm">arrow_forward</span>
-        </button>
-      </div>
-    </div>
-  )
-}
+import React, { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 function ProfilePage() {
-  const userData = {
-    nombre: 'Ing. Camilo Cárdenas Chacón',
-    titulo: 'Ingeniero Civil - Hidrosanitariia',
-    email: 'camilo.cardenas@example.com',
-    telefono: '+57 300 123 4567',
-    municipio: 'Floridablanca',
-    departamento: 'Santander',
-    matricula: '12345-ABC',
-    especialidad: 'Diseño de Redes Hidrosanitarias',
-    proyectos: 12,
-  }
+  const [perfil, setPerfil] = useState({
+    nombre: '',
+    apellido: '',
+    profesion: '',
+    matricula: '',
+    telefono: '',
+    email: '',
+  })
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(null)
+  const [editField, setEditField] = useState(null)
+  const [editValue, setEditValue] = useState('')
+  const [proyectosOpen, setProyectosOpen] = useState(false)
+  const [userId, setUserId] = useState(null)
 
-  const normas = [
-    'NTC 1500',
-    'RAS 2000',
-    'NTC 3728',
-    'NSR-10',
-    'NTC 3830',
-    'NTC 4144',
+  const proyectosActivos = [
+    { id: 1, codigo: 'CR-97', nombre: 'Casa de Roca No. 97 - Redes Sanitarias y Lluvias', progreso: 100, estado: 'completo' },
+    { id: 2, codigo: 'AF-AC-01', nombre: 'Red Hidráulica AF y AC - Casa Roca 97', progreso: 98, estado: 'completo' },
+    { id: 3, codigo: 'CR-98', nombre: 'Casa de Roca No. 98 - Redes Sanitarias', progreso: 65, estado: 'activo' },
+    { id: 4, codigo: 'TOR-01', nombre: 'Torre Residencial - Hidroneumático y bombas', progreso: 80, estado: 'revision' },
   ]
 
-  const apariencia = {
-    tema: 'Oscuro (Tech Efficiency)',
-    idioma: 'Español',
-    unidades: 'Métrico',
-    notificaciones: true,
+  const estadoConfig = {
+    completo: { color: 'bg-secondary text-on-secondary-container', label: 'COMPLETO' },
+    revision: { color: 'bg-tertiary text-on-tertiary-container', label: 'EN REVISIÓN' },
+    activo: { color: 'bg-primary text-on-primary-container', label: 'ACTIVO' },
+  }
+
+  useEffect(() => { fetchPerfil() }, [])
+
+  async function fetchPerfil() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      setUserId(user.id)
+
+      const { data, error } = await supabase
+        .from('perfiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) { console.error('Error cargando perfil:', error.message); return }
+      if (data) {
+        setPerfil({
+          nombre: data.nombre || '',
+          apellido: data.apellido || '',
+          profesion: data.profesion || '',
+          matricula: data.matricula || '',
+          telefono: data.telefono || '',
+          email: data.email || '',
+        })
+      }
+    } catch (err) {
+      console.error('Error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleEditStart(field) {
+    setEditField(field)
+    setEditValue(perfil[field])
+  }
+
+  function handleEditCancel() {
+    setEditField(null)
+    setEditValue('')
+  }
+
+  async function handleEditSave(field) {
+    if (editValue === perfil[field]) { handleEditCancel(); return }
+    setSaving(field)
+    try {
+      const { error } = await supabase
+        .from('perfiles')
+        .update({ [field]: editValue })
+        .eq('id', userId)
+      if (error) { console.error('Error guardando:', error.message); return }
+      setPerfil(prev => ({ ...prev, [field]: editValue }))
+    } catch (err) {
+      console.error('Error:', err)
+    } finally {
+      setSaving(null)
+      setEditField(null)
+      setEditValue('')
+    }
+  }
+
+  function handleEditKeyDown(e, field) {
+    if (e.key === 'Enter') handleEditSave(field)
+    if (e.key === 'Escape') handleEditCancel()
+  }
+
+  const nombreCompleto = [perfil.nombre, perfil.apellido].filter(Boolean).join(' ')
+
+  const campos = [
+    { key: 'nombre', label: 'Nombre' },
+    { key: 'apellido', label: 'Apellido' },
+    { key: 'email', label: 'Correo Electrónico', readonly: true },
+    { key: 'profesion', label: 'Profesión' },
+    { key: 'matricula', label: 'Matrícula Profesional' },
+    { key: 'telefono', label: 'Teléfono' },
+  ]
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <span className="text-on-surface-variant text-sm">Cargando perfil...</span>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="border border-outline-variant bg-surface-container p-6 flex items-start gap-6">
         <div className="w-20 h-20 border-2 border-primary bg-surface-container flex items-center justify-center shrink-0">
           <span className="material-symbols-outlined text-4xl text-primary">person</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-headline-md font-bold text-on-surface">{userData.nombre}</h1>
-          <p className="text-body-md text-on-surface-variant mt-1">{userData.titulo}</p>
-          <div className="flex items-center gap-2 mt-3">
-            <span className="px-2 py-1 text-[11px] font-bold tracking-wider uppercase bg-secondary text-on-secondary-container border border-outline-variant">
-              A2-HID
-            </span>
-            <span className="px-2 py-1 text-[11px] font-bold tracking-wider uppercase bg-primary text-on-primary-container border border-outline-variant">
-              Ingeniero Activado
-            </span>
-          </div>
-        </div>
-        <button className="h-10 px-4 border border-primary text-primary hover:bg-primary hover:text-on-primary transition-colors text-[13px] font-medium">
-          Editar Perfil
-        </button>
-      </div>
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-3">
-        <StatCard title="Proyectos Activos" value="12" unit="" status="ok" icon="folder_open" />
-        <StatCard title="Cálculos Completados" value="47" unit="" status="warn" icon="calculate" />
-        <StatCard title="Normas Vigentes" value="5" unit="" status="ok" icon="verified" />
-        <StatCard title="Última Actualización" value="Hoy" unit="" status="ok" icon="update" />
-      </div>
-
-      {/* Info Grid */}
-      <div className="grid grid-cols-3 gap-6">
-        {/* Personal Info */}
-        <div className="col-span-2 border border-outline-variant bg-surface-container p-6">
-          <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-4">
-            Información Personal
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: 'Nombre Completo', value: userData.nombre },
-              { label: 'Correo Electrónico', value: userData.email },
-              { label: 'Teléfono', value: userData.telefono },
-              { label: 'Municipio', value: userData.municipio },
-              { label: 'Departamento', value: userData.departamento },
-              { label: 'Matrícula Profesional', value: userData.matricula },
-            ].map((field) => (
-              <div key={field.label} className="border-l-2 border-primary pl-3 py-2">
-                <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant block mb-1">
-                  {field.label}
-                </span>
-                <span className="text-[13px] text-on-surface font-medium">{field.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="space-y-3">
-          <div className="border border-outline-variant bg-surface-container p-4">
-            <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant block mb-1">
-              Proyectos Totales
-            </span>
-            <span className="text-3xl font-bold font-mono text-on-surface">{userData.proyectos}</span>
-          </div>
-          <div className="border border-outline-variant bg-surface-container p-4">
-            <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant block mb-1">
-              Tasa de Éxito
-            </span>
-            <span className="text-3xl font-bold font-mono text-secondary">98%</span>
-          </div>
-          <div className="border border-outline-variant bg-surface-container p-4">
-            <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant block mb-1">
-              Experiencia
-            </span>
-            <span className="text-3xl font-bold font-mono text-primary">15</span>
-            <span className="text-[13px] text-on-surface-variant ml-1">años</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Normas y Apariencia */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="border border-outline-variant bg-surface-container p-6">
-          <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-4">
-            Normas Disponibles
-          </h2>
-          <div className="grid grid-cols-3 gap-2">
-            {normas.map((n) => (
-              <div key={n} className="flex items-center gap-2 py-2 px-3 border border-outline-variant bg-surface-container-low">
-                <span className="material-symbols-outlined text-secondary text-lg">verified</span>
-                <span className="text-[13px] text-on-surface">{n}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="border border-outline-variant bg-surface-container p-6">
-          <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-4">
-            Preferencias
-          </h2>
-          <div className="space-y-3">
-            {[
-              { label: 'Tema Visual', value: apariencia.tema },
-              { label: 'Idioma', value: apariencia.idioma },
-              { label: 'Unidades', value: apariencia.unidades },
-            ].map((pref) => (
-              <div key={pref.label} className="flex items-center justify-between py-2 border-b border-outline-variant last:border-0">
-                <span className="text-[13px] text-on-surface">{pref.label}</span>
-                <span className="text-[13px] text-primary font-medium">{pref.value}</span>
-              </div>
-            ))}
-            <div className="flex items-center justify-between py-2">
-              <span className="text-[13px] text-on-surface">Notificaciones</span>
-              <div className="w-10 h-5 bg-primary relative cursor-pointer">
-                <div className="absolute top-0.5 right-0.5 w-4 h-4 bg-on-primary" />
-              </div>
+          <h1 className="text-headline-md font-bold text-on-surface">{nombreCompleto || 'Sin nombre'}</h1>
+          <p className="text-body-md text-on-surface-variant mt-1">{perfil.profesion || 'Profesión no definida'}</p>
+          {perfil.matricula && (
+            <div className="flex items-center gap-2 mt-3">
+              <span className="px-2 py-1 text-[11px] font-bold tracking-wider uppercase bg-secondary text-on-secondary-container border border-outline-variant">
+                {perfil.matricula}
+              </span>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* === MOVED FROM DASHBOARD === */}
-
-      {/* Proyectos Recientes */}
-      <div className="border border-outline-variant bg-surface-container">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant">
-          <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
-            Proyectos Recientes
-          </h2>
-          <button className="text-primary text-[13px] flex items-center gap-1">
-            Ver todos <span className="material-symbols-outlined text-sm">arrow_forward</span>
-          </button>
-        </div>
-        <div className="p-4 grid gap-3 grid-cols-2">
-          <ProjectCard
-            code="CR-97"
-            name="Casa de Roca No. 97 - Redes Sanitarias y Lluvias"
-            status="completo"
-            date="15/05/2026"
-            progress={100}
-          />
-          <ProjectCard
-            code="AF-AC-01"
-            name="Red Hidráulica AF y AC - Casa Roca 97"
-            status="completo"
-            date="14/05/2026"
-            progress={98}
-          />
-          <ProjectCard
-            code="CR-98"
-            name="Casa de Roca No. 98 - Redes Sanitarias"
-            status="activo"
-            date="10/05/2026"
-            progress={65}
-          />
-          <ProjectCard
-            code="TOR-01"
-            name="Torre Residencial - Hidroneumático y bombas"
-            status="revision"
-            date="05/05/2026"
-            progress={80}
-          />
-        </div>
-      </div>
-
-      {/* Acciones Rápidas */}
-      <div className="border border-outline-variant bg-surface-container p-4">
+      {/* ── Información Personal Editable ── */}
+      <div className="border border-outline-variant bg-surface-container p-6">
         <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-4">
-          Acciones Rápidas
+          Información Personal
         </h2>
-        <div className="grid grid-cols-4 gap-3">
-          <button className="flex flex-col items-center justify-center h-24 border border-outline-variant bg-surface-container-low hover:border-primary hover:text-primary transition-colors p-3">
-            <span className="material-symbols-outlined text-3xl mb-2">add_circle</span>
-            <span className="text-[13px] font-medium">Nuevo Proyecto</span>
-          </button>
-          <button className="flex flex-col items-center justify-center h-24 border border-outline-variant bg-surface-container-low hover:border-secondary hover:text-secondary transition-colors p-3">
-            <span className="material-symbols-outlined text-3xl mb-2">calculate</span>
-            <span className="text-[13px] font-medium">Calculadora</span>
-          </button>
-          <button className="flex flex-col items-center justify-center h-24 border border-outline-variant bg-surface-container-low hover:border-tertiary hover:text-tertiary transition-colors p-3">
-            <span className="material-symbols-outlined text-3xl mb-2">table_view</span>
-            <span className="text-[13px] font-medium">Tablas</span>
-          </button>
-          <button className="flex flex-col items-center justify-center h-24 border border-outline-variant bg-surface-container-low hover:border-primary hover:text-primary transition-colors p-3">
-            <span className="material-symbols-outlined text-3xl mb-2">upload</span>
-            <span className="text-[13px] font-medium">Importar Excel</span>
-          </button>
+  <div className="grid grid-cols-2 gap-4">
+    {campos.map(({ key, label, readonly }) => (
+      <div key={key} className="border-l-2 border-primary pl-3 py-2 group">
+        <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant block mb-1">
+          {label}
+        </span>
+        {editField === key ? (
+          <div className="flex items-center gap-2">
+            <input
+              type={key === 'email' ? 'email' : 'text'}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => handleEditKeyDown(e, key)}
+              autoFocus
+              className="flex-1 h-8 px-2 border text-sm bg-surface-container-low text-on-surface focus:outline-none"
+              style={{ borderColor: 'var(--primary)', fontFamily: 'var(--mono)' }}
+            />
+            <button
+              onClick={() => handleEditSave(key)}
+              disabled={saving === key}
+              className="h-8 w-8 flex items-center justify-center bg-primary text-on-primary text-sm"
+            >✓</button>
+            <button
+              onClick={handleEditCancel}
+              className="h-8 w-8 flex items-center justify-center border border-outline-variant text-on-surface-variant text-sm hover:text-error"
+            >✕</button>
+          </div>
+        ) : readonly ? (
+          <span className="text-[13px] text-on-surface font-medium">{perfil[key]}</span>
+        ) : (
+          <div
+            className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+            onClick={() => handleEditStart(key)}
+          >
+            <span className="text-[13px] text-on-surface font-medium">
+              {perfil[key] || <span className="text-on-surface-variant italic opacity-50">Click para editar</span>}
+            </span>
+            <span className="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-60 transition-opacity">edit</span>
+          </div>
+        )}
+      </div>
+    ))}
         </div>
       </div>
 
-      {/* Módulos Activos */}
-      <div className="grid grid-cols-3 gap-6">
-        <div className="border border-outline-variant bg-surface-container p-4">
-          <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-4">
-            Módulos Activos
-          </h2>
-          <div className="space-y-3">
-            <div className="border border-outline-variant bg-surface-container p-4 hover:border-primary transition-colors cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <span className="material-symbols-outlined text-2xl text-primary">water_drop</span>
-                <span className="w-2.5 h-2.5 bg-secondary rounded-full" />
-              </div>
-              <h4 className="text-headline-sm font-semibold text-on-surface mb-1">Agua Fría</h4>
-              <p className="text-[13px] text-on-surface-variant">Red de abastecimiento y distribución</p>
-            </div>
-            <div className="border border-outline-variant bg-surface-container p-4 hover:border-primary transition-colors cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <span className="material-symbols-outlined text-2xl text-primary">water</span>
-                <span className="w-2.5 h-2.5 bg-secondary rounded-full" />
-              </div>
-              <h4 className="text-headline-sm font-semibold text-on-surface mb-1">Agua Caliente</h4>
-              <p className="text-[13px] text-on-surface-variant">Red de distribución de agua caliente</p>
+      {/* ── Proyectos Activos (Lista desplegable) ── */}
+      <div className="border border-outline-variant bg-surface-container">
+        <button
+          onClick={() => setProyectosOpen(!proyectosOpen)}
+          className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-surface-container-low transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary text-xl">folder_open</span>
+            <div>
+              <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+                Proyectos Activos
+              </h2>
+              <span className="text-[13px] text-on-surface font-medium">{proyectosActivos.length} proyectos</span>
             </div>
           </div>
-        </div>
+          <span className={`material-symbols-outlined text-on-surface-variant transition-transform ${proyectosOpen ? 'rotate-180' : ''}`}>
+            expand_more
+          </span>
+        </button>
 
-        <div className="border border-outline-variant bg-surface-container p-4">
-          <h2 className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-4">
-            Estado del Sistema
-          </h2>
-          <div className="space-y-3">
-            {[
-              { label: 'Cálculo Hidroneumático', pct: 100 },
-              { label: 'Bombas', pct: 85 },
-              { label: 'Tanques', pct: 60 },
-              { label: 'Ventilación', pct: 45 },
-            ].map((item) => (
-              <div key={item.label}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[13px] text-on-surface">{item.label}</span>
-                  <span className="text-[13px] font-mono text-on-surface">{item.pct}%</span>
-                </div>
-                <div className="h-1 bg-surface-container-low border border-outline-variant">
-                  <div
-                    className="h-full bg-primary transition-all"
-                    style={{ width: `${item.pct}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {proyectosOpen && (
+          <div className="border-t border-outline-variant">
+            {/* Nuevo Proyecto */}
+            <div className="px-6 py-3 border-b border-outline-variant bg-surface-container-low">
+              <button
+                className="flex items-center gap-2 text-primary hover:text-primary-fixed text-[13px] font-medium transition-colors"
+              >
+                <span className="material-symbols-outlined text-lg">add_circle</span>
+                Nuevo Proyecto
+              </button>
+            </div>
 
-        <div className="space-y-3">
-          <div className="border border-outline-variant bg-surface-container p-4 hover:border-primary transition-colors cursor-pointer">
-            <div className="flex items-start justify-between mb-3">
-              <span className="material-symbols-outlined text-2xl text-primary">plumbing</span>
-              <span className="w-2.5 h-2.5 bg-secondary rounded-full" />
+            {/* Lista de proyectos */}
+            <div className="divide-y divide-outline-variant">
+              {proyectosActivos.map((proy) => {
+                const e = estadoConfig[proy.estado] || estadoConfig.activo
+                return (
+                  <div key={proy.id} className="px-6 py-3 flex items-center gap-4 hover:bg-surface-container-low transition-colors cursor-pointer">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[13px] font-bold font-mono text-on-surface">{proy.codigo}</span>
+                        <span className={`px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase ${e.color}`}>
+                          {e.label}
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-on-surface-variant truncate">{proy.nombre}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="w-20">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] font-mono text-on-surface-variant">{proy.progreso}%</span>
+                        </div>
+                        <div className="h-1 bg-surface-container-low border border-outline-variant">
+                          <div className="h-full bg-primary transition-all" style={{ width: `${proy.progreso}%` }} />
+                        </div>
+                      </div>
+                      <span className="material-symbols-outlined text-on-surface-variant text-lg">arrow_forward</span>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-            <h4 className="text-headline-sm font-semibold text-on-surface mb-1">Sanitariia</h4>
-            <p className="text-[13px] text-on-surface-variant">Red de desagües y ventilación</p>
           </div>
-          <div className="border border-outline-variant bg-surface-container p-4 hover:border-primary transition-colors cursor-pointer">
-            <div className="flex items-start justify-between mb-3">
-              <span className="material-symbols-outlined text-2xl text-primary">local_fire_department</span>
-              <span className="w-2.5 h-2.5 bg-tertiary rounded-full" />
-            </div>
-            <h4 className="text-headline-sm font-semibold text-on-surface mb-1">Contra Incendio</h4>
-            <p className="text-[13px] text-on-surface-variant">Red de protección contra incendios</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   )

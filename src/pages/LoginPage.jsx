@@ -1,15 +1,34 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { supabase } from '../lib/supabase';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError('');
+    setLoading(true);
+
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+      navigate('/civilflowareatrabajo');
+    } catch (err) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,22 +84,29 @@ function LoginPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold tracking-widest uppercase mb-2"
-                  style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>
-                  CONTRASEÑA
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-11 px-4 border text-sm focus:outline-none transition-colors"
-                  style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
-                  onFocus={(e) => e.target.style.borderColor = '#00dce5'}
-                  onBlur={(e) => e.target.style.borderColor = '#3a494a'}
-                  placeholder="••••••••"
-                />
-              </div>
+        <div>
+          <label className="block text-[10px] font-bold tracking-widest uppercase mb-2"
+            style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>
+            CONTRASEÑA
+          </label>
+          <div className="relative">
+            <input
+              type={showPwd ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full h-11 px-4 pr-10 border text-sm focus:outline-none transition-colors"
+              style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+              onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+              onBlur={(e) => e.target.style.borderColor = '#3a494a'}
+              placeholder="••••••••"
+            />
+            <button type="button" onClick={() => setShowPwd(!showPwd)} tabIndex={-1}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-base opacity-50 hover:opacity-90 transition-opacity"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b8cae', padding: 0, lineHeight: 1 }}>
+              {showPwd ? '⬡' : '👁'}
+            </button>
+          </div>
+        </div>
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -101,9 +127,14 @@ function LoginPage() {
                 onMouseEnter={(e) => e.target.style.boxShadow = '0 0 30px rgba(0,220,229,0.4)'}
                 onMouseLeave={(e) => e.target.style.boxShadow = '0 0 20px rgba(0,220,229,0.2)'}
               >
-                INICIAR SESIÓN
-              </button>
-            </form>
+          {loading ? 'INGRESANDO...' : 'INICIAR SESIÓN'}
+        </button>
+        {error && (
+          <div style={{ color: '#F04545', fontSize: 12, fontFamily: 'Geist, monospace', textAlign: 'center', padding: '8px', background: 'rgba(240,69,69,.08)', border: '1px solid rgba(240,69,69,.2)', borderRadius: 4 }}>
+            {error}
+          </div>
+        )}
+      </form>
 
             <div className="px-8 py-5 border-t text-center" style={{ borderColor: '#3a494a' }}>
               <p className="text-xs" style={{ color: '#6b8cae' }}>

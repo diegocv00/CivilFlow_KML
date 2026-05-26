@@ -29,7 +29,7 @@ export default function CivilTerrainPage() {
               Herramientas avanzadas para topografía, cálculo preciso de movimiento de tierras y análisis  de alta densidad, integradas en un flujo de trabajo brutalmente eficiente.
             </p>
             <div className="flex gap-4 mt-4">
-              <Link to="/dashboard" className="bg-primary text-on-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-primary-fixed transition-colors border border-primary" style={{ fontFamily: 'Geist, monospace' }}>
+              <Link to="/civilflowareatrabajo" className="bg-primary text-on-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-primary-fixed transition-colors border border-primary" style={{ fontFamily: 'Geist, monospace' }}>
                 Iniciar Prueba Gratuita
               </Link>
               <Link to="/docs" className="bg-transparent text-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-surface-container-highest transition-colors border border-primary" style={{ fontFamily: 'Geist, monospace' }}>

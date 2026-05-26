@@ -35,7 +35,7 @@ export default function CivilFlowPage() {
               Diseño, análisis y optimización de redes hidráulicas, sanitarias y de gas. Integre flujos de trabajo de ingeniería de alta precisión directamente con modelos de terreno KML.
             </p>
             <div className="flex gap-4 mt-4">
-              <Link to="/dashboard" className="px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold text-on-primary transition-all" style={{ fontFamily: 'Geist, monospace', background: '#00dce5', boxShadow: '0 0 15px rgba(0,220,229,0.3)' }}>
+              <Link to="/civilflowareatrabajo" className="px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold text-on-primary transition-all" style={{ fontFamily: 'Geist, monospace', background: '#00dce5', boxShadow: '0 0 15px rgba(0,220,229,0.3)' }}>
                 Explorar Funciones
               </Link>
               <Link to="/docs" className="border border-outline-variant text-on-surface px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:border-primary transition-all" style={{ fontFamily: 'Geist, monospace', background: 'rgba(17,19,23,0.5)' }}>

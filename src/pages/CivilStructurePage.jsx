@@ -32,7 +32,7 @@ export default function CivilStructurePage() {
                 Diseño estructural avanzado y simulación física integrada. Analiza puentes, edificaciones y obras civiles complejas con interoperabilidad topográfica directa para cimentaciones precisas.
               </p>
               <div className="flex gap-4 pt-4">
-                <Link to="/dashboard" className="bg-primary text-on-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-primary-fixed transition-all" style={{ fontFamily: 'Geist, monospace' }}>
+                <Link to="/civilflowareatrabajo" className="bg-primary text-on-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-primary-fixed transition-all" style={{ fontFamily: 'Geist, monospace' }}>
                   COMENZAR ANÁLISIS
                 </Link>
                 <button className="border border-primary text-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-surface-container transition-all flex items-center gap-2" style={{ fontFamily: 'Geist, monospace' }}>

@@ -37,7 +37,7 @@ export default function CivilRoadsPage() {
                 Diseño geométrico de carreteras y urbanismo sobre gemelos digitales.
               </p>
               <div className="pt-8 flex gap-4">
-                <Link to="/dashboard" className="bg-primary text-on-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors" style={{ fontFamily: 'Geist, monospace' }}>
+                <Link to="/civilflowareatrabajo" className="bg-primary text-on-primary px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors" style={{ fontFamily: 'Geist, monospace' }}>
                   Iniciar Diseño <span className="material-symbols-outlined text-base">arrow_forward</span>
                 </Link>
                 <Link to="/docs" className="border border-outline text-on-background px-6 py-3 uppercase text-[11px] tracking-[0.08em] font-bold hover:bg-surface-container-highest transition-colors" style={{ fontFamily: 'Geist, monospace' }}>

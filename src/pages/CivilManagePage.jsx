@@ -30,7 +30,7 @@ export default function CivilManagePage() {
               Gestión financiera y operativa optimizada para infraestructura crítica. Integra presupuestos, cronogramas y análisis de riesgos en un dashboard táctico.
             </p>
             <div className="flex gap-4 mt-8">
-              <Link to="/dashboard" className="px-8 py-4 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2" style={{ fontFamily: 'Geist, monospace', background: accent, color: '#111317' }}>
+              <Link to="/civilflowareatrabajo" className="px-8 py-4 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2" style={{ fontFamily: 'Geist, monospace', background: accent, color: '#111317' }}>
                 <span className="material-symbols-outlined text-sm">rocket_launch</span> INICIAR DEPLOYMENT
               </Link>
               <Link to="/docs" className="border border-outline-variant text-on-surface px-8 py-4 uppercase text-[11px] tracking-[0.08em] font-bold flex items-center gap-2 hover:border-primary transition-colors" style={{ fontFamily: 'Geist, monospace' }}>

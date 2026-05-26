@@ -251,7 +251,7 @@ function LandingPage() {
             CivilCore — de los datos del proyecto a la memoria de cálculo exportable, con verificación normativa automática.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-            <Link to="/dashboard" className="bg-primary text-on-primary px-10 py-4 uppercase text-[11px] tracking-[0.1em] font-bold hover:bg-primary-container transition-all"
+            <Link to="/civilflowareatrabajo" className="bg-primary text-on-primary px-10 py-4 uppercase text-[11px] tracking-[0.1em] font-bold hover:bg-primary-container transition-all"
               style={{ fontFamily: 'Geist, monospace', boxShadow: '0 0 20px rgba(0,245,255,0.3)' }}>
               EMPEZAR AHORA
             </Link>

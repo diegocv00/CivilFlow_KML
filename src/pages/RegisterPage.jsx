@@ -1,16 +1,60 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { supabase } from '../lib/supabase';
 
 function RegisterPage() {
-  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', empresa: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', profesion: '', matricula: '', telefono: '', password: '', confirm: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError('');
+
+    if (!aceptaTerminos) {
+      setError('Debe aceptar los Términos de Servicio y la Política de Privacidad');
+      return;
+    }
+    if (form.password !== form.confirm) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+    if (form.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            nombre: form.nombre,
+            apellido: form.apellido,
+            profesion: form.profesion,
+            matricula: form.matricula,
+            telefono: form.telefono,
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      navigate('/civilflowareatrabajo');
+    } catch (err) {
+      setError(err.message || 'Error al crear la cuenta');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,45 +125,83 @@ function RegisterPage() {
                   placeholder="usuario@civilcore.com" />
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
-                  style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>EMPRESA</label>
-                <input type="text" value={form.empresa} onChange={handleChange('empresa')}
-                  className="w-full h-10 px-3 border text-sm focus:outline-none transition-colors"
-                  style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
-                  onFocus={(e) => e.target.style.borderColor = '#00dce5'}
-                  onBlur={(e) => e.target.style.borderColor = '#3a494a'}
-                  placeholder="Nombre de su empresa" />
-              </div>
+        <div>
+          <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
+            style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>PROFESIÓN</label>
+          <input type="text" value={form.profesion} onChange={handleChange('profesion')}
+            className="w-full h-10 px-3 border text-sm focus:outline-none transition-colors"
+            style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+            onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+            onBlur={(e) => e.target.style.borderColor = '#3a494a'}
+            placeholder="Ingeniero Civil" />
+        </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
-                    style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>CONTRASEÑA</label>
-                  <input type="password" value={form.password} onChange={handleChange('password')}
-                    className="w-full h-10 px-3 border text-sm focus:outline-none transition-colors"
-                    style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
-                    onFocus={(e) => e.target.style.borderColor = '#00dce5'}
-                    onBlur={(e) => e.target.style.borderColor = '#3a494a'} />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
-                    style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>CONFIRMAR</label>
-                  <input type="password" value={form.confirm} onChange={handleChange('confirm')}
-                    className="w-full h-10 px-3 border text-sm focus:outline-none transition-colors"
-                    style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
-                    onFocus={(e) => e.target.style.borderColor = '#00dce5'}
-                    onBlur={(e) => e.target.style.borderColor = '#3a494a'} />
-                </div>
-              </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
+              style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>MATRÍCULA PROFESIONAL</label>
+            <input type="text" value={form.matricula} onChange={handleChange('matricula')}
+              className="w-full h-10 px-3 border text-sm focus:outline-none transition-colors"
+              style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+              onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+              onBlur={(e) => e.target.style.borderColor = '#3a494a'}
+              placeholder="12345-ABC" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
+              style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>TELÉFONO</label>
+            <input type="tel" value={form.telefono} onChange={handleChange('telefono')}
+              className="w-full h-10 px-3 border text-sm focus:outline-none transition-colors"
+              style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+              onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+              onBlur={(e) => e.target.style.borderColor = '#3a494a'}
+              placeholder="+57 300 123 4567" />
+          </div>
+        </div>
 
-              <div className="flex items-start gap-2 pt-1">
-                <input type="checkbox" className="w-4 h-4 mt-0.5 border accent-[#00dce5]"
-                  style={{ borderColor: '#3a494a', background: '#0a0e14' }} />
-                <span className="text-[11px] leading-tight" style={{ color: '#6b8cae' }}>
-                  Acepto los <span className="cursor-pointer hover:underline" style={{ color: '#00dce5' }}>Términos de Servicio</span> y la <span className="cursor-pointer hover:underline" style={{ color: '#00dce5' }}>Política de Privacidad</span>
-                </span>
-              </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
+              style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>CONTRASEÑA</label>
+            <div className="relative">
+              <input type={showPwd ? 'text' : 'password'} value={form.password} onChange={handleChange('password')}
+                className="w-full h-10 px-3 pr-9 border text-sm focus:outline-none transition-colors"
+                style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+                onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+                onBlur={(e) => e.target.style.borderColor = '#3a494a'} />
+              <button type="button" onClick={() => setShowPwd(!showPwd)} tabIndex={-1}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm opacity-50 hover:opacity-90 transition-opacity"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b8cae', padding: 0 }}>
+                {showPwd ? '⬡' : '👁'}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5"
+              style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>CONFIRMAR</label>
+            <div className="relative">
+              <input type={showConfirm ? 'text' : 'password'} value={form.confirm} onChange={handleChange('confirm')}
+                className="w-full h-10 px-3 pr-9 border text-sm focus:outline-none transition-colors"
+                style={{ background: '#0a0e14', borderColor: '#3a494a', color: '#e2e2e8', fontFamily: 'Geist, monospace' }}
+                onFocus={(e) => e.target.style.borderColor = '#00dce5'}
+                onBlur={(e) => e.target.style.borderColor = '#3a494a'} />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)} tabIndex={-1}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm opacity-50 hover:opacity-90 transition-opacity"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b8cae', padding: 0 }}>
+                {showConfirm ? '⬡' : '👁'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 pt-1">
+          <input type="checkbox" checked={aceptaTerminos} onChange={(e) => setAceptaTerminos(e.target.checked)}
+            className="w-4 h-4 mt-0.5 border accent-[#00dce5]"
+            style={{ borderColor: '#3a494a', background: '#0a0e14' }} />
+          <span className="text-[11px] leading-tight" style={{ color: '#6b8cae' }}>
+            Acepto los <span className="cursor-pointer hover:underline" style={{ color: '#00dce5' }}>Términos de Servicio</span> y la <span className="cursor-pointer hover:underline" style={{ color: '#00dce5' }}>Política de Privacidad</span>
+          </span>
+        </div>
 
               <button
                 type="submit"
@@ -129,9 +211,14 @@ function RegisterPage() {
                 onMouseEnter={(e) => e.target.style.boxShadow = '0 0 30px rgba(0,220,229,0.4)'}
                 onMouseLeave={(e) => e.target.style.boxShadow = '0 0 20px rgba(0,220,229,0.2)'}
               >
-                CREAR CUENTA
-              </button>
-            </form>
+          {loading ? 'CREANDO CUENTA...' : 'CREAR CUENTA'}
+        </button>
+        {error && (
+          <div style={{ color: '#F04545', fontSize: 12, fontFamily: 'Geist, monospace', textAlign: 'center', padding: '8px', background: 'rgba(240,69,69,.08)', border: '1px solid rgba(240,69,69,.2)', borderRadius: 4 }}>
+            {error}
+          </div>
+        )}
+      </form>
 
             <div className="px-8 py-5 border-t text-center" style={{ borderColor: '#3a494a' }}>
               <p className="text-xs" style={{ color: '#6b8cae' }}>

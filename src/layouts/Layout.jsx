@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 
 const SIDEBAR_LINKS = [
-  { to: '/dashboard', l: 'Área de trabajo', ico: '◈' },
+  { to: '/civilflowareatrabajo', l: 'Área de trabajo', ico: '◈' },
   { to: '/perfil', l: 'Perfil', ico: '◎' },
   { to: '/docs', l: 'Documentación', ico: '▣' },
 ]

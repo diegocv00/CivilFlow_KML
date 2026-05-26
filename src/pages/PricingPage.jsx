@@ -11,7 +11,7 @@ const plans = [
     desc: 'Para proyectos pequeños y estudiantes de ingeniería civil.',
     color: '#3B82F6',
     cta: 'Comenzar gratis',
-    to: '/dashboard',
+    to: '/civilflowareatrabajo',
     features: [
       'Hasta 3 proyectos activos',
       'Módulos: Agua Fría + Sanitaria',
@@ -34,7 +34,7 @@ missing: [
     desc: 'Para ingenieros civiles independientes y firmas pequeñas.',
     color: '#00f5ff',
     cta: 'Prueba gratis 7 días',
-    to: '/dashboard',
+    to: '/civilflowareatrabajo',
     destacado: true,
     features: [
       'Proyectos ilimitados',
@@ -61,7 +61,7 @@ missing: [
     desc: 'Para firmas de ingeniería y constructoras con múltiples proyectos.',
     color: '#A855F7',
     cta: 'Contactar ventas',
-    to: '/dashboard',
+    to: '/civilflowareatrabajo',
     features: [
       'Todo lo de Profesional',
       'API REST para integración con BIM/ERP',
@@ -167,7 +167,7 @@ function PricingPage() {
         <div className="text-center mt-20 space-y-2" style={{ borderTop: '1px solid #3a494a', paddingTop: 40 }}>
           <p className="text-[13px] text-on-surface-variant">
             ¿Necesita algo más específico?{' '}
-            <Link to="/dashboard" className="text-primary hover:underline">Contáctenos</Link> para un plan a medida para su firma.
+            <Link to="/civilflowareatrabajo" className="text-primary hover:underline">Contáctenos</Link> para un plan a medida para su firma.
           </p>
           <p className="text-[12px] text-outline">Precios en USD. Facturación mensual. Cancele cuando quiera.</p>
         </div>
