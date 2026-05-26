@@ -1,30 +1,6 @@
 import { useState } from "react";
-
-const MAT = {
-  af:  { l: 'Agua Fría',       opts: ['PVC presión','CPVC','Cobre rígido','PP-R'] },
-  ac:  { l: 'Agua Caliente',   opts: ['CPVC','Cobre rígido','PP-R','PEX'] },
-  san: { l: 'Sanitaria',       opts: ['PVC sanitario','Novatec','Hierro fundido'] },
-  ll:  { l: 'Aguas Lluvias',   opts: ['PVC sanitario','Novatec','Concreto'] },
-  ven: { l: 'Ventilación',     opts: ['PVC sanitario','Novatec'] },
-  gas: { l: 'Gas',             opts: ['PE al PE','Polietileno PEAD','Cobre rígido','Acero galvanizado'] },
-  rci: { l: 'Contra Incendio', opts: ['Acero SCH 40','Acero SCH 10','CPVC-CI'] },
-};
-
-const CALS = [
-  { l: 'HACEB 6 LPM',  lpm: 6,  kw: 11.5, m3h: 1.11, ef: 87 },
-  { l: 'BOSCH 8 LPM',  lpm: 8,  kw: 14.5, m3h: 1.40, ef: 88 },
-  { l: 'HACEB 10 LPM', lpm: 10, kw: 20.5, m3h: 1.98, ef: 89 },
-  { l: 'HACEB 12 LPM', lpm: 12, kw: 24.0, m3h: 2.32, ef: 88 },
-  { l: 'RHEEM 16 LPM', lpm: 16, kw: 31.0, m3h: 3.00, ef: 90 },
-  { l: 'BOSCH 21 LPM', lpm: 21, kw: 45.0, m3h: 4.35, ef: 88 },
-];
-
-const BD_SUBTABS = [
-  { id:'mats',   l:'📦 Materiales por red', s:'Tipos de tubería editables' },
-  { id:'apars',  l:'🚿 Aparatos',            s:'UC · UD · Presiones · Q gas' },
-  { id:'calent', l:'♨️ Calentadores',         s:'Catálogo a gas' },
-  { id:'profs',  l:'📏 Profundidades',        s:'Instalación por red' },
-];
+import { useSanitario } from "../context/SanitarioContext";
+import { MATERIALES, MAT_COL, BD_SUBTABS, CALS, MATS_DEFAULT } from "./constants";
 
 function SubNav({ items, val, set }) {
   const [open, setOpen] = useState(true);
@@ -62,38 +38,13 @@ function SubNav({ items, val, set }) {
 }
 
 export default function BaseDatos() {
-  const [mats, setMats] = useState(
-    Object.fromEntries(
-      Object.entries(MAT).map(([k, v]) => [k, v.opts.map((o, i) => ({ id: k + i, val: o }))])
-    )
-  );
-  const [matEdit, setMatEdit] = useState({ key: null, v: '' });
+  const { mats, setMats, aps, setAps, profs, setProfs } = useSanitario();
 
-  const [aps, setAps] = useState([
-    { id:'lvm',  s:'Lvm:',  n:'Lavamanos',   g:'h', ucaf:0.5, ucac:0.5, ud:2, pmin:0.51, pmax:5.63,  qg:0    },
-    { id:'san',  s:'San:',  n:'Sanitario',   g:'h', ucaf:2.2, ucac:0,   ud:4, pmin:0.71, pmax:14.1,  qg:0    },
-    { id:'duc',  s:'Duc:',  n:'Ducha',       g:'h', ucaf:1.0, ucac:1.0, ud:2, pmin:1.02, pmax:5.63,  qg:0    },
-    { id:'lvp',  s:'Lvp:',  n:'Lavaplatos',  g:'h', ucaf:1.0, ucac:1.0, ud:2, pmin:0.51, pmax:5.63,  qg:0    },
-    { id:'tin',  s:'Tin:',  n:'Tina',        g:'h', ucaf:1.0, ucac:1.0, ud:2, pmin:0.51, pmax:14.1,  qg:0    },
-    { id:'lvra', s:'Lvra:', n:'Lavadora',    g:'h', ucaf:1.0, ucac:0,   ud:4, pmin:0.51, pmax:5.63,  qg:0    },
-    { id:'est4', s:'Est4:', n:'Estufa 4Q',   g:'g', ucaf:0,   ucac:0,   ud:0, pmin:17,   pmax:25,    qg:1.35 },
-    { id:'cal',  s:'Cal:',  n:'Calentador',  g:'g', ucaf:0,   ucac:0,   ud:0, pmin:17,   pmax:25,    qg:1.76 },
-    { id:'hor',  s:'Hor:',  n:'Horno',       g:'g', ucaf:0,   ucac:0,   ud:0, pmin:17,   pmax:25,    qg:1.15 },
-  ]);
+  const [matEdit, setMatEdit] = useState({ key: null, v: '' });
 
   const [calSel, setCalSel] = useState(null);
 
   const qGas = aps.filter(a => a.g === 'g').reduce((s, a) => s + a.qg, 0);
-
-  const [profs, setProfs] = useState([
-    { id:'san', red:'Sanitaria',       col:'var(--san)',   prof:-0.70, norma:'RAS 2000 §D.4.1',   nota:'Bajo losa'       },
-    { id:'ll',  red:'Aguas Lluvias',   col:'var(--ll)',    prof:-0.50, norma:'RAS 2000 §D.4.2',   nota:'Bajo losa'       },
-    { id:'af',  red:'Agua Fría',       col:'var(--acc2)',  prof: 0.00, norma:'NTC 1500 §5.4',     nota:'A nivel NPT'     },
-    { id:'ac',  red:'Agua Caliente',   col:'var(--san)',   prof:-0.10, norma:'NTC 1500 §5.4',     nota:'Bajo NPT'        },
-    { id:'gas', red:'Gas',             col:'var(--gas)',   prof:-0.15, norma:'NTC 3728 §4.3',     nota:'Con protección'  },
-    { id:'ven', red:'Ventilación',     col:'var(--ven)',   prof: 0.00, norma:'NTC 1500 §9.2',     nota:'A nivel NPT'     },
-    { id:'rci', red:'Contra Incendio', col:'#F87171',      prof:-0.45, norma:'NFPA 13 §6',        nota:'Zona protegida'  },
-  ]);
 
   const [datosTab, setDatosTab] = useState('mats');
 
@@ -108,13 +59,13 @@ export default function BaseDatos() {
           <div style={{flex:1,minHeight:0,overflow:'auto'}}>
             <div style={{display:'flex',flexDirection:'column',gap:10}}>
               {Object.entries(mats).map(([key, items]) => {
-                const col = {af:'var(--acc2)',ac:'#F04545',san:'var(--san)',ll:'var(--ll)',ven:'var(--ven)',gas:'var(--gas)',rci:'#F87171'}[key]||'var(--txt2)';
+                const col = (MAT_COL[key])||'var(--txt2)';
                 return (
                   <div key={key} className="card">
                     <div className="card-h">
                       <span className="card-t">
                         <span style={{width:9,height:9,borderRadius:'50%',background:col,display:'inline-block',marginRight:6}}/>
-                        {MAT[key]?.l||key}
+{MATERIALES[key]?.lbl||key}
                       </span>
                       <span className="card-s">{items.length} tipos</span>
                     </div>
@@ -136,15 +87,15 @@ export default function BaseDatos() {
                                   onChange={e=>{const v=e.target.value;setMats(p=>({...p,[key]:p[key].map(x=>x.id===it.id?{...x,val:v}:x)}));}}/>
                               </td>
                               <td style={{textAlign:'center'}}>
-                                <button style={{background:'var(--err-bg)',border:'1px solid var(--err-b)',borderRadius:'var(--r)',color:'var(--err)',padding:'1px 8px',fontSize:12,cursor:'pointer'}}
-                                  onClick={()=>{if(items.length<=1){alert('Mínimo 1');return;}setMats(p=>({...p,[key]:p[key].filter(x=>x.id!==it.id)}));}}>✕</button>
+                        <button className="btn-del" style={{padding:'1px 8px',fontSize:12}}
+                        onClick={()=>{if(items.length<=1){alert('Mínimo 1');return;}setMats(p=>({...p,[key]:p[key].filter(x=>x.id!==it.id)}));}}>✕</button>
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                       <div style={{padding:'6px 10px',background:'var(--bg3)',borderTop:'1px solid var(--line)',display:'flex',gap:7,alignItems:'center'}}>
-                        <input className="ni" style={{flex:1,textAlign:'left',fontSize:12}} placeholder={`Nuevo — ${MAT[key]?.l||key}...`}
+                        <input className="ni" style={{flex:1,textAlign:'left',fontSize:12}} placeholder={`Nuevo — ${MATERIALES[key]?.lbl||key}...`}
                           value={matEdit.key===key?matEdit.v:''}
                           onFocus={()=>setMatEdit({key,v:matEdit.key===key?matEdit.v:''})}
                           onChange={e=>setMatEdit({key,v:e.target.value})}
@@ -154,7 +105,7 @@ export default function BaseDatos() {
                       </div>
                       <div style={{padding:'2px 10px',background:'var(--bg)',borderTop:'1px solid var(--line)',textAlign:'right'}}>
                         <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--txt3)',fontSize:10}}
-                          onClick={()=>{if(!window.confirm('Restaurar?'))return;setMats(p=>({...p,[key]:MAT[key].opts.map((o,i)=>({id:key+i,val:o}))}));}}>↺ Restaurar defaults</button>
+                          onClick={()=>{if(!window.confirm('Restaurar?'))return;setMats(p=>({...p,[key]:MATS_DEFAULT[key].map(o=>({...o}))}));}}>↺ Restaurar defaults</button>
                       </div>
                     </div>
                   </div>

@@ -133,3 +133,77 @@ export const DIAM_OPTIONS=[
   {pulg:4,label:'4"',mm:107.70},
   {pulg:6,label:'6"',mm:160.04},
 ];
+
+export const DIAM_BAN=[
+  { pulg:1.5, mm:42.68, nom:'1½"' },
+  { pulg:2, mm:54.48, nom:'2"' },
+  { pulg:3, mm:76.20, nom:'3"' },
+  { pulg:4, mm:107.70,nom:'4"' },
+  { pulg:6, mm:160.04,nom:'6"' },
+  { pulg:8, mm:213.20,nom:'8"' },
+];
+
+export const DIAM_VENT=[
+  { pulg:1.5, mm:42.68, nom:'1½"' },
+  { pulg:2, mm:54.48, nom:'2"' },
+  { pulg:3, mm:76.20, nom:'3"' },
+  { pulg:4, mm:107.70,nom:'4"' },
+  { pulg:6, mm:160.04,nom:'6"' },
+];
+
+export const R_OPTIONS=[{value:'1/4',label:'1/4'},{value:'7/24',label:'7/24'}];
+
+export const REQ_ITEMS=[
+  ['📏','Escala explícita','Barra gráfica o nota 1:50 · 1:75 · 1:100'],
+  ['📄','Plantas separadas','Una página por nivel (Sótano 1, 2... / Piso 1, 2...)'],
+  ['🏷️','Cotas NPT','Nivel piso terminado en cada planta'],
+  ['🎨','Redes por color','AF · AC · SAN · LL · VEN · GAS con leyenda'],
+  ['🚿','Símbolos NTC','Lvm · San · Duc · Lvp · Tin · Lvra'],
+  ['🔥','Puntos gas','Est · Cal · Hor · Sec marcados en plano'],
+];
+
+export const BD_SUBTABS=[
+  { id:'mats', l:'📦 Materiales por red', s:'Tipos de tubería editables' },
+  { id:'apars', l:'🚿 Aparatos', s:'UC · UD · Presiones · Q gas' },
+  { id:'calent', l:'♨️ Calentadores', s:'Catálogo a gas' },
+  { id:'profs', l:'📏 Profundidades', s:'Instalación por red' },
+];
+
+export const CALS=[
+  { l: 'HACEB 6 LPM', lpm: 6, kw: 11.5, m3h: 1.11, ef: 87 },
+  { l: 'BOSCH 8 LPM', lpm: 8, kw: 14.5, m3h: 1.40, ef: 88 },
+  { l: 'HACEB 10 LPM', lpm: 10, kw: 20.5, m3h: 1.98, ef: 89 },
+  { l: 'HACEB 12 LPM', lpm: 12, kw: 24.0, m3h: 2.32, ef: 88 },
+  { l: 'RHEEM 16 LPM', lpm: 16, kw: 31.0, m3h: 3.00, ef: 90 },
+  { l: 'BOSCH 21 LPM', lpm: 21, kw: 45.0, m3h: 4.35, ef: 88 },
+];
+
+export const V_MIN = 0.45;
+export const V_MAX = 4.0;
+export const Y_D_MAX = 0.75;
+export const Q_RATIO_MAX = 1.0;
+export const FR_SUBCRITICO = 0.9;
+export const FR_SUPERCRITICO = 1.1;
+export const FUERZA_TRACTIVA_MIN = 0.15;
+
+export const APS_DEFAULT=[
+{id:'lvm',s:'Lvm:',n:'Lavamanos',g:'h',ucaf:0.5,ucac:0.5,ud:2,pmin:0.51,pmax:5.63,qg:0},
+{id:'san',s:'San:',n:'Sanitario',g:'h',ucaf:2.2,ucac:0,ud:4,pmin:0.71,pmax:14.1,qg:0},
+{id:'duc',s:'Duc:',n:'Ducha',g:'h',ucaf:1.0,ucac:1.0,ud:2,pmin:1.02,pmax:5.63,qg:0},
+{id:'lvp',s:'Lvp:',n:'Lavaplatos',g:'h',ucaf:1.0,ucac:1.0,ud:2,pmin:0.51,pmax:5.63,qg:0},
+{id:'tin',s:'Tin:',n:'Tina',g:'h',ucaf:1.0,ucac:1.0,ud:2,pmin:0.51,pmax:14.1,qg:0},
+{id:'lvra',s:'Lvra:',n:'Lavadora',g:'h',ucaf:1.0,ucac:0,ud:4,pmin:0.51,pmax:5.63,qg:0},
+{id:'est4',s:'Est4:',n:'Estufa 4Q',g:'g',ucaf:0,ucac:0,ud:0,pmin:17,pmax:25,qg:1.35},
+{id:'cal',s:'Cal:',n:'Calentador',g:'g',ucaf:0,ucac:0,ud:0,pmin:17,pmax:25,qg:1.76},
+{id:'hor',s:'Hor:',n:'Horno',g:'g',ucaf:0,ucac:0,ud:0,pmin:17,pmax:25,qg:1.15},
+];
+
+export const PROFS_DEFAULT=[
+{id:'san',red:'Sanitaria',col:'var(--san)',prof:-0.70,norma:'RAS 2000 §D.4.1',nota:'Bajo losa'},
+{id:'ll',red:'Aguas Lluvias',col:'var(--ll)',prof:-0.50,norma:'RAS 2000 §D.4.2',nota:'Bajo losa'},
+{id:'af',red:'Agua Fría',col:'var(--acc2)',prof:0.00,norma:'NTC 1500 §5.4',nota:'A nivel NPT'},
+{id:'ac',red:'Agua Caliente',col:'var(--san)',prof:-0.10,norma:'NTC 1500 §5.4',nota:'Bajo NPT'},
+{id:'gas',red:'Gas',col:'var(--gas)',prof:-0.15,norma:'NTC 3728 §4.3',nota:'Con protección'},
+{id:'ven',red:'Ventilación',col:'var(--ven)',prof:0.00,norma:'NTC 1500 §9.2',nota:'A nivel NPT'},
+{id:'rci',red:'Contra Incendio',col:'#F87171',prof:-0.45,norma:'NFPA 13 §6',nota:'Zona protegida'},
+];
