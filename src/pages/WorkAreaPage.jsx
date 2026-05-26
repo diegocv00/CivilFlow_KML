@@ -1,7 +1,7 @@
 import React from 'react'
-import WorkArea from '../components/workarea'
+import WorkArea from '../components/WorkArea'
 
-function DashboardPage() {
+function WorkAreaPage() {
   return (
     <div className="h-full">
       <WorkArea />
@@ -9,4 +9,4 @@ function DashboardPage() {
   )
 }
 
-export default DashboardPage
+export default WorkAreaPage

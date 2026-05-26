@@ -1,8 +1,13 @@
 import { useSanitario } from "../context/SanitarioContext";
-import { pisoCorto, DIAM_OPTIONS } from "./constants";
+import { pisoCorto, DIAM_OPTIONS, V_MIN, V_MAX, Y_D_MAX, FR_SUBCRITICO, FR_SUPERCRITICO, FUERZA_TRACTIVA_MIN } from "./constants";
+import { parseDecimalInput } from "../utils/parseDecimal";
+import { parseDescripcion } from "../utils/parseDescripcion";
+import { relacionesHidraulicas, caudalTuboLleno, velocidadTuboLleno, diametromaning, tipoRegimen, numeroFroude, tiranteCritico, GRAVEDAD } from "../utils/calcSanitario";
 
 export default function DisenoLluvias() {
   const { tramosLl, pisos, updTramoLL, addTramoLL, delTramoLL } = useSanitario();
+
+  const bajantes=tramosLl.filter(o=>o.esBajante);
 
   return (
     <div className="card">
@@ -11,7 +16,7 @@ export default function DisenoLluvias() {
       </div>
       <div className="scroll-top" style={{padding:'16px'}}>
         <div className="scroll-inner" style={{minWidth:'max-content'}}>
-        <table className="tbl" style={{fontSize:13}}>
+          <table className="tbl" style={{fontSize:13}}>
           <thead>
             <tr>
               <th className="col-h ll" rowSpan={2} style={{fontSize:11,textAlign:'center'}}>Tramo<br/>o Ramal</th>
@@ -55,35 +60,29 @@ const Q=t.qLps||0;
       let Qo=0,Vo=0,qqo=0,Vreal=0,chequeoV='—';
       let Yc=0,Yn=0,Froude=0,tipoFlujo='—',Ymax=0,chequeoYn='—';
       let fuerzaTractiva=0,chequeoFT='—';
-      if(Q>0&&S!=null&&S>0&&n!=null&&n>0){
-        DcalcPulg=Math.round(1.548*Math.pow((n*Q/1000/Math.sqrt(S)),3/8)*1000/25.4*100)/100;
-        if(DdisPulg>0){chequeo=DcalcPulg<=DdisPulg?'O.K.':'NO CUMPLE';}
-      }
-      if(Q>0&&S!=null&&S>0&&n!=null&&n>0&&DintMm>0){
-        Qo=Math.round(0.312*Math.pow(DintMm/1000,8/3)*Math.sqrt(S)/n*1000*100)/100;
-        Vo=Math.round(4*Qo/1000/Math.PI/Math.pow(DintMm/1000,2)*100)/100;
-        qqo=Qo>0?Math.round(Q/Qo*100)/100:0;
-        const q=Qo>0?Q/Qo:0;
-        let v=0;
-        if(q>0){v=q<=0.06?Math.pow(10,0.029806+0.29095*Math.log10(q)):q<=0.26?Math.pow(10,0.013778+0.28597*Math.log10(q)):Math.pow(10,0.021763+0.289951*Math.log10(q));}
-        let y_D=0;
-        if(q>0){y_D=q<0.11?0.3827+0.0645*Math.log(q):q<0.21?0.60025+0.15471*Math.log(q):0.225+0.667*q;}
-        Vreal=Math.round(v*Vo*100)/100;
-        chequeoV=(Vreal<0.45||Vreal>4.0)?'NO CUMPLE':'O.K.';
-        const alpha=2*Math.acos(1-2*y_D);
-        const Rh_D=0.25*(1-Math.sin(alpha)/alpha);
-        const Rh=Rh_D*DintMm;
-        Yc=Math.round(0.296938082*DintMm*100)/100;
-        Yn=Math.round(y_D*DintMm*100)/100;
-        Ymax=Math.round(DintMm*0.75*100)/100;
-        chequeoYn=Math.max(Yc,Yn)<Ymax?'O.K.':'NO CUMPLE';
-        Froude=Math.round(Vreal/Math.sqrt(9.806*Rh/1000)*100)/100;
-        tipoFlujo=Froude>1.1?'Supercrítico':Froude<0.9?'Subcrítico':'Crítico';
-        fuerzaTractiva=Math.round(1000*Rh/1000*S*100)/100;
-        chequeoFT=fuerzaTractiva>0.15?'O.K.':'NO CUMPLE';
-      }
-              const bajantes=tramosLl.filter(o=>o.esBajante);
-              const descIds=(t.descripcion||'').split('+').map(s=>s.trim()).filter(Boolean);
+if(Q>0&&S!=null&&S>0&&n!=null&&n>0){
+DcalcPulg=Math.round(diametromaning(Q/1000,n,S)*1000/25.4*100)/100;
+if(DdisPulg>0){chequeo=DcalcPulg<=DdisPulg?'O.K.':'NO CUMPLE';}
+}
+if(Q>0&&S!=null&&S>0&&n!=null&&n>0&&DintMm>0){
+Qo=Math.round(caudalTuboLleno(DintMm/1000,n,S)*1000*100)/100;
+Vo=Math.round(velocidadTuboLleno(DintMm/1000,n,S)*100)/100;
+qqo=Qo>0?Math.round(Q/Qo*100)/100:0;
+const q=Qo>0?Q/Qo:0;
+const rel=relacionesHidraulicas(q);
+Vreal=Math.round(rel.v_V0*Vo*100)/100;
+chequeoV=(Vreal<V_MIN||Vreal>V_MAX)?'NO CUMPLE':'O.K.';
+const Rh=rel.Rh_D*DintMm;
+Yc=Math.round(tiranteCritico(DintMm/1000,Q/1000)*1000*100)/100;
+Yn=Math.round(rel.h_D*DintMm*100)/100;
+Ymax=Math.round(DintMm*Y_D_MAX*100)/100;
+chequeoYn=Math.max(Yc,Yn)<Ymax?'O.K.':'NO CUMPLE';
+Froude=Math.round(numeroFroude(Vreal,rel.Rh_D*DintMm/1000)*100)/100;
+tipoFlujo=tipoRegimen(Froude)==='Supercritico'?'Supercrítico':tipoRegimen(Froude)==='Subcritico'?'Subcrítico':'Crítico';
+fuerzaTractiva=Math.round(1000*Rh/1000*S*100)/100;
+chequeoFT=fuerzaTractiva>FUERZA_TRACTIVA_MIN?'O.K.':'NO CUMPLE';
+}
+const descIds=parseDescripcion(t.descripcion);
               return(
                 <tr key={t._key}>
                   <td className="c"><input className="ni" style={{width:72,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.id} onChange={e=>updTramoLL(t._key,'id',e.target.value)}/></td>
@@ -98,9 +97,9 @@ const Q=t.qLps||0;
                       })}
                     </div>
                   </td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.qLps||''} key={t._key+'q'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'qLps',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'qLps',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.nmaning||''} key={t._key+'nm'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'nmaning',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'nmaning',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={sVal||''} key={t._key+'sp'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'sPercent',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoLL(t._key,'sPercent',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.qLps||''} key={t._key+'q'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoLL(t._key,'qLps',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoLL(t._key,'qLps',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.nmaning||''} key={t._key+'nm'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoLL(t._key,'nmaning',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoLL(t._key,'nmaning',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={sVal||''} key={t._key+'sp'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoLL(t._key,'sPercent',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoLL(t._key,'sPercent',v);}}/></td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DcalcPulg>0?DcalcPulg.toFixed(2)+'"':'—'}</td>
                   <td className="c">
                     <select className="ni" style={{width:56,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.diamDisPulg||''} onChange={e=>updTramoLL(t._key,'diamDisPulg',parseFloat(e.target.value))}>

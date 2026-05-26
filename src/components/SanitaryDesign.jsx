@@ -1,6 +1,9 @@
 import { useSanitario } from "../context/SanitarioContext";
 import { calcUDparcial, calcUDacumulado } from "./utils";
-import { pisoLbl, pisoCorto, DIAM_OPTIONS } from "./constants";
+import { pisoLbl, pisoCorto, DIAM_OPTIONS, V_MIN, V_MAX, Y_D_MAX, FR_SUBCRITICO, FR_SUPERCRITICO, FUERZA_TRACTIVA_MIN } from "./constants";
+import { parseDecimalInput } from "../utils/parseDecimal";
+import { parseDescripcion } from "../utils/parseDescripcion";
+import { relacionesHidraulicas, caudalTuboLleno, velocidadTuboLleno, diametromaning, tipoRegimen, numeroFroude, tiranteCritico, caudalHunterLPS, factorSimultaneidad, GRAVEDAD } from "../utils/calcSanitario";
 
 export default function DisenosSanitarios() {
 const { tramosSan, udBase, pisos, updTramoSan } = useSanitario();
@@ -56,46 +59,41 @@ return (
               const acumMap=calcUDacumulado(tramosSan,udBase);
               return tramosSan.map(t=>{
                 const udPropias=calcUDparcial(t,udBase);
-                const descIds=(t.descripcion||'').split('+').map(s=>s.trim()).filter(Boolean);
+                const descIds=parseDescripcion(t.descripcion);
                 const udOtros=descIds.reduce((s,id)=>s+(acumMap[id]||0),0);
                 const udAcum=udPropias+udOtros;
         const nSalidas=t.nSalidas;
-        const K=nSalidas!=null&&nSalidas>0?Math.round(nSalidas<=1?1:1/Math.sqrt(nSalidas-1)*100)/100:null;
-        const n=t.nmaning;
-        const sVal=t.sPercent;
-        const S=sVal!=null&&sVal>0?sVal/100:null;
-        const Q=udAcum>0&&K!=null&&nSalidas!=null?Math.round(K*(udAcum<240?0.1163*Math.pow(udAcum,0.6875):0.074*Math.pow(udAcum,0.7504))*1000)/1000:null;
+const K=nSalidas!=null&&nSalidas>0?Math.round(factorSimultaneidad(nSalidas)*100)/100:null;
+const n=t.nmaning;
+const sVal=t.sPercent;
+const S=sVal!=null&&sVal>0?sVal/100:null;
+const Q=udAcum>0&&K!=null?Math.round(caudalHunterLPS(udAcum,K)*1000)/1000:null;
                 const dSel=DIAM_OPTIONS.find(d=>d.pulg===(t.diamDisPulg||0))||null;
         let DcalcPulg=0,DdisPulg=dSel?dSel.pulg:0,DintMm=dSel?dSel.mm:0,chequeo='—';
         let Qo=0,Vo=0,qqo=0,Vreal=0,chequeoV='—';
         let Yc=0,Yn=0,Froude=0,tipoFlujo='—',Ymax=0,chequeoYn='—';
         let fuerzaTractiva=0,chequeoFT='—';
-        if(Q!=null&&Q>0&&S!=null&&S>0&&n!=null&&n>0){
-          DcalcPulg=Math.round(1.548*Math.pow((n*Q/1000/Math.sqrt(S)),3/8)*1000/25.4*100)/100;
-          if(DdisPulg>0){chequeo=DcalcPulg<=DdisPulg?'O.K.':'NO CUMPLE';}
-        }
-        if(Q!=null&&Q>0&&S!=null&&S>0&&n!=null&&n>0&&DintMm>0){
-          Qo=Math.round(0.312*Math.pow(DintMm/1000,8/3)*Math.sqrt(S)/n*1000*100)/100;
-          Vo=Math.round(4*Qo/1000/Math.PI/Math.pow(DintMm/1000,2)*100)/100;
-          qqo=Qo>0?Math.round(Q/Qo*100)/100:0;
-          const q=Qo>0?Q/Qo:0;
-          let v=0;
-          if(q>0){v=q<=0.06?Math.pow(10,0.029806+0.29095*Math.log10(q)):q<=0.26?Math.pow(10,0.013778+0.28597*Math.log10(q)):Math.pow(10,0.021763+0.289951*Math.log10(q));}
-          let y_D=0;
-          if(q>0){y_D=q<0.11?0.3827+0.0645*Math.log(q):q<0.21?0.60025+0.15471*Math.log(q):0.225+0.667*q;}
-          Vreal=Math.round(v*Vo*100)/100;
-          chequeoV=(Vreal<0.45||Vreal>4.0)?'NO CUMPLE':'O.K.';
-          const alpha=2*Math.acos(1-2*y_D);
-          const Rh_D=0.25*(1-Math.sin(alpha)/alpha);
-          const Rh=Rh_D*DintMm;
-          Yc=Math.round(0.296938082*DintMm*100)/100;
-          Yn=Math.round(y_D*DintMm*100)/100;
-          Ymax=Math.round(DintMm*0.75*100)/100;
-          chequeoYn=Math.max(Yc,Yn)<Ymax?'O.K.':'NO CUMPLE';
-          Froude=Math.round(Vreal/Math.sqrt(9.806*Rh/1000)*100)/100;
-          tipoFlujo=Froude>1.1?'Supercrítico':Froude<0.9?'Subcrítico':'Crítico';
-          fuerzaTractiva=Math.round(1000*Rh/1000*S*100)/100;
-          chequeoFT=fuerzaTractiva>0.15?'O.K.':'NO CUMPLE';
+if(Q!=null&&Q>0&&S!=null&&S>0&&n!=null&&n>0){
+DcalcPulg=Math.round(diametromaning(Q/1000,n,S)*1000/25.4*100)/100;
+if(DdisPulg>0){chequeo=DcalcPulg<=DdisPulg?'O.K.':'NO CUMPLE';}
+}
+if(Q!=null&&Q>0&&S!=null&&S>0&&n!=null&&n>0&&DintMm>0){
+Qo=Math.round(caudalTuboLleno(DintMm/1000,n,S)*1000*100)/100;
+Vo=Math.round(velocidadTuboLleno(DintMm/1000,n,S)*100)/100;
+qqo=Qo>0?Math.round(Q/Qo*100)/100:0;
+const q=Qo>0?Q/Qo:0;
+const rel=relacionesHidraulicas(q);
+Vreal=Math.round(rel.v_V0*Vo*100)/100;
+chequeoV=(Vreal<V_MIN||Vreal>V_MAX)?'NO CUMPLE':'O.K.';
+const Rh=rel.Rh_D*DintMm;
+Yc=Math.round(tiranteCritico(DintMm/1000,Q/1000)*1000*100)/100;
+Yn=Math.round(rel.h_D*DintMm*100)/100;
+Ymax=Math.round(DintMm*Y_D_MAX*100)/100;
+chequeoYn=Math.max(Yc,Yn)<Ymax?'O.K.':'NO CUMPLE';
+Froude=Math.round(numeroFroude(Vreal,rel.Rh_D*DintMm/1000)*100)/100;
+tipoFlujo=tipoRegimen(Froude)==='Supercritico'?'Supercrítico':tipoRegimen(Froude)==='Subcritico'?'Subcrítico':'Crítico';
+fuerzaTractiva=Math.round(1000*Rh/1000*S*100)/100;
+chequeoFT=fuerzaTractiva>FUERZA_TRACTIVA_MIN?'O.K.':'NO CUMPLE';
         }
         const otrosTramos=tramosSan.filter(o=>o.id!==t.id && o.piso===t.piso);
         return(
@@ -120,8 +118,8 @@ return (
           <td className="c"><input type="text" inputMode="numeric" pattern="[0-9]*" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.nSalidas!==undefined&&t.nSalidas!==0?String(t.nSalidas):''} onChange={e=>{const v=e.target.value.replace(/\D/g,'');updTramoSan(t.id,'nSalidas',v===''?0:parseInt(v)||0);}}/></td>
           <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{K!=null?K.toFixed(2):'—'}</td>
           <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{Q>0?Q.toFixed(3):'—'}</td>
-          <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.nmaning||''} key={t.id+'nm'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'nmaning',v);}}/></td>
-          <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={sVal||''} key={t.id+'sp'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'sPercent',v);}}/></td>
+          <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:12,textAlign:'center'}} defaultValue={t.nmaning||''} key={t.id+'nm'} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoSan(t.id,'nmaning',v);}}/></td>
+          <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:36,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={sVal||''} key={t.id+'sp'} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoSan(t.id,'sPercent',v);}}/></td>
           <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DcalcPulg>0?DcalcPulg.toFixed(2)+'"':'—'}</td>
           <td className="c">
           <select className="ni" style={{width:56,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={t.diamDisPulg||''} onChange={e=>updTramoSan(t.id,'diamDisPulg',parseFloat(e.target.value))}>

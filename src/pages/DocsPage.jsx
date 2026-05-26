@@ -826,7 +826,7 @@ const docData = {
                 <div className="px-3 py-2 border-b border-outline-variant">Area central donde se muestran las tablas, formularios y resultados del modulo selecciónado. Aqui se ingresan los datos de cada red, se visualizan los cálculos y se revisan las verificaciones de norma.</div>
 
                 <div className="bg-surface-container-high font-semibold px-3 py-2">Act Bar</div>
-                <div className="px-3 py-2">Barra de accion inferior que muestra en tiempo real los totales del proyecto: unidades de consumo (UC) de agua fria y caliente, unidades de descarga (UD) sanitarias, pérdida de presión acumulada de gas (ΔP) con indicador color verde/rojo según cumpla el límite NTC 3728. Incluye los botones de exportación a Excel (.csv) y Memoria de cálculo (.html).</div>
+                <div className="px-3 py-2">Barra de accion inferior que muestra en tiempo real los totales del proyecto: unidades de consumo (UC) de agua fria y caliente, unidades de descarga (UD) sanitarias, pérdida de presión acumulada de gas (ΔP) con indicador color verde/rojo según cumpla el límite NTC 3728.</div>
               </div>
             </div>
 
@@ -903,7 +903,7 @@ const docData = {
             <Tr><Td>7</Td><Td>Calcular red de gas (Renouard)</Td></Tr>
             <Tr><Td>8</Td><Td>Seleccionar calentador</Td></Tr>
             <Tr><Td>9</Td><Td>Verificar validación</Td></Tr>
-            <Tr><Td>10</Td><Td>Exportar documentos (Excel + Memoria)</Td></Tr>
+            <Tr><Td>10</Td><Td>Verificar validación final</Td></Tr>
           </T>
         ),
       },

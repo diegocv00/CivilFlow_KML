@@ -6,6 +6,7 @@ export default function CalculoUD({ onTraerPlano }) {
 const { tramosSan, udBase, pisos, addTramoSan, delTramoSan, updTramoSan, updTramoSanFix, setUdBase } = useSanitario();
 
 const pisosSelect = pisos.filter(p => p.tipo !== 'cubierta');
+const acumMap = calcUDacumulado(tramosSan, udBase);
 
 return (
 <>
@@ -54,10 +55,9 @@ return (
             </tr>
           </thead>
           <tbody>
-            {tramosSan.map((t,i)=>{
-              const parcial=calcUDparcial(t,udBase);
-              const acumMap=calcUDacumulado(tramosSan,udBase);
-              const acum=acumMap[t.id]||0;
+{tramosSan.map((t,i)=>{
+const parcial=calcUDparcial(t,udBase);
+const acum=acumMap[t.id]||0;
               return(
                 <tr key={i}>
                   <td className="c"><input className="ni" style={{width:64,padding:'3px 6px',fontSize:11,textAlign:'center'}} value={t.id} onChange={e=>updTramoSan(t.id,'id',e.target.value)}/></td>

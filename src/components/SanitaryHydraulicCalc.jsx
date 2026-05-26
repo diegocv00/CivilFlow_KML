@@ -1,6 +1,8 @@
 import { useSanitario } from "../context/SanitarioContext";
 import { calcUDparcial, calcUDacumulado } from "./utils";
 import { DIAM_OPTIONS } from "./constants";
+import { parseDescripcion } from "../utils/parseDescripcion";
+import { relacionesHidraulicas, caudalTuboLleno } from "../utils/calcSanitario";
 
 export default function CalculoHidraulicoSanitario() {
   const { tramosSan, udBase } = useSanitario();
@@ -8,7 +10,6 @@ export default function CalculoHidraulicoSanitario() {
   const acumMap = calcUDacumulado(tramosSan, udBase);
 
   return (
-    <div style={{display:'none'}}>
     <div className="card">
       <div className="card-h">
         <span className="card-t">♻️ Cálculo de Vreal, Y real, Rh real</span>
@@ -34,25 +35,22 @@ export default function CalculoHidraulicoSanitario() {
               const nSalidas=t.nSalidas||2;
               const K=Math.round(nSalidas<=1?1:1/Math.sqrt(nSalidas-1)*100)/100;
               const udPropias=calcUDparcial(t,udBase);
-              const descIds=(t.descripcion||'').split('+').map(s=>s.trim()).filter(Boolean);
+              const descIds=parseDescripcion(t.descripcion);
               const udOtros=descIds.reduce((s,id)=>s+(acumMap[id]||0),0);
               const udAcum=udPropias+udOtros;
               const Q=udAcum>0?Math.round(K*(udAcum<240?0.1163*Math.pow(udAcum,0.6875):0.074*Math.pow(udAcum,0.7504))*1000)/1000:0;
               const dSel=DIAM_OPTIONS.find(d=>d.pulg===(t.diamDisPulg||0))||null;
               const DintMm=dSel?dSel.mm:0;
 
-      let Qo=0, qqo=0, v=0, y_D=0, alpha=0, Rh_D=0, Rh=0;
+let Qo=0, qqo=0, v=0, y_D=0, alpha=0, Rh_D=0, Rh=0;
 
-      if(Q>0&&S>0&&n>0&&DintMm>0){
-                Qo=Math.round(0.312*Math.pow(DintMm/1000,8/3)*Math.sqrt(S)/n*1000*100)/100;
-                const q=Q/Qo;
-                qqo=Math.round(q*100)/100;
-                v=q<=0.06?Math.pow(10,0.029806+0.29095*Math.log10(q)):q<=0.26?Math.pow(10,0.013778+0.28597*Math.log10(q)):Math.pow(10,0.021763+0.289951*Math.log10(q));
-                y_D=q<0.11?0.3827+0.0645*Math.log(q):q<0.21?0.60025+0.15471*Math.log(q):0.225+0.667*q;
-                alpha=2*Math.acos(1-2*y_D);
-                Rh_D=0.25*(1-Math.sin(alpha)/alpha);
-                Rh=Rh_D*DintMm;
-              }
+if(Q>0&&S>0&&n>0&&DintMm>0){
+Qo=Math.round(caudalTuboLleno(DintMm/1000,n,S)*1000*100)/100;
+const q=Q/Qo;
+qqo=Math.round(q*100)/100;
+const rel=relacionesHidraulicas(q);
+v=rel.v_V0; y_D=rel.h_D; alpha=rel.alpha; Rh_D=rel.Rh_D; Rh=Rh_D*DintMm;
+}
 
               return(
                 <tr key={t.id}>
@@ -69,7 +67,6 @@ export default function CalculoHidraulicoSanitario() {
           </tbody>
         </table>
       </div>
-    </div>
     </div>
   );
 }

@@ -1,23 +1,8 @@
 import { useSanitario } from "../context/SanitarioContext";
-import { pisoCorto } from "./constants";
+import { pisoCorto, DIAM_BAN, DIAM_VENT } from "./constants";
 import { calcUDparcial, calcUDacumulado } from "./utils";
-
-const DIAM_BAN=[
-  { pulg:1.5, mm:42.68, nom:'1½"' },
-  { pulg:2, mm:54.48, nom:'2"' },
-  { pulg:3, mm:76.20, nom:'3"' },
-  { pulg:4, mm:107.70,nom:'4"' },
-  { pulg:6, mm:160.04,nom:'6"' },
-  { pulg:8, mm:213.20,nom:'8"' },
-];
-
-const DIAM_VENT=[
-  { pulg:1.5, mm:42.68, nom:'1½"' },
-  { pulg:2, mm:54.48, nom:'2"' },
-  { pulg:3, mm:76.20, nom:'3"' },
-  { pulg:4, mm:107.70,nom:'4"' },
-  { pulg:6, mm:160.04,nom:'6"' },
-];
+import { parseDecimalInput } from "../utils/parseDecimal";
+import { calcularBajanteVentilacion, caudalHunterLPS } from "../utils/calcSanitario";
 
 export default function BajantesTable() {
   const { tramosSan, udBase, pisos, updTramoSan } = useSanitario();
@@ -78,27 +63,33 @@ const descArr=(t.recibeDe||[]).join('+');
 const udOtros=(t.recibeDe||[]).reduce((s,id)=>s+(acumMapALL[id]||0),0);
 const udAcum=udParcial+udOtros;
 const n=t.nmaning;
-const Q=(udAcum>0&&rVal>0?0.1163*Math.pow(udAcum,0.6875):0);
-const DcalcMm=(Q>0&&rVal!=null&&rVal>0?Math.pow(Q/(1.754*Math.pow(rVal,5/3)),3/8)*25.4:0);
-const DcalcPulg=DcalcMm/25.4;
-const Dprop=DIAM_BAN.find(d=>Number(d.pulg)===Number(t.bajDprop))||null;
-const DpropPulg=Dprop?Dprop.pulg:0;
-const DpropMm=Dprop?Dprop.mm:0;
-const chequeo=(DcalcMm>0&&DpropPulg>0)?(DcalcPulg<=DpropPulg?'O.K.':'NO CUMPLE'):(DcalcMm>0?'Sin diseño':'—');
-const QmaxB=(DpropPulg>0&&rVal!=null&&rVal>0?1.754*Math.pow(rVal,5/3)*Math.pow(DpropPulg,8/3):0);
-const Vt=Math.round((Q>0&&rVal!=null&&rVal>0?2.76*Math.pow(Q/Math.max(DpropPulg,DcalcPulg||0),0.4):0)*100)/100;
-const Ltcalc=(Vt>0?0.17*Vt*Vt:0);
-const Ltmin=(DpropPulg>0?Math.max(Ltcalc,10*DpropPulg*2.54/100):Ltcalc);
+const res=calcularBajanteVentilacion({
+bajante:t.id,
+pisos:`${t.pisoDesde||''}-${t.pisoHasta||''}`,
+UD_propias:udParcial,
+UD_otros:udOtros,
+UD_acum:udAcum,
+r:t.bajR,
+n:t.nmaning||0.009,
+bajDprop:t.bajDprop||0,
+bajLong:t.bajLong||3,
+bajFDarcy:t.bajFDarcy||0.025,
+ventDprop:t.ventDprop||0,
+});
+const Q=res.Q_Ls;
+const DcalcPulg=res.Dcalc_pulg;
+const chequeo=res.chequeoDiam;
+const QmaxB=res.QmaxBajante;
+const Vt=res.Vt;
+const Ltcalc=res.Lt_calc;
+const Ltmin=res.Lt_min;
 const fDarcy=t.bajFDarcy;
-const Vair=Vt;
-const Qair=(DpropPulg>0&&Vair>0?1000*Vair*(17/24)*(Math.PI/4)*Math.pow(DpropPulg*2.54/100,2):0);
-const Lbaj=t.bajLong;
-const DventPulgRaw=(Lbaj!=null&&Lbaj>0&&Qair>0&&fDarcy!=null&&fDarcy>0?Math.pow((Lbaj*fDarcy*Qair*Qair)/3.25,1/5):0);
-const DventMm=DventPulgRaw*25.4;
-const DventCalcPulg=DventMm/25.4;
-const DventProp=DIAM_VENT.find(d=>Number(d.pulg)===Number(t.ventDprop))||null;
-const DventPropPulg=DventProp?DventProp.pulg:0;
-const chequeoVent=DventMm>0&&DventPropPulg>0?(DventCalcPulg<=DventPropPulg?'O.K.':'NO CUMPLE'):(DventMm>0?'Sin diseño':'—');
+const Vair=res.V_aire;
+const Qair=res.Q_aire_Ls;
+const Lbaj=res.longBajante_m;
+const DventCalcPulg=res.D_vent_calc_pulg;
+const DventPropPulg=res.D_vent_prop_pulg;
+const chequeoVent=res.D_vent_prop_pulg>0?(res.D_vent_calc_pulg<=res.D_vent_prop_pulg?'O.K.':'NO CUMPLE'):(res.D_vent_calc_pulg>0?'Sin diseño':'—');
                 return(
                   <tr key={t.id}>
                     <td className="c"><span className="sigla" style={{fontSize:10}}>{t.id}</span></td>
@@ -125,8 +116,8 @@ const chequeoVent=DventMm>0&&DventPropPulg>0?(DventCalcPulg<=DventPropPulg?'O.K.
                       </select>
                     </td>
                     <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600}}>{Q>0?Q.toFixed(3):'—'}</td>
-                    <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:50,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={n||''} key={t.id+'nm'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'nmaning',v);}}/></td>
-                    <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DcalcMm>0?DcalcPulg.toFixed(2)+'"':'—'}</td>
+                    <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:50,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={n||''} key={t.id+'nm'} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoSan(t.id,'nmaning',v);}}/></td>
+                    <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DcalcPulg>0?DcalcPulg.toFixed(2)+'"':'—'}</td>
                     <td className="c">
                       <select className="ni" style={{width:54,padding:'2px 3px',fontSize:11,textAlign:'center'}} value={t.bajDprop||''} onChange={e=>updTramoSan(t.id,'bajDprop',parseFloat(e.target.value)||0)}>
                         <option value="">—</option>
@@ -140,13 +131,13 @@ const chequeoVent=DventMm>0&&DventPropPulg>0?(DventCalcPulg<=DventPropPulg?'O.K.
                     <td className="c">{Ltmin>0?Ltmin.toFixed(2):'—'}</td>
                     <td className="c">{Vair>0?Vair.toFixed(2):'—'}</td>
                     <td className="c">
-                      <input type="text" inputMode="decimal" className="ni" style={{width:46,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={fDarcy||''} key={t.id+'fd'} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updTramoSan(t.id,'bajFDarcy',v);}}/>
+                      <input type="text" inputMode="decimal" className="ni" style={{width:46,padding:'2px 3px',fontSize:10,textAlign:'center'}} defaultValue={fDarcy||''} key={t.id+'fd'} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updTramoSan(t.id,'bajFDarcy',v);}}/>
                     </td>
                     <td className="c" style={{fontFamily:'var(--mono)'}}>{Qair>0?Qair.toFixed(2):'—'}</td>
                     <td className="c">
                       <input type="text" inputMode="decimal" className="ni" style={{width:46,padding:'2px 3px',fontSize:10,textAlign:'center'}} value={t.bajLong!==undefined?String(t.bajLong):'3'} onChange={e=>{const v=e.target.value.replace(/[^0-9.]/g,'');updTramoSan(t.id,'bajLong',v===''?0:parseFloat(v)||3);}}/>
                     </td>
-                    <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DventMm>0?DventCalcPulg.toFixed(2)+'"':'—'}</td>
+                    <td className="c" style={{fontFamily:'var(--mono)',fontSize:10}}>{DventCalcPulg>0?DventCalcPulg.toFixed(2)+'"':'—'}</td>
                     <td className="c">
                       <select className="ni" style={{width:54,padding:'2px 3px',fontSize:11,textAlign:'center'}} value={t.ventDprop||''} onChange={e=>updTramoSan(t.id,'ventDprop',parseFloat(e.target.value)||0)}>
                         <option value="">—</option>

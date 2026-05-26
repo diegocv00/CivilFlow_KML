@@ -1,5 +1,7 @@
 import { useSanitario } from "../context/SanitarioContext";
 import { chequeoBajanteLluvia } from "../utils/calcSanitario";
+import { parseDecimalInput } from "../utils/parseDecimal";
+import { R_OPTIONS } from "./constants";
 
 export default function ChequeoBajantesLluvias() {
   const { bajantesLl, addBajanteLL, delBajanteLL, updBajanteLL } = useSanitario();
@@ -39,18 +41,17 @@ const diamProp = b.diamPropuesto || 0;
 return(
                 <tr key={b.id}>
                   <td className="c"><input className="ni" style={{width:80,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.bajante} onChange={e=>updBajanteLL(b.id,'bajante',e.target.value)}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.areaParcial||''} key={b.id+'ap'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'areaParcial',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'areaParcial',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.areaAcumulada||''} key={b.id+'aa'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'areaAcumulada',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'areaAcumulada',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.intensidad||''} key={b.id+'in'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'intensidad',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'intensidad',v);}}/></td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.coeficienteC||''} key={b.id+'cc'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'coeficienteC',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'coeficienteC',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.areaParcial||''} key={b.id+'ap'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'areaParcial',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'areaParcial',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.areaAcumulada||''} key={b.id+'aa'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'areaAcumulada',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'areaAcumulada',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:70,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.intensidad||''} key={b.id+'in'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'intensidad',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'intensidad',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.coeficienteC||''} key={b.id+'cc'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'coeficienteC',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'coeficienteC',v);}}/></td>
                   <td className="c">
 <select className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.R} onChange={e=>updBajanteLL(b.id,'R',e.target.value)}>
-  <option value="">—</option><option value="1/4">1/4</option>
-  <option value="7/24">7/24</option>
+<option value="">—</option>{R_OPTIONS.map(r=><option key={r.value} value={r.value}>{r.label}</option>)}
                     </select>
                   </td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:700,fontSize:13}}>{Q>0?Q.toFixed(2):'—'}</td>
-                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.manning||''} key={b.id+'mn'} onChange={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'manning',v);}} onBlur={e=>{const raw=e.target.value.replace(/,/g,'.');const v=parseFloat(raw);if(!isNaN(v)&&raw!=='')updBajanteLL(b.id,'manning',v);}}/></td>
+                  <td className="c"><input type="text" inputMode="decimal" className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} defaultValue={b.manning||''} key={b.id+'mn'} onChange={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'manning',v);}} onBlur={e=>{const v=parseDecimalInput(e.target.value);if(v!==null)updBajanteLL(b.id,'manning',v);}}/></td>
                   <td className="c" style={{fontFamily:'var(--mono)',fontWeight:600,fontSize:12}}>{diamCalc > 0 ? diamCalc.toFixed(2) : '—'}</td>
                   <td className="c"><select className="ni" style={{width:60,padding:'2px 4px',fontSize:11,textAlign:'center'}} value={b.diamPropuesto||''} onChange={e=>updBajanteLL(b.id,'diamPropuesto',e.target.value?Number(e.target.value):0)}><option value="">—</option><option value="1.5">1½"</option><option value="2">2"</option><option value="3">3"</option><option value="4">4"</option><option value="6">6"</option></select></td>
                   <td className="c" style={{fontWeight:700}}>{chequeo}</td>
