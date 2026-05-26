@@ -44,6 +44,7 @@ export const REDES=[
   {id:'bom',lbl:'Bomba AR', sub:'Aguas residuales presión', ico:'⬆️',col:'var(--bom)'},
   {id:'rec',lbl:'Recirculación AC',sub:'Solo si L > 15 m', ico:'🔄',col:'var(--rec)'},
   {id:'rci',lbl:'Contra Incendio', sub:'NSR-10 J · NFPA 13:2022', ico:'🔴',col:'var(--rci)'},
+  {id:'gas',lbl:'Gas', sub:'NTC 3728 · Baja presión', ico:'⛽',col:'var(--gas)'},
 ];
 
 export const TABS=[
@@ -101,8 +102,8 @@ export const REDES_SAN_LL=REDES.filter(r=>r.id==='san'||r.id==='ll');
 
 export const FILTROS_NORM=[{k:'todos',l:'Todos'},{k:'af',l:'AF/AC'},{k:'san',l:'Sanitaria'},{k:'ll',l:'Lluvias'},{k:'gas',l:'Gas'},{k:'rci',l:'RCI'}];
 
-export const NORM_COL={af:'var(--acc2)',ac:'var(--ac)',san:'var(--san)',ll:'var(--ll)',gas:'var(--gas)',rci:'#F87171'};
-export const MAT_COL={af:'var(--acc2)',ac:'var(--ac)',san:'var(--san)',ll:'var(--ll)',ven:'var(--ven)',gas:'var(--gas)',rci:'#F87171'};
+export const NORM_COL={af:'var(--af)',ac:'var(--ac)',san:'var(--san)',ll:'var(--ll)',gas:'var(--gas)',rci:'var(--rci)',ven:'var(--ven)',ep:'var(--ep)',bom:'var(--bom)',rec:'var(--rec)'};
+export const MAT_COL={af:'var(--af)',ac:'var(--ac)',san:'var(--san)',ll:'var(--ll)',ven:'var(--ven)',gas:'var(--gas)',rci:'var(--rci)',ep:'var(--ep)',bom:'var(--bom)',rec:'var(--rec)'};
 
 export const CRIT0=[
 {id:'a1',red:'af',param:'V mínima AF/AC',val:'0.50',uni:'m/s',norma:'NTC 1500:2020',art:'§5.4',cumple:'V ≥ 0.50 m/s todos tramos',nota:'Evita sedimentación'},
@@ -201,9 +202,9 @@ export const APS_DEFAULT=[
 export const PROFS_DEFAULT=[
 {id:'san',red:'Sanitaria',col:'var(--san)',prof:-0.70,norma:'RAS 2000 §D.4.1',nota:'Bajo losa'},
 {id:'ll',red:'Aguas Lluvias',col:'var(--ll)',prof:-0.50,norma:'RAS 2000 §D.4.2',nota:'Bajo losa'},
-{id:'af',red:'Agua Fría',col:'var(--acc2)',prof:0.00,norma:'NTC 1500 §5.4',nota:'A nivel NPT'},
-{id:'ac',red:'Agua Caliente',col:'var(--san)',prof:-0.10,norma:'NTC 1500 §5.4',nota:'Bajo NPT'},
+{id:'af',red:'Agua Fría',col:'var(--af)',prof:0.00,norma:'NTC 1500 §5.4',nota:'A nivel NPT'},
+{id:'ac',red:'Agua Caliente',col:'var(--ac)',prof:-0.10,norma:'NTC 1500 §5.4',nota:'Bajo NPT'},
 {id:'gas',red:'Gas',col:'var(--gas)',prof:-0.15,norma:'NTC 3728 §4.3',nota:'Con protección'},
 {id:'ven',red:'Ventilación',col:'var(--ven)',prof:0.00,norma:'NTC 1500 §9.2',nota:'A nivel NPT'},
-{id:'rci',red:'Contra Incendio',col:'#F87171',prof:-0.45,norma:'NFPA 13 §6',nota:'Zona protegida'},
+{id:'rci',red:'Contra Incendio',col:'var(--rci)',prof:-0.45,norma:'NFPA 13 §6',nota:'Zona protegida'},
 ];
