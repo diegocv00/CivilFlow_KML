@@ -56,7 +56,7 @@ function ViewerInner() {
             <div className="text-xs mb-6" style={{ color: '#6b8cae', fontFamily: 'Geist, monospace' }}>
               Sube planos PDF para comenzar a trabajar
             </div>
-            <button onClick={() => navigate('/planos')}
+            <button onClick={() => navigate('/civilflowareatrabajo')}
               className="px-6 py-3 font-bold text-[11px] tracking-widest uppercase border rounded-lg transition-colors"
               style={{ background: 'rgba(0,220,229,0.08)', borderColor: '#00dce555', color: '#00dce5', fontFamily: 'Geist, monospace' }}>
               IR A CARGA DE PLANOS
@@ -139,7 +139,7 @@ function ViewerInner() {
                     }}>
                     + Agregar
                   </button>
-                  <button onClick={() => navigate('/planos')}
+        <button onClick={() => navigate('/civilflowareatrabajo')}
                     style={{
                       padding: '5px 8px', background: '#1e2024',
                       border: '1px solid #3a494a', borderRadius: 3,
@@ -159,7 +159,7 @@ function ViewerInner() {
         </div>
       </div>
 
-      <div style={{ flex: 1, paddingTop: 100, overflow: 'hidden', position: 'relative' }}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 100, overflow: 'hidden', position: 'relative' }}
         onClick={() => setDropdownOpen(false)}>
         <PdfViewer
           files={files}

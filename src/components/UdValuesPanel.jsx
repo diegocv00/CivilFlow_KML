@@ -1,20 +1,39 @@
 import { useSanitario } from "../context/SanitarioContext";
-import { NumIn } from "./utils";
-import FloatingPanel from "./FloatingPanel";
+import FloatingPanel, { thS, tdS, inputStyle, tableStyle } from "./FloatingPanel";
+import { APARATO_EMOJI } from "./PlanoEngine";
+
+const NET_NAMES = { sif: '♻️', lvm: '👐', san: '🚽', duc: '🚿', lvra: '👕', tin: '🛀', lvp: '🍽', lvro: '👖' };
 
 export default function PanelValoresUD({ onClose }) {
   const { udBase, setUdBase } = useSanitario();
 
   return (
     <FloatingPanel title="Valores base UD" icon="📊" onClose={onClose} minW={380}>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'6px 20px',padding:'4px 0'}}>
-        {udBase.map(d=>(
-          <div key={d.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid #2a2c30'}}>
-            <span style={{fontWeight:500,fontSize:13,color:'#e2e2e8'}}>{d.nombre}</span>
-            <NumIn val={d.ud} step={1} w={64} onChange={v=>setUdBase(prev=>prev.map(x=>x.id===d.id?{...x,ud:v}:x))}/>
-          </div>
-        ))}
-      </div>
+      <table style={tableStyle}>
+        <thead>
+          <tr>
+            <th style={thS}>Aparato</th>
+            <th style={thS}>UD</th>
+          </tr>
+        </thead>
+        <tbody>
+          {udBase.map(d => (
+            <tr key={d.id} style={{ borderBottom: '1px solid #2a2c30' }}>
+              <td style={{...tdS, textAlign: 'left', paddingLeft: 8}}>
+                <span style={{display:'flex',alignItems:'center',gap:6,color:'#e2e2e8',fontWeight:500,fontSize:12}}>
+                  <span style={{fontSize:14}}>{APARATO_EMOJI[d.id] || NET_NAMES[d.id] || '📋'}</span>
+                  {d.nombre}
+                </span>
+              </td>
+              <td style={tdS}>
+                <input type="number" className="ni" style={inputStyle(56)}
+                  value={d.ud === 0 ? '' : d.ud} step={1} min={0}
+                  onChange={e => setUdBase(prev => prev.map(x => x.id === d.id ? {...x, ud: e.target.value === '' ? 0 : parseInt(e.target.value) || 0} : x))}/>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </FloatingPanel>
   );
 }

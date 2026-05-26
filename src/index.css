@@ -11,3 +11,19 @@ input[type="number"].ni::-webkit-inner-spin-button {
 input[type="number"].ni {
   -moz-appearance: textfield;
 }
+
+/* Sidebar scrollbar */
+.visor-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: #3a494a #14161a;
+}
+.visor-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+.visor-sidebar::-webkit-scrollbar-track {
+  background: #14161a;
+}
+.visor-sidebar::-webkit-scrollbar-thumb {
+  background: #3a494a;
+  border-radius: 3px;
+}
