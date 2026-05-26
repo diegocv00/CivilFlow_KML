@@ -1,11 +1,44 @@
 export const NETS = [
-  { id: 'af', lbl: 'RAF', col: '#4D8FF7', ucType: 'uc', bmType: 'montante', bmPfx: 'MAF', bmIco: '⬆' },
-  { id: 'ac', lbl: 'RAC', col: '#F04545', ucType: 'uc', bmType: 'montante', bmPfx: 'MAC', bmIco: '⬆' },
-  { id: 'san', lbl: 'RS', col: '#F5A623', ucType: 'ud', bmType: 'bajante', bmPfx: 'BAN', bmIco: '⬇' },
-  { id: 'll', lbl: 'RALL', col: '#22D3EE', ucType: null, bmType: 'bajante', bmPfx: 'BALL', bmIco: '⬇' },
-  { id: 'gas', lbl: 'RG', col: '#A855F7', ucType: null, bmType: 'montante', bmPfx: 'MG', bmIco: '⬆' },
-  { id: 'ven', lbl: 'RV', col: '#10B981', ucType: 'ud', bmType: 'montante', bmPfx: 'MV', bmIco: '⬆' },
+  { id: 'af', lbl: 'RAF', col: '#4D8FF7', ucType: 'uc', bmType: 'montante', bmPfx: 'MAF', bmIco: '⬆', emoji: '💧', name: 'Agua Fría' },
+  { id: 'ac', lbl: 'RAC', col: '#F04545', ucType: 'uc', bmType: 'montante', bmPfx: 'MAC', bmIco: '⬆', emoji: '🔥', name: 'Agua Caliente' },
+  { id: 'san', lbl: 'RS', col: '#F5A623', ucType: 'ud', bmType: 'bajante', bmPfx: 'BAN', bmIco: '⬇', emoji: '♻️', name: 'Sanitaria' },
+  { id: 'll', lbl: 'RALL', col: '#22D3EE', ucType: null, bmType: 'bajante', bmPfx: 'BALL', bmIco: '⬇', emoji: '🌧️', name: 'Aguas Lluvias' },
+  { id: 'ven', lbl: 'RV', col: '#A3E635', ucType: 'ud', bmType: 'montante', bmPfx: 'MV', bmIco: '⬆', emoji: '💨', name: 'Ventilación' },
+  { id: 'gas', lbl: 'RG', col: '#A855F7', ucType: null, bmType: 'montante', bmPfx: 'MG', bmIco: '⬆', emoji: '⛽', name: 'Gas' },
+  { id: 'rci', lbl: 'RRCI', col: '#F87171', ucType: null, bmType: 'montante', bmPfx: 'MRCI', bmIco: '⬆', emoji: '🔴', name: 'Contra Incendio' },
+  { id: 'rec', lbl: 'RREC', col: '#22D3EE', ucType: null, bmType: 'montante', bmPfx: 'MREC', bmIco: '⬆', emoji: '🔄', name: 'Recirculación' },
+  { id: 'ep', lbl: 'REP', col: '#F5A623', ucType: null, bmType: 'montante', bmPfx: 'MEP', bmIco: '⬆', emoji: '⚡', name: 'Eléctrica Provisional' },
+  { id: 'bom', lbl: 'RBOM', col: '#8A9BB8', ucType: null, bmType: 'bajante', bmPfx: 'BOM', bmIco: '⬇', emoji: '⬆️', name: 'Bombeo' },
 ];
+
+export const APARATO_EMOJI = {
+  san: '🚽',
+  lvm: '👐',
+  duc: '🚿',
+  lvp: '🍽',
+  tin: '🛀',
+  lvra: '👕',
+  sec: '👕',
+  lvro: '👖',
+  ori: '🚹',
+  est4: '🍳',
+  est2: '🍳',
+  cal: '♨️',
+  caf: '♨️',
+  hor: '🎛',
+  hor_g: '🎛',
+  hor_m: '🎛',
+  hor_p: '🎛',
+  clim: '❄️',
+  flu: '🚽',
+  jac: '🛀',
+  pisc: '♨️',
+  sauna: '♨️',
+  turco: '♨️',
+  sec_g: '👕',
+  sec_p: '👕',
+  cal_b: '♨️',
+};
 
 export default class PlanoEngine {
   constructor(cw, pdfWrap, canv) {
@@ -29,8 +62,11 @@ export default class PlanoEngine {
     this.dims = [];
     this.textAnnots = [];
     this.bajantes = [];
+    this.areas = [];
     this.activeRamal = null;
+    this.activeArea = null;
     this.selId = null;
+    this.areaDrag = null;
     this.panning = false;
     this.panX0 = 0;
     this.panY0 = 0;
@@ -40,6 +76,7 @@ export default class PlanoEngine {
     this.lblDrag = null;
     this.txtDrag = null;
     this.bajDrag = null;
+    this.ptDrag = null;
     this._dimStart = null;
     this.nivelActual = null;
     this.nptLevels = [];
@@ -112,12 +149,16 @@ export default class PlanoEngine {
   }
 
   _emitSelect(el) {
-    if (this._onSelectCb) this._onSelectCb(el);
+    if (!this._onSelectCb) return;
+    if (!el) { this._onSelectCb(null); return; }
+    const { _circ, _ghost, _box, _polyBox, ...rest } = el;
+    this._onSelectCb(rest);
   }
 
   setTool(t) {
     if (this.activeRamal && this.activeRamal.pts.length >= 2 && t !== 'line') this.finishRamal();
     else if (this.activeRamal && t !== 'line') this.cancelRamal();
+    if (this.activeArea && t !== 'area') this.finishArea();
     if (t !== 'dim') this._dimStart = null;
     this.tool = t;
     this.canv.style.cursor = t === 'pan' ? 'grab' : t === 'sel' ? 'default' : 'crosshair';
@@ -141,12 +182,15 @@ export default class PlanoEngine {
   }
 
   _statusMsg() {
-    const names = { sel: 'Seleccionar', line: 'Ramal', dim: 'Cota', text: 'Texto', baj: 'Bajante', pan: 'Pan' };
+    const names = { sel: 'Seleccionar', line: 'Ramal', dim: 'Cota', text: 'Texto', baj: 'Bajante', pan: 'Pan', area: 'Área', erase: 'Borrar' };
     let m = names[this.tool] || this.tool;
     if (this.tool === 'line') {
       const net = NETS.find(n => n.id === this.activeNet);
       m += ` — ${net ? net.lbl : ''} [${this.tipoTramo}]`;
       if (this.activeRamal) m += ` (${this.activeRamal.pts.length} pts, ${this.activeRamal.totalL}m)`;
+    }
+    if (this.tool === 'area' && this.activeArea) {
+      m += ` (${this.activeArea.pts.length} pts)`;
     }
     return m;
   }
@@ -215,17 +259,52 @@ export default class PlanoEngine {
 
     let found = null, minD = 20;
     this.ramales.forEach(r => {
+      const lx = this.toCvs(r.labelX, r.labelY);
+      if (Math.hypot(cx - lx.x, cy - lx.y) < 18) {
+        const d = Math.hypot(cx - lx.x, cy - lx.y);
+        if (d < minD) { minD = d; found = r; }
+      }
       for (let i = 0; i < r.pts.length - 1; i++) {
         const [x1, y1] = r.pts[i], [x2, y2] = r.pts[i + 1];
         const c1 = this.toCvs(x1, y1), c2 = this.toCvs(x2, y2);
-        const mx = (c1.x + c2.x) / 2, my = (c1.y + c2.y) / 2;
-        const d = Math.hypot(cx - mx, cy - my);
+        const ddx = c2.x - c1.x, ddy = c2.y - c1.y;
+        const len2 = ddx * ddx + ddy * ddy;
+        let d;
+        if (len2 < 1) {
+          d = Math.hypot(cx - c1.x, cy - c1.y);
+        } else {
+          const t = Math.max(0, Math.min(1, ((cx - c1.x) * ddx + (cy - c1.y) * ddy) / len2));
+          const px = c1.x + t * ddx, py = c1.y + t * ddy;
+          d = Math.hypot(cx - px, cy - py);
+        }
         if (d < minD) { minD = d; found = r; }
       }
     });
     this.selId = found ? found.id : null;
+
+    // Check area polygons after ramales
+    let foundArea = null;
+    this.areas.forEach(a => {
+      if (this._pointInPoly(cx, cy, a.pts.map(pt => this.toCvs(pt[0], pt[1])))) {
+        foundArea = a;
+      }
+    });
+    if (foundArea) { this.selId = foundArea.id; this._emitSelect(foundArea); this.render(); return; }
+
     this._emitSelect(found);
     this.render();
+  }
+
+  _pointInPoly(px, py, cvsPts) {
+    let inside = false;
+    for (let i = 0, j = cvsPts.length - 1; i < cvsPts.length; j = i++) {
+      const xi = cvsPts[i].x, yi = cvsPts[i].y;
+      const xj = cvsPts[j].x, yj = cvsPts[j].y;
+      if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) {
+        inside = !inside;
+      }
+    }
+    return inside;
   }
 
   _nextLabel() {
@@ -239,17 +318,10 @@ export default class PlanoEngine {
     return `${pfx}${cnt}`;
   }
 
-  finishRamal() {
+finishRamal() {
     if (!this.activeRamal || this.activeRamal.pts.length < 1) return;
-    if (this.activeRamal.pts.length < 2) {
-      this.activeRamal = null;
-      this._emitStatus(this._statusMsg());
-      this.render();
-      return;
-    }
-    const mid = Math.floor(this.activeRamal.pts.length / 2);
-    const [mx, my] = this.activeRamal.pts[mid];
-    const net = NETS.find(n => n.id === this.activeRamal.net);
+    if (this.activeRamal.pts.length < 2) { this.activeRamal = null; this._emitStatus(this._statusMsg()); this.render(); return; }
+    const [mx, my] = this._midpoint(this.activeRamal.pts);
     const r = {
       id: 'R' + Date.now(),
       net: this.activeRamal.net,
@@ -258,13 +330,8 @@ export default class PlanoEngine {
       pts: this.activeRamal.pts,
       totalL: this.activeRamal.totalL,
       label: this._nextLabel(),
-      ini: '',
-      fin: '',
-      piso: '',
-      dz: '',
-      uc: 0,
-      labelX: mx,
-      labelY: my,
+      ini: '', fin: '', piso: '', dz: '', uc: 0,
+      labelX: mx, labelY: my,
       labelAngle: 0,
     };
     this.ramales.push(r);
@@ -281,10 +348,13 @@ export default class PlanoEngine {
 
   undoLast() {
     if (this.activeRamal) { this.cancelRamal(); return; }
+    if (this.activeArea) { this.cancelArea(); return; }
     if (this.tool === 'baj' && this.bajantes.length) {
       this.bajantes.pop();
     } else if (this.ramales.length) {
       this.ramales.pop();
+    } else if (this.areas.length) {
+      this.areas.pop();
     } else if (this.dims.length) {
       this.dims.pop();
     } else if (this.textAnnots.length) {
@@ -295,12 +365,53 @@ export default class PlanoEngine {
     this.render();
   }
 
+  cancelArea() {
+    this.activeArea = null;
+    this._emitStatus(this._statusMsg());
+    this.render();
+  }
+
+  finishArea() {
+    if (!this.activeArea || this.activeArea.pts.length < 3) { this.activeArea = null; return; }
+    const pts = this.activeArea.pts;
+    const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    const area = {
+      id: 'AR' + Date.now(),
+      pts: pts.map(p => [...p]),
+      color: this.activeArea.color,
+      label: '',
+      labelX: cx,
+      labelY: cy,
+      labelAngle: 0,
+      areaM2: this._calcPolyArea(pts),
+    };
+    this.areas.push(area);
+    this.activeArea = null;
+    this._emitStatus(this._statusMsg());
+    this.render();
+  }
+
+  _calcPolyArea(pts) {
+    let area = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const j = (i + 1) % pts.length;
+      area += pts[i][0] * pts[j][1];
+      area -= pts[j][0] * pts[i][1];
+    }
+    area = Math.abs(area) / 2;
+    const m2 = area * Math.pow(2.54 * this.scaleM / 96, 2);
+    return +m2.toFixed(2);
+  }
+
   clearAll() {
     this.ramales = [];
     this.dims = [];
     this.textAnnots = [];
     this.bajantes = [];
+    this.areas = [];
     this.activeRamal = null;
+    this.activeArea = null;
     this.selId = null;
     this._netCounts = {};
     NETS.forEach(n => { this._netCounts[n.id] = { ramal: 0, tributario: 0 }; });
@@ -310,12 +421,39 @@ export default class PlanoEngine {
 
   getSelected() {
     if (!this.selId) return null;
-    return this.ramales.find(r => r.id === this.selId) || this.bajantes.find(b => b.id === this.selId) || this.textAnnots.find(t => t.id === this.selId) || null;
+    return this.ramales.find(r => r.id === this.selId) || this.bajantes.find(b => b.id === this.selId) || this.textAnnots.find(t => t.id === this.selId) || this.areas.find(a => a.id === this.selId) || null;
+  }
+
+  _midpoint(pts) {
+    let totalLen = 0;
+    const segLens = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const l = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+      segLens.push(l);
+      totalLen += l;
+    }
+    const half = totalLen / 2;
+    let acc = 0;
+    for (let i = 0; i < segLens.length; i++) {
+      if (acc + segLens[i] >= half) {
+        const t = segLens[i] > 0 ? (half - acc) / segLens[i] : 0;
+        return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t];
+      }
+      acc += segLens[i];
+    }
+    return pts[pts.length - 1];
   }
 
   updateSelected(fields) {
     const el = this.getSelected();
-    if (el) Object.assign(el, fields);
+    if (el) {
+      Object.assign(el, fields);
+      if (el.pts && el.id?.startsWith('R')) {
+        const [mx, my] = this._midpoint(el.pts);
+        el.labelX = mx;
+        el.labelY = my;
+      }
+    }
     this.render();
   }
 
@@ -338,6 +476,8 @@ export default class PlanoEngine {
     if (idxB >= 0) { this.bajantes.splice(idxB, 1); this.selId = null; this._emitSelect(null); this.render(); return; }
     const idxT = this.textAnnots.findIndex(t => t.id === this.selId);
     if (idxT >= 0) { this.textAnnots.splice(idxT, 1); this.selId = null; this._emitSelect(null); this.render(); return; }
+    const idxA = this.areas.findIndex(a => a.id === this.selId);
+    if (idxA >= 0) { this.areas.splice(idxA, 1); this.selId = null; this._emitSelect(null); this.render(); return; }
     const idxD = this.dims.findIndex(d => d.id === this.selId);
     if (idxD >= 0) { this.dims.splice(idxD, 1); this.selId = null; this._emitSelect(null); this.render(); return; }
   }
@@ -392,10 +532,10 @@ export default class PlanoEngine {
 
   saveWork() {
     return JSON.stringify({
-      v: 5, scaleM: this.scaleM, activeNet: this.activeNet,
+      v: 6, scaleM: this.scaleM, activeNet: this.activeNet,
       nets: NETS.map(n => ({ id: n.id, col: n.col })),
       ramales: this.ramales, dims: this.dims, textAnnots: this.textAnnots,
-      bajantes: this.bajantes, nptLevels: this.nptLevels,
+      bajantes: this.bajantes, areas: this.areas, nptLevels: this.nptLevels,
     });
   }
 
@@ -408,9 +548,11 @@ export default class PlanoEngine {
       this.dims = d.dims || [];
       this.textAnnots = d.textAnnots || [];
       this.bajantes = d.bajantes || [];
+      this.areas = d.areas || [];
       this.nptLevels = d.nptLevels || [];
       this.selId = null;
       this.activeRamal = null;
+      this.activeArea = null;
       this.render();
     } catch (e) { console.error('Error loading work:', e); }
   }
@@ -428,6 +570,8 @@ export default class PlanoEngine {
 
 if (this.tool === 'sel') {
       const sel = this.getSelected();
+
+      // Drag already-selected bajante
       if (sel && sel._circ && sel.id?.startsWith('B')) {
         const d = Math.hypot(x - sel._circ.x, y - sel._circ.y);
         if (d < sel._circ.r) {
@@ -435,21 +579,91 @@ if (this.tool === 'sel') {
           return;
         }
       }
-      if (sel && sel.labelX !== undefined && !sel.id?.startsWith('B')) {
+
+      // Drag already-selected label (ramales/bajantes)
+      if (sel && sel.labelX !== undefined && !sel.id?.startsWith('B') && !sel.id?.startsWith('T') && !sel.id?.startsWith('AR')) {
         const lx = this.toCvs(sel.labelX, sel.labelY);
         if (Math.hypot(x - lx.x, y - lx.y) < 20) {
           this.lblDrag = { id: sel.id, offX: x - lx.x, offY: y - lx.y };
           return;
         }
       }
-    if (sel && sel._box && sel.id.startsWith('T')) {
-      const b = sel._box;
-      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
-        this.txtDrag = { id: sel.id, offX: x - b.x, offY: y - b.y };
-        return;
+
+      // Drag already-selected ramal points
+      if (sel && sel.pts && sel.id?.startsWith('R')) {
+        for (let i = 0; i < sel.pts.length; i++) {
+          const pc = this.toCvs(sel.pts[i][0], sel.pts[i][1]);
+          if (Math.hypot(x - pc.x, y - pc.y) < 10) {
+            this.ptDrag = { id: sel.id, ptIdx: i };
+            return;
+          }
+        }
       }
-    }
-    const fg = this.getBajantesFantasma();
+
+      // Drag already-selected text annotation
+      if (sel && sel._box && sel.id?.startsWith('T')) {
+        const b = sel._box;
+        if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+          const tp = this.toPlane(x, y);
+          this.txtDrag = { id: sel.id, startX: tp.x, startY: tp.y, origX: sel.x, origY: sel.y };
+          return;
+        }
+      }
+
+      // Drag already-selected area
+      if (sel && sel.id?.startsWith('AR') && sel._polyBox) {
+        if (x >= sel._polyBox.x && x <= sel._polyBox.x + sel._polyBox.w && y >= sel._polyBox.y && y <= sel._polyBox.y + sel._polyBox.h) {
+          const tp = this.toPlane(x, y);
+          this.areaDrag = { id: sel.id, startX: tp.x, startY: tp.y };
+          return;
+        }
+      }
+
+      // Hit-test all text annotations (not just selected)
+      for (const t of this.textAnnots) {
+        if (t._box) {
+          const b = t._box;
+          if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+            this.selId = t.id;
+            const tp = this.toPlane(x, y);
+            this.txtDrag = { id: t.id, startX: tp.x, startY: tp.y, origX: t.x, origY: t.y };
+            this._emitSelect(t);
+            this.render();
+            return;
+          }
+        }
+      }
+
+      // Hit-test all area polygons
+      for (const a of this.areas) {
+        if (a._polyBox) {
+          const b = a._polyBox;
+          if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+            this.selId = a.id;
+            const tp = this.toPlane(x, y);
+            this.areaDrag = { id: a.id, startX: tp.x, startY: tp.y };
+            this._emitSelect(a);
+            this.render();
+            return;
+          }
+        }
+      }
+
+      // Hit-test all ramal labels (select + drag in one click)
+      for (const r of this.ramales) {
+        if (r.label !== undefined && r.labelX !== undefined) {
+          const lx = this.toCvs(r.labelX, r.labelY);
+          if (Math.hypot(x - lx.x, y - lx.y) < 18) {
+            this.selId = r.id;
+            this.lblDrag = { id: r.id, offX: x - lx.x, offY: y - lx.y };
+            this._emitSelect(r);
+            this.render();
+            return;
+          }
+        }
+      }
+
+      const fg = this.getBajantesFantasma();
       let gFound = null, gMin = 16;
       fg.forEach(b => {
         if (b._ghost) {
@@ -535,7 +749,7 @@ if (this.tool === 'line') {
         x: p.x, y: p.y,
         pisoBase: '', pisoCima: '',
         nptBase: 0, nptCima: 0,
-        hVert: 0, dNominal: '',
+        hVert: 0, dNominal: '0',
         recibeDeIds: [], alimentaIds: [], descargaEnId: null,
         ucAcum: 0, ucExtra: 0, area_m2: 0,
         desplazamientos: {},
@@ -550,6 +764,32 @@ if (this.tool === 'line') {
     if (this.tool === 'erase') {
       this.selectAt(x, y);
       this.deleteSelected();
+      this._emitSelect(null);
+      this.selId = null;
+      return;
+    }
+
+    if (this.tool === 'area') {
+      let pt = { x: p.x, y: p.y };
+      if (!this.activeArea) {
+        if (this.snapMode) pt = this.snapAngle(p.x, p.y, pt.x, pt.y);
+        this.activeArea = { pts: [[pt.x, pt.y]], color: NETS.find(n => n.id === this.activeNet)?.col + '33' || 'rgba(0,220,229,0.2)' };
+      } else {
+        const last = this.activeArea.pts[this.activeArea.pts.length - 1];
+        const first = this.activeArea.pts[0];
+        if (this.snapMode) pt = this.snapAngle(last[0], last[1], pt.x, pt.y);
+        const sp = this.snapToExisting(pt.x, pt.y);
+        if (sp) pt = sp;
+        const distFirst = Math.hypot(pt.x - first[0], pt.y - first[1]);
+        const SNAP_CLOSE = 12 / this.zoom;
+        if (this.activeArea.pts.length >= 3 && distFirst < SNAP_CLOSE) {
+          this.finishArea();
+          return;
+        }
+        this.activeArea.pts.push([pt.x, pt.y]);
+      }
+      this._emitStatus(this._statusMsg());
+      this.render();
       return;
     }
 
@@ -601,15 +841,41 @@ if (this.tool === 'line') {
       if (this.txtDrag) {
         const t = this.textAnnots.find(t => t.id === this.txtDrag.id);
         if (t) {
-          const b = t._box;
-          if (b) {
-            const p = this.toPlane(x - this.txtDrag.offX, y - this.txtDrag.offY);
-            t.lblOffX = t.lblOffX || 0;
-            t.lblOffY = t.lblOffY || 0;
-            t.x = p.x;
-            t.y = p.y;
-            this.render();
-          }
+          const p = this.toPlane(x, y);
+          t.x = this.txtDrag.origX + (p.x - this.txtDrag.startX);
+          t.y = this.txtDrag.origY + (p.y - this.txtDrag.startY);
+          this.render();
+        }
+        return;
+      }
+      if (this.areaDrag) {
+        const a = this.areas.find(a => a.id === this.areaDrag.id);
+        if (a) {
+          const p = this.toPlane(x, y);
+          const dx = p.x - this.areaDrag.startX;
+          const dy = p.y - this.areaDrag.startY;
+          a.pts.forEach(pt => { pt[0] += dx; pt[1] += dy; });
+          if (a.labelX !== undefined) { a.labelX += dx; a.labelY += dy; }
+          this.areaDrag.startX = p.x;
+          this.areaDrag.startY = p.y;
+          this.render();
+        }
+        return;
+      }
+if (this.ptDrag) {
+      const r = this.ramales.find(r => r.id === this.ptDrag.id);
+      if (r) {
+        const p = this.toPlane(x, y);
+        r.pts[this.ptDrag.ptIdx] = [p.x, p.y];
+        r.totalL = 0;
+        for (let i = 0; i < r.pts.length - 1; i++) {
+          r.totalL += this.pxToM(Math.hypot(r.pts[i + 1][0] - r.pts[i][0], r.pts[i + 1][1] - r.pts[i][1]));
+        }
+        r.totalL = +r.totalL.toFixed(3);
+        const [mx, my] = this._midpoint(r.pts);
+        r.labelX = mx;
+        r.labelY = my;
+        this.render();
         }
         return;
       }
@@ -618,6 +884,10 @@ if (this.tool === 'line') {
         this.mouseY = y;
         this.render();
       } else if (this._dimStart) {
+        this.mouseX = x;
+        this.mouseY = y;
+        this.render();
+      } else if (this.activeArea) {
         this.mouseX = x;
         this.mouseY = y;
         this.render();
@@ -641,11 +911,16 @@ if (this.tool === 'line') {
       if (this.lblDrag) { this.lblDrag = null; }
       if (this.txtDrag) { this.txtDrag = null; }
       if (this.bajDrag) { this.bajDrag = null; }
+      if (this.areaDrag) { this.areaDrag = null; }
+      if (this.ptDrag) { this.ptDrag = null; }
   }
 
   _onDblClick(e) {
     if (this.tool === 'line' && this.activeRamal && this.activeRamal.pts.length >= 2) {
       this.finishRamal();
+    }
+    if (this.tool === 'area' && this.activeArea && this.activeArea.pts.length >= 3) {
+      this.finishArea();
     }
   }
 
@@ -665,18 +940,24 @@ if (this.tool === 'line') {
   _onKeyDown(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
     const k = e.key.toLowerCase();
-    if (k === 's') { this.setTool('sel'); e.preventDefault(); }
+if (k === 's') { this.setTool('sel'); e.preventDefault(); }
     else if (k === 'l') { this.setTool('line'); e.preventDefault(); }
     else if (k === 'd') { this.setTool('dim'); e.preventDefault(); }
     else if (k === 't') { this.setTool('text'); e.preventDefault(); }
+    else if (k === 'b') { this.setTool('baj'); e.preventDefault(); }
+    else if (k === 'a') { this.setTool('area'); e.preventDefault(); }
+    else if (k === 'e') { this.setTool('erase'); e.preventDefault(); }
     else if (k === ' ') { this.setTool(this.tool === 'pan' ? 'sel' : 'pan'); e.preventDefault(); }
-    else if (k === 'enter') { if (this.activeRamal) { this.finishRamal(); e.preventDefault(); } }
-else if (k === 'escape') {
-  if (this.activeRamal && this.activeRamal.pts.length >= 2) { this.finishRamal(); e.preventDefault(); }
-  else if (this.activeRamal) { this.cancelRamal(); e.preventDefault(); }
-  else if (this._dimStart) { this._dimStart = null; this.render(); e.preventDefault(); }
-  else { this.selId = null; this._emitSelect(null); this.render(); }
-}
+    else if (k === 'enter') {
+      if (this.activeRamal) { this.finishRamal(); e.preventDefault(); }
+      else if (this.activeArea) { this.finishArea(); e.preventDefault(); }
+    }
+    else if (k === 'escape') {
+      if (this.activeRamal) { this.cancelRamal(); e.preventDefault(); }
+      else if (this.activeArea) { this.cancelArea(); e.preventDefault(); }
+      else if (this._dimStart) { this._dimStart = null; this.render(); e.preventDefault(); }
+      else { this.selId = null; this._emitSelect(null); this.render(); }
+    }
     else if (e.ctrlKey && k === 'z') { this.undoLast(); e.preventDefault(); }
     else if (e.ctrlKey && k === 's') { e.preventDefault(); }
   }
@@ -693,10 +974,12 @@ else if (k === 'escape') {
 
     this._drawDims(ctx);
     this._drawTexts(ctx);
+    this._drawAreas(ctx);
     this._drawRamales(ctx);
     this._drawBajantes(ctx);
     this._drawGhosts(ctx);
     this._drawDimGhost(ctx);
+    this._drawActiveArea(ctx);
     this._drawActiveRamal(ctx);
   }
 
@@ -786,6 +1069,137 @@ else if (k === 'escape') {
     });
   }
 
+  _drawAreas(ctx) {
+    this.areas.forEach(a => {
+      if (a.pts.length < 3) return;
+      const sel = a.id === this.selId;
+      const pts = a.pts.map(p => this.toCvs(p[0], p[1]));
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+      ctx.closePath();
+
+      ctx.fillStyle = a.color || 'rgba(0,220,229,0.12)';
+      ctx.fill();
+      ctx.strokeStyle = sel ? '#00dce5' : (a.color || 'rgba(0,220,229,0.5)').replace('0.2', '0.7').replace('33', 'aa');
+      ctx.lineWidth = sel ? 2.5 : 1.5;
+      ctx.setLineDash(sel ? [] : []);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      pts.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y > maxY) maxY = p.y;
+      });
+      a._polyBox = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+
+      const lx = this.toCvs(a.labelX, a.labelY);
+
+      if (a.label || a.areaM2) {
+        ctx.save();
+        ctx.translate(lx.x, lx.y);
+        ctx.rotate((a.labelAngle || 0) * Math.PI / 180);
+        const displayLabel = a.label || '';
+        const areaLabel = a.areaM2 ? `${a.areaM2} m²` : '';
+        ctx.font = 'bold 11px Geist, monospace';
+        const tw = Math.max(ctx.measureText(displayLabel).width, ctx.measureText(areaLabel).width);
+        ctx.fillStyle = 'rgba(17,19,23,0.82)';
+        ctx.fillRect(-tw / 2 - 5, -16, tw + 10, areaLabel ? 30 : 22);
+        ctx.fillStyle = sel ? '#00dce5' : '#e2e2e8';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        if (displayLabel) ctx.fillText(displayLabel, 0, areaLabel ? -4 : 0);
+        if (areaLabel) {
+          ctx.font = 'bold 10px Geist, monospace';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(areaLabel, 0, displayLabel ? 8 : 8);
+        }
+        ctx.restore();
+      }
+
+      if (sel) {
+        ctx.strokeStyle = '#4D8FF7';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(lx.x - 14, lx.y, 5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#4D8FF7';
+        ctx.fill();
+      }
+
+      ctx.restore();
+    });
+  }
+
+  _drawActiveArea(ctx) {
+    if (!this.activeArea || this.activeArea.pts.length < 1) return;
+    const pts = this.activeArea.pts.map(p => this.toCvs(p[0], p[1]));
+    const col = NETS.find(n => n.id === this.activeNet)?.col || '#00dce5';
+
+    ctx.save();
+    ctx.fillStyle = col + '22';
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    if (pts.length >= 3) {
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    pts.forEach((p, idx) => {
+      ctx.fillStyle = idx === 0 ? '#fff' : col;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    if (pts.length >= 1) {
+      let mp = this.toPlane(this.mouseX, this.mouseY);
+      const last = this.activeArea.pts[this.activeArea.pts.length - 1];
+      if (this.snapMode) mp = this.snapAngle(last[0], last[1], mp.x, mp.y);
+      const mc = this.toCvs(mp.x, mp.y);
+      ctx.strokeStyle = col + '88';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+      ctx.lineTo(mc.x, mc.y);
+      if (pts.length >= 2) {
+        ctx.lineTo(pts[0].x, pts[0].y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const first = this.activeArea.pts[0];
+      const distFirst = Math.hypot(mp.x - first[0], mp.y - first[1]);
+      const SNAP_CLOSE = 12 / this.zoom;
+      if (this.activeArea.pts.length >= 3 && distFirst < SNAP_CLOSE) {
+        const fc = this.toCvs(first[0], first[1]);
+        ctx.strokeStyle = '#22D3EE';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(fc.x, fc.y, 10, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(34,211,238,0.25)';
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+  }
+
   _drawRamales(ctx) {
     this.ramales.forEach(r => {
       const net = NETS.find(n => n.id === r.net);
@@ -834,23 +1248,30 @@ else if (k === 'escape') {
         ctx.fill();
       });
 
-      if (r.label) {
+      if (r.label || r.totalL) {
         const lc = this.toCvs(r.labelX, r.labelY);
         ctx.save();
         ctx.translate(lc.x, lc.y);
         ctx.rotate((r.labelAngle || 0) * Math.PI / 180);
+        const lbl = r.label || '';
+        const mLabel = r.totalL ? `${r.totalL}m` : '';
         ctx.font = 'bold 11px Geist, monospace';
-        const lbl = r.label;
-        const tw = ctx.measureText(lbl).width;
+        const tw = Math.max(ctx.measureText(lbl).width, mLabel ? (ctx.font = '9px Geist, monospace', ctx.measureText(mLabel).width) : 0);
+        const boxH = lbl && mLabel ? 32 : 22;
         ctx.fillStyle = 'rgba(17,19,23,0.82)';
-        ctx.fillRect(-tw / 2 - 5, -16, tw + 10, 22);
-        ctx.fillStyle = col;
+        ctx.fillRect(-tw / 2 - 5, -16, tw + 10, boxH);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(lbl, 0, -4);
-        ctx.font = '9px Geist, monospace';
-        ctx.fillStyle = '#849495';
-        ctx.fillText(`${r.totalL}m`, 0, 8);
+        if (lbl) {
+          ctx.font = 'bold 11px Geist, monospace';
+          ctx.fillStyle = col;
+          ctx.fillText(lbl, 0, mLabel ? -5 : -4);
+        }
+        if (mLabel) {
+          ctx.font = 'bold 10px Geist, monospace';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(mLabel, 0, lbl ? 9 : -4);
+        }
         ctx.restore();
 
         if (sel) {
@@ -968,16 +1389,24 @@ else if (k === 'escape') {
         ctx.font = 'bold 10px Geist, monospace';
         const displayCode = b.code || '—';
         const tw = ctx.measureText(displayCode).width;
+        const labelH = 28 + (b.hVert !== undefined ? 13 : 0) + (b.dNominal !== undefined ? 13 : 0);
         ctx.fillStyle = 'rgba(17,19,23,0.82)';
-        ctx.fillRect(-tw / 2 - 4, -10, tw + 8, 28);
+        ctx.fillRect(-tw / 2 - 4, -10, tw + 8, labelH);
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(displayCode, 0, 0);
-        if (b.hVert) {
+        let labelY = 12;
+        if (b.hVert !== undefined) {
           ctx.font = '9px Geist, monospace';
           ctx.fillStyle = '#849495';
-          ctx.fillText(`H=${b.hVert}m`, 0, 12);
+          ctx.fillText(`H=${b.hVert}m`, 0, labelY);
+          labelY += 13;
+        }
+        if (b.dNominal !== undefined) {
+          ctx.font = '9px Geist, monospace';
+          ctx.fillStyle = '#849495';
+          ctx.fillText(`D=${b.dNominal && b.dNominal !== '0' ? b.dNominal : ''}mm`, 0, labelY);
         }
         if (sel) {
           ctx.strokeStyle = '#4D8FF7';
