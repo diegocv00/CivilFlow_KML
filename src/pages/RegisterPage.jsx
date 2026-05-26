@@ -34,6 +34,7 @@ function RegisterPage() {
     setLoading(true);
 
     try {
+      if (!supabase) { setError('Servicio no configurado'); setLoading(false); return; }
       const { error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,

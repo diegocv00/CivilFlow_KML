@@ -17,6 +17,7 @@ function LoginPage() {
     setLoading(true);
 
     try {
+      if (!supabase) { setError('Servicio no configurado'); setLoading(false); return; }
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,

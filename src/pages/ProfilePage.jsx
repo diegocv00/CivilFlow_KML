@@ -33,6 +33,7 @@ function ProfilePage() {
   useEffect(() => { fetchPerfil() }, [])
 
   async function fetchPerfil() {
+    if (!supabase) return
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
